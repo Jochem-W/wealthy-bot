@@ -3,6 +3,7 @@ import { CommandHandler } from "./handlers/interactionCreate/commandHandler.mjs"
 import { MessageComponentHandler } from "./handlers/interactionCreate/messageComponentHandler.mjs"
 import { ModalHandler } from "./handlers/interactionCreate/modalHandler.mjs"
 import { HttpServer } from "./handlers/ready/httpServer.mjs"
+import { StartupHandler } from "./handlers/ready/startupHandler.mjs"
 import type { Handler } from "./types/handler.mjs"
 import type { ClientEvents } from "discord.js"
 
@@ -12,4 +13,5 @@ export const Handlers: Handler<keyof ClientEvents>[] = [
   MessageComponentHandler,
   ModalHandler,
   HttpServer,
+  StartupHandler,
 ]
