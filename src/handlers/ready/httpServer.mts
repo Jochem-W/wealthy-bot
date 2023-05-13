@@ -1,6 +1,7 @@
 import { logError } from "../../errors.mjs"
 import type { Handler } from "../../types/handler.mjs"
 import { Variables } from "../../variables.mjs"
+import camelcaseKeys from "camelcase-keys"
 import type { Client } from "discord.js"
 import { createServer, IncomingMessage, ServerResponse } from "http"
 import { parse } from "querystring"
@@ -17,16 +18,7 @@ const donationModel = z
     is_subscription_payment: z.boolean(),
     is_first_subscription_payment: z.boolean(),
   })
-  .transform((arg) => ({
-    verificationToken: arg.verification_token,
-    timestamp: arg.timestamp,
-    type: arg.type,
-    fromName: arg.from_name,
-    amount: arg.amount,
-    email: arg.email,
-    isSubscriptionPayment: arg.is_subscription_payment,
-    isFirstSubscriptionPayment: arg.is_first_subscription_payment,
-  }))
+  .transform((arg) => camelcaseKeys(arg))
 
 function ok(response: ServerResponse) {
   response.writeHead(200, { "Content-Length": "0" })

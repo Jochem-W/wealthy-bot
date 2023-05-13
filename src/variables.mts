@@ -1,3 +1,4 @@
+import camelcaseKeys from "camelcase-keys"
 import { z } from "zod"
 
 const model = z
@@ -8,12 +9,6 @@ const model = z
     NODE_ENV: z.string().optional(),
     HTTP_PORT: z.coerce.number().optional().default(80),
   })
-  .transform((arg) => ({
-    commitHash: arg.COMMIT_HASH,
-    discordBotToken: arg.DISCORD_BOT_TOKEN,
-    githubToken: arg.GITHUB_TOKEN,
-    nodeEnv: arg.NODE_ENV,
-    httpPort: arg.HTTP_PORT,
-  }))
+  .transform((arg) => camelcaseKeys(arg))
 
 export const Variables = await model.parseAsync(process.env)
