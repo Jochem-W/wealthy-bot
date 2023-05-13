@@ -89,7 +89,7 @@ function requestHandler(request: IncomingMessage, response: ServerResponse) {
 export const HttpServer: Handler<"ready"> = {
   event: "ready",
   once: true,
-  async handle(_client: Client) {
+  handle(_client: Client) {
     const server = createServer()
     server.on("error", (e) => void logError(e))
     server.on("request", requestHandler)
