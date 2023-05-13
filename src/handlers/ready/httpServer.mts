@@ -58,7 +58,7 @@ export const HttpServer: Handler<"ready"> = {
           return
         }
 
-        const info = donationModel.parse(formData["data"])
+        const info = donationModel.parse(JSON.parse(data))
         console.log(info)
         ok(response)
       })
