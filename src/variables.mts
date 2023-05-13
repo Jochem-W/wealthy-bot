@@ -8,6 +8,7 @@ const model = z
     GITHUB_TOKEN: z.string(),
     NODE_ENV: z.string().optional(),
     HTTP_PORT: z.coerce.number().optional().default(80),
+    VERIFICATION_TOKEN: z.string().uuid(),
   })
   .transform((arg) => camelcaseKeys(arg))
 

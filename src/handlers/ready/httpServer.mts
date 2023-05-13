@@ -63,7 +63,10 @@ function requestHandler(request: IncomingMessage, response: ServerResponse) {
         }
 
         const info = donationModel.parse(JSON.parse(data))
-        console.log(info)
+        if (info.verificationToken !== Variables.verificationToken) {
+          badRequest(response, "Invalid verification token")
+        }
+
         ok(response)
       } catch (e) {
         if (e instanceof Error) {
