@@ -6,7 +6,7 @@ const model = z
     DISCORD_BOT_TOKEN: z.string(),
     GITHUB_TOKEN: z.string(),
     NODE_ENV: z.string().optional(),
-    HTTP_PORT: z.preprocess(Number, z.number().optional().default(80)),
+    HTTP_PORT: z.coerce.number().optional().default(80),
   })
   .transform((arg) => ({
     commitHash: arg.COMMIT_HASH,
