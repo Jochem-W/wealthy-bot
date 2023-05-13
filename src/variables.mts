@@ -6,12 +6,14 @@ const model = z
     DISCORD_BOT_TOKEN: z.string(),
     GITHUB_TOKEN: z.string(),
     NODE_ENV: z.string().optional(),
+    HTTP_PORT: z.preprocess(Number, z.number().optional().default(80)),
   })
-  .transform((c) => ({
-    commitHash: c.COMMIT_HASH,
-    discordBotToken: c.DISCORD_BOT_TOKEN,
-    githubToken: c.GITHUB_TOKEN,
-    nodeEnv: c.NODE_ENV,
+  .transform((arg) => ({
+    commitHash: arg.COMMIT_HASH,
+    discordBotToken: arg.DISCORD_BOT_TOKEN,
+    githubToken: arg.GITHUB_TOKEN,
+    nodeEnv: arg.NODE_ENV,
+    httpPort: arg.HTTP_PORT,
   }))
 
 export const Variables = await model.parseAsync(process.env)

@@ -1,5 +1,6 @@
 import { logError } from "../../errors.mjs"
 import type { Handler } from "../../types/handler.mjs"
+import { Variables } from "../../variables.mjs"
 import type { Client } from "discord.js"
 import { createServer } from "http"
 
@@ -22,6 +23,6 @@ export const HttpServer: Handler<"ready"> = {
       response.end()
     })
     server.on("listening", () => console.log("Listening on", server.address()))
-    server.listen()
+    server.listen(Variables.httpPort)
   },
 }
