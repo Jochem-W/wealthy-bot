@@ -6,7 +6,7 @@ export type CustomId = {
   args: string[]
 }
 
-type InteractionScope = "b" | "c" | "m"
+type InteractionScope = "b" | "c" | "m" | "u"
 export const InteractionScope = {
   get Button() {
     return "b" as const
@@ -16,6 +16,9 @@ export const InteractionScope = {
   },
   get Modal() {
     return "m" as const
+  },
+  get UserSelectMenu() {
+    return "u" as const
   },
 }
 
@@ -28,7 +31,8 @@ export function stringToCustomId(data: string) {
   if (
     scope !== InteractionScope.Button &&
     scope !== InteractionScope.Modal &&
-    scope !== InteractionScope.Collector
+    scope !== InteractionScope.Collector &&
+    scope !== InteractionScope.UserSelectMenu
   ) {
     throw new InvalidCustomIdError(data)
   }

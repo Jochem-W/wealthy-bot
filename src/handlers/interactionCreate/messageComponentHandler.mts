@@ -3,7 +3,10 @@ import {
   InvalidCustomIdError,
   logError,
 } from "../../errors.mjs"
-import { RegisteredButtons } from "../../interactable.mjs"
+import {
+  RegisteredButtons,
+  RegisteredUserSelectMenus,
+} from "../../interactable.mjs"
 import { InteractionScope, stringToCustomId } from "../../models/customId.mjs"
 import type { Handler } from "../../types/handler.mjs"
 import { makeErrorEmbed } from "../../utilities/embedUtilities.mjs"
@@ -14,20 +17,34 @@ async function handleMessageComponent(
   interaction: MessageComponentInteraction
 ) {
   const data = stringToCustomId(interaction.customId)
-  if (data.scope !== InteractionScope.Button) {
-    return
-  }
+  switch (data.scope) {
+    case InteractionScope.Button: {
+      if (!interaction.isButton()) {
+        throw new InvalidCustomIdError(interaction.customId)
+      }
 
-  if (!interaction.isButton()) {
-    throw new InvalidCustomIdError(interaction.customId)
-  }
+      const button = RegisteredButtons.get(data.name)
+      if (!button) {
+        throw new ButtonNotFoundError(data.name)
+      }
 
-  const button = RegisteredButtons.get(data.name)
-  if (!button) {
-    throw new ButtonNotFoundError(data.name)
-  }
+      await button(interaction, data.args)
+      break
+    }
+    case InteractionScope.UserSelectMenu: {
+      if (!interaction.isUserSelectMenu()) {
+        throw new InvalidCustomIdError(interaction.customId)
+      }
 
-  await button(interaction, data.args)
+      const userSelectMenu = RegisteredUserSelectMenus.get(data.name)
+      if (!userSelectMenu) {
+        throw new ButtonNotFoundError(data.name)
+      }
+
+      await userSelectMenu(interaction, data.args)
+      break
+    }
+  }
 }
 
 export const MessageComponentHandler: Handler<"interactionCreate"> = {

@@ -162,13 +162,19 @@ export class ModalNotFoundError extends BotError {
 }
 
 export class DuplicateNameError extends BotError {
-  public constructor(type: "button" | "modal", name: string) {
+  public constructor(
+    type: "button" | "modal" | "userSelectMenu",
+    name: string
+  ) {
     super(`A ${type} with the name ${name} already exists`)
   }
 }
 
 export class UnregisteredNameError extends BotError {
-  public constructor(type: "button" | "modal", name: string) {
+  public constructor(
+    type: "button" | "modal" | "userSelectMenu",
+    name: string
+  ) {
     super(`A ${type} with the name ${name} doesn't exist`)
   }
 }
@@ -209,8 +215,6 @@ export class InvalidDateTimeError extends CustomError {
   }
 }
 
-export async function logError(
-  error: Error,
-) {
+export async function logError(error: Error) {
   console.error(error)
 }
