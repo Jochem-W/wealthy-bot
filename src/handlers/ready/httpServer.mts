@@ -4,6 +4,18 @@ import { Variables } from "../../variables.mjs"
 import type { Client } from "discord.js"
 import { createServer, ServerResponse } from "http"
 import { parse } from "querystring"
+import { z } from "zod"
+
+const donationModel = z.object({
+  verification_token: z.string(),
+  timestamp: z.coerce.date(),
+  type: z.string(),
+  from_name: z.string(),
+  amount: z.coerce.number(),
+  email: z.string().email(),
+  is_subscription_payment: z.boolean(),
+  is_first_subscription_payment: z.boolean(),
+})
 
 function ok(response: ServerResponse) {
   response.writeHead(200, { "Content-Length": "0" })
@@ -40,7 +52,14 @@ export const HttpServer: Handler<"ready"> = {
       request.on("data", (chunk) => (body += chunk))
       request.on("end", () => {
         const formData = parse(body)
-        console.log(formData["data"])
+        const data = formData["data"]
+        if (typeof data !== "string") {
+          badRequest(response)
+          return
+        }
+
+        const info = donationModel.parse(formData["data"])
+        console.log(info)
         ok(response)
       })
     })
