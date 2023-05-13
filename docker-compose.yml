@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  bot:
+    build: .
+    env_file: .env
+    volumes:
+      - ./persisted/bot:/app/persisted/bot
+    restart: unless-stopped
+    networks:
+      - default
+      - ubuntu_caddy
+
+networks:
+  ubuntu_caddy:
+    external: true
