@@ -39,6 +39,7 @@ const donationModel = z
 
 async function timeoutHandler(id: number) {
   try {
+    await Prisma.user.update({ where: { id }, data: { expired: true } })
     await loggingChannel.send(await didntRenewMessage(id))
   } catch (e) {
     if (e instanceof Error) {
@@ -93,6 +94,7 @@ async function processDonation(info: z.infer<typeof donationModel>) {
     data: {
       email: info.email,
       name: info.fromName,
+      expired: false,
       lastPaymentAmount: info.amount,
       lastPaymentId: info.kofiTransactionId,
       lastPaymentTier: info.tierName,
