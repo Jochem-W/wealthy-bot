@@ -138,7 +138,7 @@ export function expiredMillis(user: User) {
     .toMillis()
 }
 
-function replaceTimeout(user: User) {
+export function replaceTimeout(user: User) {
   const delay = expiredMillis(user)
   if (delay < 0) {
     return
