@@ -13,6 +13,9 @@ dependencies:
   camelcase-keys:
     specifier: ^8.0.2
     version: 8.0.2
+  csv-parse:
+    specifier: ^5.3.10
+    version: 5.3.10
   discord.js:
     specifier: ^14.11.0
     version: 14.11.0(bufferutil@4.0.7)(utf-8-validate@6.0.3)
@@ -976,6 +979,10 @@ packages:
       shebang-command: 2.0.0
       which: 2.0.2
     dev: true
+
+  /csv-parse@5.3.10:
+    resolution: {integrity: sha512-cTXY6iy0gN5Ha/cGILeDgQE+nKiKDU2m0DjSRdJhr86BN3cM7oefBsTk2aH0LQeaYtL7Z7HvW+jYoadmdhzeDA==}
+    dev: false
 
   /debug@4.3.4:
     resolution: {integrity: sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==}
