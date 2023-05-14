@@ -15,7 +15,6 @@ model User {
   discordId String?
 
   lastPaymentAmount Float
-  lastPaymentId     String   @unique
   lastPaymentTier   String
   lastPaymentTime   DateTime
 }

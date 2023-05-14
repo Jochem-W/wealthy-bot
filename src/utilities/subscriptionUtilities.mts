@@ -25,7 +25,6 @@ export const DonationModel = z
     from_name: z.string(),
     is_first_subscription_payment: z.boolean(),
     is_subscription_payment: z.boolean(),
-    kofi_transaction_id: z.string().uuid(),
     tier_name: z.string().nullable(),
     timestamp: z.coerce.date(),
     type: z.string(),
@@ -53,7 +52,6 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
     data: {
       name: data.fromName,
       lastPaymentAmount: data.amount,
-      lastPaymentId: data.kofiTransactionId,
       lastPaymentTier: data.tierName,
       lastPaymentTime: data.timestamp,
     },
@@ -80,7 +78,6 @@ async function newSubscription(
       email: data.email,
       name: data.fromName,
       lastPaymentAmount: data.amount,
-      lastPaymentId: data.kofiTransactionId,
       lastPaymentTier: data.tierName,
       lastPaymentTime: data.timestamp,
     },
