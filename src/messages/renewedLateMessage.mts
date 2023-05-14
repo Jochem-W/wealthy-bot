@@ -1,11 +1,11 @@
 import type { User } from "@prisma/client"
 import { EmbedBuilder, userMention } from "discord.js"
 
-export function renewedMessage(user: User) {
+export function renewedLateMessage(user: User) {
   return {
     embeds: [
       new EmbedBuilder()
-        .setTitle("Subscription renewed")
+        .setTitle("Subscription renewed late")
         .setFields(
           {
             name: user.discordId ? "Member" : "Email",

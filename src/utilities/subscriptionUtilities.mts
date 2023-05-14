@@ -2,13 +2,14 @@ import { Prisma } from "../clients.mjs"
 import { logError } from "../errors.mjs"
 import { didntRenewMessage } from "../messages/didntRenewMessage.mjs"
 import { newSubscriptionMessage } from "../messages/newSubscriptionMessage.mjs"
+import { renewedLateMessage } from "../messages/renewedLateMessage.mjs"
 import { tierChangedMessage } from "../messages/tierChangedMessage.mjs"
 import { Config } from "../models/config.mjs"
 import { fetchChannel, tryFetchMember } from "./discordUtilities.mjs"
 import type { User } from "@prisma/client"
 import camelcaseKeys from "camelcase-keys"
 import { ChannelType } from "discord.js"
-import { Duration } from "luxon"
+import { DateTime } from "luxon"
 import { z } from "zod"
 
 const timeouts = new Map<number, NodeJS.Timeout>()
@@ -51,7 +52,6 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
     where: { email: data.email },
     data: {
       name: data.fromName,
-      expired: false,
       lastPaymentAmount: data.amount,
       lastPaymentId: data.kofiTransactionId,
       lastPaymentTier: data.tierName,
@@ -59,13 +59,17 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
     },
   })
 
+  if (expiredMillis(user) < 0) {
+    await textChannel.send(renewedLateMessage(updatedUser))
+  }
+
   if (user.lastPaymentTier !== updatedUser.lastPaymentTier) {
     await textChannel.send(tierChangedMessage(user, updatedUser))
   }
 
   await updateRoles(updatedUser)
 
-  replaceTimeout(updatedUser.id)
+  replaceTimeout(updatedUser)
 }
 
 async function newSubscription(
@@ -75,7 +79,6 @@ async function newSubscription(
     data: {
       email: data.email,
       name: data.fromName,
-      expired: false,
       lastPaymentAmount: data.amount,
       lastPaymentId: data.kofiTransactionId,
       lastPaymentTier: data.tierName,
@@ -85,11 +88,11 @@ async function newSubscription(
 
   await textChannel.send(newSubscriptionMessage(user))
 
-  replaceTimeout(user.id)
+  replaceTimeout(user)
 }
 
 async function updateRoles(user: User) {
-  if (!user.discordId) {
+  if (!Config.assignRoles || !user.discordId) {
     return
   }
 
@@ -98,9 +101,11 @@ async function updateRoles(user: User) {
     return
   }
 
+  const expired = expiredMillis(user) < 0
+
   const currentTier = Config.tiers.get(user.lastPaymentTier)
   for (const [, { roleId, position }] of Config.tiers) {
-    if (!currentTier || user.expired) {
+    if (!currentTier || expired) {
       await discordMember.roles.remove(roleId)
       continue
     }
@@ -126,14 +131,23 @@ export async function linkDiscord(id: number, discordId: string) {
   return user
 }
 
-function replaceTimeout(id: number) {
-  cancelTimeout(id)
+export function expiredMillis(user: User) {
+  return DateTime.fromJSDate(user.lastPaymentTime)
+    .plus({ days: 30 + Config.gracePeriod })
+    .diffNow()
+    .toMillis()
+}
+
+function replaceTimeout(user: User) {
+  const delay = expiredMillis(user)
+  if (delay < 0) {
+    return
+  }
+
+  cancelTimeout(user.id)
   timeouts.set(
-    id,
-    setTimeout(
-      () => void checkCallback(id),
-      Duration.fromObject({ minutes: 1 }).toMillis()
-    )
+    user.id,
+    setTimeout(() => void checkCallback(user.id), delay)
   )
 }
 
@@ -144,7 +158,6 @@ function cancelTimeout(id: number) {
 
 async function checkCallback(id: number) {
   try {
-    await Prisma.user.update({ where: { id }, data: { expired: true } })
     await textChannel.send(await didntRenewMessage(id))
   } catch (e) {
     if (e instanceof Error) {

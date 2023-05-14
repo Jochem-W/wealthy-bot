@@ -1,6 +1,7 @@
 import { Discord, Prisma } from "../clients.mjs"
 import { GuildOnlyError } from "../errors.mjs"
 import { ChatInputCommand } from "../models/chatInputCommand.mjs"
+import { expiredMillis } from "../utilities/subscriptionUtilities.mjs"
 import type { User } from "@prisma/client"
 import type { ChatInputCommandInteraction, GuildMember } from "discord.js"
 import {
@@ -25,7 +26,7 @@ function formatUsers(users: { prismaUser?: User; guildMember: GuildMember }[]) {
           ? userMention(prismaUser.discordId)
           : inlineCode(prismaUser.email)
       } paid ${time(prismaUser.lastPaymentTime, TimestampStyles.RelativeTime)}`
-      if (prismaUser.expired) {
+      if (expiredMillis(prismaUser) < 0) {
         return strikethrough(string)
       }
 

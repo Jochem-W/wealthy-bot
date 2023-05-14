@@ -5,7 +5,6 @@ import {
   processDonation,
 } from "../../utilities/subscriptionUtilities.mjs"
 import { Variables } from "../../variables.mjs"
-import type { Client } from "discord.js"
 import { createServer, IncomingMessage, ServerResponse } from "http"
 import { parse } from "querystring"
 
@@ -82,7 +81,7 @@ async function requestHandler(
 export const HttpServer: Handler<"ready"> = {
   event: "ready",
   once: true,
-  handle(_client: Client) {
+  handle() {
     const server = createServer()
     server.on("error", (e) => void logError(e))
     server.on(
