@@ -22,7 +22,6 @@ export async function didntRenewMessage(id: number) {
             )} (${time(user.lastPaymentTime, TimestampStyles.RelativeTime)})`,
           }
         )
-        .setTimestamp(Date.now())
         .setColor(0xff0000),
     ],
   }
