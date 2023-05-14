@@ -4,8 +4,8 @@ ENV NODE_ENV=development
 
 WORKDIR /app
 
-# Copy package.json, lockfile, .npmrc
-COPY ["pnpm-lock.yaml", "package.json", ".npmrc", "./"]
+# Copy package.json, lockfile, .npmrc and prisma
+COPY ["pnpm-lock.yaml", "package.json", ".npmrc", "prisma", "./"]
 
 # Install build tools
 RUN apt-get update && \
@@ -18,7 +18,8 @@ RUN apt-get update && \
 COPY . .
 
 # Compile Typescript and remove dev packages
-RUN pnpm tsc && \
+RUN pnpm prisma generate && \
+    pnpm tsc && \
     pnpm prune --prod
 
 # Set-up running image

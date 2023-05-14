@@ -11,6 +11,16 @@ services:
     networks:
       - default
       - ubuntu_caddy
+    depends_on:
+      - db
+  db:
+    image: postgres:15
+    env_file: .env.db
+    environment:
+      POSTGRES_USER: wealthy-bot
+    volumes:
+      - ./persisted/db/data:/var/lib/postgresql/data
+    restart: unless-stopped
 
 networks:
   ubuntu_caddy:
