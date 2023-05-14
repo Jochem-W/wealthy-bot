@@ -7,6 +7,9 @@ const model = z.object({
   loggingChannel: z.string(),
   repository: z.object({ name: z.string(), owner: z.string() }),
   restartChannel: z.string(),
+  tiers: z
+    .record(z.string(), z.object({ position: z.number(), roleId: z.string() }))
+    .transform((arg) => new Map(Object.entries(arg))),
 })
 
 export const Config = await model.parseAsync(

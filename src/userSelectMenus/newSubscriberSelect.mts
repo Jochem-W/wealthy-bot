@@ -1,7 +1,6 @@
-import { Prisma } from "../clients.mjs"
 import { InvalidCustomIdError } from "../errors.mjs"
-import { Timeouts } from "../handlers/ready/httpServer.mjs"
 import { newSubscriptionMessage } from "../messages/newSubscriptionMessage.mjs"
+import { linkDiscord } from "../utilities/subscriptionUtilities.mjs"
 import { registerUserSelectMenuHandler } from "../utilities/userSelectMenu.mjs"
 import { EmbedBuilder } from "discord.js"
 
@@ -27,30 +26,7 @@ export const NewSubscriberSelect = registerUserSelectMenuHandler(
       return
     }
 
-    let prismaUser
-    const oldUser = await Prisma.user.findFirst({
-      where: { discordId: discordUser.id },
-    })
-    const newUser = await Prisma.user.findFirstOrThrow({
-      where: { id: userId },
-    })
-    if (oldUser) {
-      await Prisma.user.delete({ where: { id: userId } })
-      prismaUser = await Prisma.user.update({
-        where: { id: oldUser.id },
-        data: { ...newUser, id: oldUser.id, discordId: discordUser.id },
-      })
-      const timeout = Timeouts.get(userId)
-      if (timeout) {
-        clearTimeout(timeout)
-        Timeouts.delete(userId)
-      }
-    } else {
-      prismaUser = await Prisma.user.update({
-        where: { id: userId },
-        data: { discordId: discordUser.id },
-      })
-    }
+    const prismaUser = await linkDiscord(userId, discordUser.id)
 
     await interaction.update(newSubscriptionMessage(prismaUser))
   }
