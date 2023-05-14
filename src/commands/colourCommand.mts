@@ -41,6 +41,8 @@ export class ColourCommand extends ChatInputCommand {
     const name = `c${interaction.user.id}`
     let role = member.roles.cache.find((r) => r.name === name)
 
+    const bot = await guild.members.fetchMe()
+
     const subcommand = interaction.options.getSubcommand()
     switch (subcommand) {
       case "set": {
@@ -87,7 +89,10 @@ export class ColourCommand extends ChatInputCommand {
         }
 
         role = await guild.roles.create({
-          position: member.roles.highest.position + 1,
+          position: Math.min(
+            member.roles.highest.position + 1,
+            bot.roles.highest.position
+          ),
           name,
           reason,
           color,
