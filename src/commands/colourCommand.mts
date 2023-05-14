@@ -1,11 +1,11 @@
 import { Discord } from "../clients.mjs"
 import { GuildOnlyError } from "../errors.mjs"
 import { ChatInputCommand } from "../models/chatInputCommand.mjs"
-import type { ChatInputCommandInteraction, HexColorString } from "discord.js"
+import type { ChatInputCommandInteraction } from "discord.js"
 import { EmbedBuilder, inlineCode } from "discord.js"
 
 function colorToHex(color: number) {
-  return `#${color.toString(16).padStart(6, "0")}` as HexColorString
+  return `#${color.toString(16).padStart(6, "0")}`
 }
 
 export class ColourCommand extends ChatInputCommand {
