@@ -1,9 +1,7 @@
-import { Prisma } from "../clients.mjs"
+import type { User } from "@prisma/client"
 import { EmbedBuilder, time, TimestampStyles, userMention } from "discord.js"
 
-export async function didntRenewMessage(id: number) {
-  const user = await Prisma.user.findFirstOrThrow({ where: { id } })
-
+export function didntRenewMessage(user: User) {
   return {
     embeds: [
       new EmbedBuilder()

@@ -1,4 +1,5 @@
 import { ColourCommand } from "./commands/colourCommand.mjs"
+import { ImportCommand } from "./commands/importCommand.mjs"
 import { MembersCommand } from "./commands/membersCommand.mjs"
 import type { ChatInputCommand } from "./models/chatInputCommand.mjs"
 import type { MessageContextMenuCommand } from "./models/messageContextMenuCommand.mjs"
@@ -10,6 +11,7 @@ import type { Snowflake } from "discord.js"
 export const SlashCommands: ChatInputCommand[] = [
   new ColourCommand(),
   new MembersCommand(),
+  new ImportCommand(),
 ]
 
 export const MessageContextMenuCommands: MessageContextMenuCommand[] = []

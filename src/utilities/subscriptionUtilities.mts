@@ -1,6 +1,4 @@
 import { Prisma } from "../clients.mjs"
-import { logError } from "../errors.mjs"
-import { didntRenewMessage } from "../messages/didntRenewMessage.mjs"
 import { newSubscriptionMessage } from "../messages/newSubscriptionMessage.mjs"
 import { renewedLateMessage } from "../messages/renewedLateMessage.mjs"
 import { tierChangedMessage } from "../messages/tierChangedMessage.mjs"
@@ -12,7 +10,6 @@ import { ChannelType } from "discord.js"
 import { DateTime } from "luxon"
 import { z } from "zod"
 
-const timeouts = new Map<number, NodeJS.Timeout>()
 const textChannel = await fetchChannel(
   Config.loggingChannel,
   ChannelType.GuildText
@@ -66,8 +63,6 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
   }
 
   await updateRoles(updatedUser)
-
-  replaceTimeout(updatedUser)
 }
 
 async function newSubscription(
@@ -84,8 +79,6 @@ async function newSubscription(
   })
 
   await textChannel.send(newSubscriptionMessage(user))
-
-  replaceTimeout(user)
 }
 
 async function updateRoles(user: User) {
@@ -117,11 +110,6 @@ async function updateRoles(user: User) {
 }
 
 export async function linkDiscord(id: number, discordId: string) {
-  const oldUsers = await Prisma.user.findMany({ where: { discordId } })
-  for (const user of oldUsers) {
-    cancelTimeout(user.id)
-  }
-
   await Prisma.user.deleteMany({ where: { discordId } })
   const user = await Prisma.user.update({ where: { id }, data: { discordId } })
   await updateRoles(user)
@@ -133,32 +121,4 @@ export function expiredMillis(user: User) {
     .plus({ days: 30 + Config.gracePeriod })
     .diffNow()
     .toMillis()
-}
-
-export function replaceTimeout(user: User) {
-  const delay = expiredMillis(user)
-  if (delay < 0) {
-    return
-  }
-
-  cancelTimeout(user.id)
-  timeouts.set(
-    user.id,
-    setTimeout(() => void checkCallback(user.id), delay)
-  )
-}
-
-function cancelTimeout(id: number) {
-  clearTimeout(timeouts.get(id))
-  timeouts.delete(id)
-}
-
-async function checkCallback(id: number) {
-  try {
-    await textChannel.send(await didntRenewMessage(id))
-  } catch (e) {
-    if (e instanceof Error) {
-      await logError(e)
-    }
-  }
 }
