@@ -17,7 +17,6 @@ const model = z
     Email: z.string().email(),
     IsActive: z.coerce.boolean(),
     SinceDateUTC: z.coerce.date(),
-    CurrentPledge: z.coerce.number(),
     Tier: z.string(),
   })
   .transform((arg) => ({
@@ -25,7 +24,6 @@ const model = z
     email: arg.Email,
     isActive: arg.IsActive,
     sinceDateUtc: arg.SinceDateUTC,
-    currentPledge: arg.CurrentPledge,
     tier: arg.Tier,
   }))
 
@@ -80,7 +78,6 @@ export class ImportCommand extends ChatInputCommand {
         data: {
           email: member.email,
           name: member.name,
-          lastPaymentAmount: member.currentPledge,
           lastPaymentTier: member.tier,
           lastPaymentTime: dateTime.toJSDate(),
         },

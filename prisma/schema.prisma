@@ -14,7 +14,6 @@ model User {
   name      String
   discordId String?
 
-  lastPaymentAmount Float
-  lastPaymentTier   String
-  lastPaymentTime   DateTime
+  lastPaymentTier String
+  lastPaymentTime DateTime
 }

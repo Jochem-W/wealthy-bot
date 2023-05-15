@@ -17,10 +17,8 @@ const textChannel = await fetchChannel(
 
 export const DonationModel = z
   .object({
-    amount: z.coerce.number(),
     email: z.string().email(),
     from_name: z.string(),
-    is_first_subscription_payment: z.boolean(),
     is_subscription_payment: z.boolean(),
     tier_name: z.string().nullable(),
     timestamp: z.coerce.date(),
@@ -48,7 +46,6 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
     where: { email: data.email },
     data: {
       name: data.fromName,
-      lastPaymentAmount: data.amount,
       lastPaymentTier: data.tierName,
       lastPaymentTime: data.timestamp,
     },
@@ -72,7 +69,6 @@ async function newSubscription(
     data: {
       email: data.email,
       name: data.fromName,
-      lastPaymentAmount: data.amount,
       lastPaymentTier: data.tierName,
       lastPaymentTime: data.timestamp,
     },
