@@ -95,7 +95,7 @@ export class MembersCommand extends ChatInputCommand {
           }
         }
 
-        await interaction.reply({ embeds })
+        await interaction.reply({ embeds, ephemeral: true })
       }
     }
   }
