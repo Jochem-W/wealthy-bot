@@ -61,10 +61,7 @@ export class MembersCommand extends ChatInputCommand {
         >()
         koFiMembers.set("Unknown", [])
         for (const [, guildMember] of await guild.members.fetch()) {
-          if (
-            guildMember.user.bot ||
-            guildMember.permissions.has(PermissionFlagsBits.Administrator)
-          ) {
+          if (guildMember.user.bot) {
             continue
           }
 
@@ -72,7 +69,11 @@ export class MembersCommand extends ChatInputCommand {
             where: { discordId: guildMember.id },
           })
           if (!prismaUser) {
-            koFiMembers.get("Unknown")?.push({ guildMember })
+            if (
+              !guildMember.permissions.has(PermissionFlagsBits.Administrator)
+            ) {
+              koFiMembers.get("Unknown")?.push({ guildMember })
+            }
             continue
           }
 
