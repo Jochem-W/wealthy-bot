@@ -19,7 +19,6 @@ async function callback() {
   try {
     for (const user of await Prisma.user.findMany()) {
       const millis = expiredMillis(user)
-      console.log(user, millis)
       if (millis < 0 || millis > interval) {
         continue
       }
