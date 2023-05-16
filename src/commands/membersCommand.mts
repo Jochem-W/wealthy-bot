@@ -15,24 +15,22 @@ import {
 } from "discord.js"
 
 function formatUsers(users: { prismaUser?: User; guildMember: GuildMember }[]) {
-  return users
-    .map(({ prismaUser, guildMember }) => {
-      if (!prismaUser) {
-        return userMention(guildMember.id)
-      }
+  return users.map(({ prismaUser, guildMember }) => {
+    if (!prismaUser) {
+      return userMention(guildMember.id)
+    }
 
-      const string = `${
-        prismaUser.discordId
-          ? userMention(prismaUser.discordId)
-          : inlineCode(prismaUser.email)
-      } paid ${time(prismaUser.lastPaymentTime, TimestampStyles.RelativeTime)}`
-      if (expiredMillis(prismaUser) < 0) {
-        return strikethrough(string)
-      }
+    const string = `${
+      prismaUser.discordId
+        ? userMention(prismaUser.discordId)
+        : inlineCode(prismaUser.email)
+    } paid ${time(prismaUser.lastPaymentTime, TimestampStyles.RelativeTime)}`
+    if (expiredMillis(prismaUser) < 0) {
+      return strikethrough(string)
+    }
 
-      return string
-    })
-    .join("\n")
+    return string
+  })
 }
 
 export class MembersCommand extends ChatInputCommand {
@@ -80,12 +78,24 @@ export class MembersCommand extends ChatInputCommand {
             ?.push({ prismaUser, guildMember })
         }
 
-        const embed = new EmbedBuilder()
+        const embeds = []
         for (const [tier, users] of koFiMembers) {
-          embed.addFields({ name: tier, value: formatUsers(users) })
+          let value = ""
+          for (const formatted of formatUsers(users)) {
+            if (value.length + formatted.length >= 1024) {
+              embeds.push(new EmbedBuilder().setFields({ name: tier, value }))
+              value = ""
+              continue
+            }
+
+            value += formatted + "\n"
+          }
+          if (value) {
+            embeds.push(new EmbedBuilder().setFields({ name: tier, value }))
+          }
         }
 
-        await interaction.reply({ embeds: [embed] })
+        await interaction.reply({ embeds })
       }
     }
   }
