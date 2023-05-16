@@ -106,7 +106,7 @@ async function updateRoles(user: User) {
 }
 
 export async function linkDiscord(id: number, discordId: string) {
-  await Prisma.user.deleteMany({ where: { discordId } })
+  await Prisma.user.deleteMany({ where: { id: { not: id }, discordId } })
   const user = await Prisma.user.update({ where: { id }, data: { discordId } })
   await updateRoles(user)
   return user
