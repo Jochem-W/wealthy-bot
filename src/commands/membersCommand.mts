@@ -61,6 +61,13 @@ export class MembersCommand extends ChatInputCommand {
         >()
         koFiMembers.set("Unknown", [])
         for (const [, guildMember] of await guild.members.fetch()) {
+          if (
+            guildMember.user.bot ||
+            guildMember.permissions.has(PermissionFlagsBits.Administrator)
+          ) {
+            continue
+          }
+
           const prismaUser = await Prisma.user.findFirst({
             where: { discordId: guildMember.id },
           })
