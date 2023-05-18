@@ -73,7 +73,7 @@ export class MembersCommand extends ChatInputCommand {
     unknownCategory.push(
       ...users.map((u) =>
         escapeMarkdown(
-          `${u.name} (${u.email}) last paid ${time(
+          `${u.name} (${u.email}) paid ${time(
             u.lastPaymentTime,
             TimestampStyles.RelativeTime
           )}`
@@ -83,6 +83,8 @@ export class MembersCommand extends ChatInputCommand {
 
     const messages = []
     for (const [name, values] of categories) {
+      let inlineCount = 0
+
       let message: { embeds: EmbedBuilder[] } = { embeds: [] }
       messages.push(message)
 
@@ -104,21 +106,34 @@ export class MembersCommand extends ChatInputCommand {
           6000
         ) {
           if (fieldValue) {
+            if (inlineCount === 2) {
+              embed.addFields({ name: "\u200b", value: "\u200b" })
+              inlineCount = 0
+            }
+
             embed.addFields({
               name: fieldName,
               value: fieldValue,
               inline: true,
             })
+            inlineCount++
           }
 
           message = { embeds: [] }
           messages.push(message)
+          inlineCount = 0
           embed = new EmbedBuilder()
           message.embeds.push(embed)
           fieldName = name
           fieldValue = ""
         } else if (nextFieldValueLength > 1024) {
+          if (inlineCount === 2) {
+            embed.addFields({ name: "\u200b", value: "\u200b" })
+            inlineCount = 0
+          }
+
           embed.addFields({ name: fieldName, value: fieldValue, inline: true })
+          inlineCount++
           fieldName = "\u200b"
           fieldValue = ""
         }
@@ -128,6 +143,11 @@ export class MembersCommand extends ChatInputCommand {
       }
 
       if (fieldValue) {
+        if (inlineCount === 2) {
+          embed.addFields({ name: "\u200b", value: "\u200b" })
+          inlineCount = 0
+        }
+
         embed.addFields({ name: fieldName, value: fieldValue, inline: true })
       }
     }
