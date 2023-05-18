@@ -1,37 +1,17 @@
 import { Discord, Prisma } from "../clients.mjs"
 import { GuildOnlyError } from "../errors.mjs"
 import { ChatInputCommand } from "../models/chatInputCommand.mjs"
+import { embedsLength } from "../utilities/embedUtilities.mjs"
 import { expiredMillis } from "../utilities/subscriptionUtilities.mjs"
-import type { User } from "@prisma/client"
-import type { ChatInputCommandInteraction, GuildMember } from "discord.js"
+import type { ChatInputCommandInteraction } from "discord.js"
 import {
   EmbedBuilder,
-  inlineCode,
   PermissionFlagsBits,
   strikethrough,
   time,
   TimestampStyles,
   userMention,
 } from "discord.js"
-
-function formatUsers(users: { prismaUser?: User; guildMember: GuildMember }[]) {
-  return users.map(({ prismaUser, guildMember }) => {
-    if (!prismaUser) {
-      return userMention(guildMember.id)
-    }
-
-    const string = `${
-      prismaUser.discordId
-        ? userMention(prismaUser.discordId)
-        : inlineCode(prismaUser.email)
-    } paid ${time(prismaUser.lastPaymentTime, TimestampStyles.RelativeTime)}`
-    if (expiredMillis(prismaUser) < 0) {
-      return strikethrough(string)
-    }
-
-    return string
-  })
-}
 
 export class MembersCommand extends ChatInputCommand {
   public constructor() {
@@ -45,65 +25,112 @@ export class MembersCommand extends ChatInputCommand {
     )
   }
 
+  private async list(
+    interaction: ChatInputCommandInteraction<"raw" | "cached">
+  ) {
+    const guild =
+      interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
+
+    const categories = new Map<string, string[]>([["Unknown", []]])
+    const unknownCategory: string[] = []
+    categories.set("Unknown", unknownCategory)
+
+    let users = await Prisma.user.findMany()
+
+    for (const [, member] of await guild.members.fetch()) {
+      const userIndex = users.findIndex((u) => u.discordId === member.id)
+      const user = users[userIndex]
+      if (!user) {
+        unknownCategory.push(userMention(member.id))
+        continue
+      }
+
+      users = users.splice(userIndex, 1)
+      let category = categories.get(user.lastPaymentTier)
+      if (!category) {
+        category = []
+        categories.set(user.lastPaymentTier, category)
+      }
+
+      let value = `${userMention(member.id)} (${user.name}) last paid ${time(
+        user.lastPaymentTime,
+        TimestampStyles.RelativeTime
+      )}`
+      if (expiredMillis(user) < 0) {
+        value = strikethrough(value)
+      }
+
+      category.push(value)
+    }
+
+    unknownCategory.push(
+      ...users.map(
+        (u) =>
+          `${u.name} (${u.email}) last paid ${time(
+            u.lastPaymentTime,
+            TimestampStyles.RelativeTime
+          )}`
+      )
+    )
+
+    const messages: { embeds: EmbedBuilder[] }[] = []
+    for (const [name, values] of categories) {
+      let message = messages.at(-1)
+      if (!message) {
+        message = { embeds: [] }
+        messages.push(message)
+      }
+
+      let embed = message.embeds.at(-1)
+      if (!embed) {
+        embed = new EmbedBuilder()
+        message.embeds.push(embed)
+      }
+
+      let fieldName = name
+      let fieldValue = ""
+      for (const value of values) {
+        const newLength = fieldName.length + fieldValue.length
+        if (embedsLength(message.embeds) + newLength > 6000) {
+          embed.addFields({ name: fieldName, value: fieldValue })
+          message = { embeds: [] }
+          messages.push(message)
+          embed = new EmbedBuilder()
+          message.embeds.push(embed)
+          fieldName = name
+        } else if (newLength > 1024) {
+          embed.addFields({ name: fieldName, value: fieldValue })
+          fieldName = ""
+          fieldValue = ""
+        }
+
+        fieldValue += value
+      }
+
+      embed.addFields({ name: fieldName, value: fieldValue })
+    }
+
+    if (!messages[0]) {
+      await interaction.reply({
+        embeds: [new EmbedBuilder().setTitle("No data")],
+      })
+      return
+    }
+
+    await interaction.reply(messages[0])
+    for (const message of messages.splice(1)) {
+      await interaction.followUp(message)
+    }
+  }
+
   public async handle(interaction: ChatInputCommandInteraction) {
     if (!interaction.inGuild()) {
       throw new GuildOnlyError()
     }
 
-    const guild =
-      interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
-
     switch (interaction.options.getSubcommand()) {
       case "list": {
-        const koFiMembers = new Map<
-          string,
-          { prismaUser?: User; guildMember: GuildMember }[]
-        >()
-        koFiMembers.set("Unknown", [])
-        for (const [, guildMember] of await guild.members.fetch()) {
-          if (guildMember.user.bot) {
-            continue
-          }
-
-          const prismaUser = await Prisma.user.findFirst({
-            where: { discordId: guildMember.id },
-          })
-          if (!prismaUser) {
-            if (
-              !guildMember.permissions.has(PermissionFlagsBits.Administrator)
-            ) {
-              koFiMembers.get("Unknown")?.push({ guildMember })
-            }
-            continue
-          }
-
-          if (!koFiMembers.get(prismaUser.lastPaymentTier)) {
-            koFiMembers.set(prismaUser.lastPaymentTier, [])
-          }
-
-          koFiMembers
-            .get(prismaUser.lastPaymentTier)
-            ?.push({ prismaUser, guildMember })
-        }
-
-        const embeds = []
-        for (const [tier, users] of koFiMembers) {
-          let value = ""
-          for (const formatted of formatUsers(users)) {
-            if (value.length + formatted.length >= 1024) {
-              embeds.push(new EmbedBuilder().setFields({ name: tier, value }))
-              value = ""
-              continue
-            }
-
-            value += formatted + "\n"
-          }
-          if (value) {
-            embeds.push(new EmbedBuilder().setFields({ name: tier, value }))
-          }
-        }
-
-        await interaction.reply({ embeds, ephemeral: true })
+        await this.list(interaction)
       }
     }
   }
