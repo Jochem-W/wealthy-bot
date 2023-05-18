@@ -6,6 +6,7 @@ import { expiredMillis } from "../utilities/subscriptionUtilities.mjs"
 import type { ChatInputCommandInteraction } from "discord.js"
 import {
   EmbedBuilder,
+  escapeMarkdown,
   PermissionFlagsBits,
   strikethrough,
   time,
@@ -56,10 +57,12 @@ export class MembersCommand extends ChatInputCommand {
         categories.set(user.lastPaymentTier, category)
       }
 
-      let value = `${userMention(member.id)} (${user.name}) last paid ${time(
-        user.lastPaymentTime,
-        TimestampStyles.RelativeTime
-      )}`
+      let value = escapeMarkdown(
+        `${userMention(member.id)} (${user.name}) last paid ${time(
+          user.lastPaymentTime,
+          TimestampStyles.RelativeTime
+        )}`
+      )
       if (expiredMillis(user) < 0) {
         value = strikethrough(value)
       }
@@ -68,12 +71,13 @@ export class MembersCommand extends ChatInputCommand {
     }
 
     unknownCategory.push(
-      ...users.map(
-        (u) =>
+      ...users.map((u) =>
+        escapeMarkdown(
           `${u.name} (${u.email}) last paid ${time(
             u.lastPaymentTime,
             TimestampStyles.RelativeTime
           )}`
+        )
       )
     )
 
