@@ -34,7 +34,7 @@ export class MembersCommand extends ChatInputCommand {
 
     const categories = new Map<string, string[]>()
     const unknownCategory: string[] = []
-    categories.set("Unknown", unknownCategory)
+    categories.set("Unlinked/not in server", unknownCategory)
 
     const users = await Prisma.user.findMany()
 
