@@ -91,7 +91,11 @@ export class MembersCommand extends ChatInputCommand {
       let fieldValue = ""
       for (const value of values) {
         if (
-          embedsLength(message.embeds) + fieldName.length + fieldValue.length >
+          embedsLength(message.embeds) +
+            fieldName.length +
+            fieldValue.length +
+            value.length +
+            1 >
           6000
         ) {
           embed.addFields({ name: fieldName, value: fieldValue })
@@ -101,7 +105,7 @@ export class MembersCommand extends ChatInputCommand {
           message.embeds.push(embed)
           fieldName = name
           fieldValue = ""
-        } else if (fieldValue.length > 1024) {
+        } else if (fieldValue.length + value.length + 1 > 1024) {
           embed.addFields({ name: fieldName, value: fieldValue })
           fieldName = "\u200b"
           fieldValue = ""
