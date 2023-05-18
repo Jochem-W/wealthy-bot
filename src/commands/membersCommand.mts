@@ -94,8 +94,8 @@ export class MembersCommand extends ChatInputCommand {
 
         if (
           embedsLength(message.embeds) +
-          fieldName.length +
-          nextFieldValueLength +
+            fieldName.length +
+            nextFieldValueLength >
           6000
         ) {
           if (fieldValue) {
