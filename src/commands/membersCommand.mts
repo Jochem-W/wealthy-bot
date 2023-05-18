@@ -77,13 +77,10 @@ export class MembersCommand extends ChatInputCommand {
       )
     )
 
-    const messages: { embeds: EmbedBuilder[] }[] = []
+    const messages = []
     for (const [name, values] of categories) {
-      let message = messages.at(-1)
-      if (!message) {
-        message = { embeds: [] }
-        messages.push(message)
-      }
+      let message: { embeds: EmbedBuilder[] } = { embeds: [] }
+      messages.push(message)
 
       let embed = new EmbedBuilder()
       message.embeds.push(embed)
