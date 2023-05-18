@@ -38,6 +38,10 @@ export class MembersCommand extends ChatInputCommand {
     const users = await Prisma.user.findMany()
 
     for (const [, member] of await guild.members.fetch()) {
+      if (member.user.bot) {
+        continue
+      }
+
       const userIndex = users.findIndex((u) => u.discordId === member.id)
       const user = users[userIndex]
       if (!user) {
