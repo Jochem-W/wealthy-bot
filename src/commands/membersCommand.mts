@@ -73,10 +73,9 @@ export class MembersCommand extends ChatInputCommand {
     unknownCategory.push(
       ...users.map((u) =>
         escapeMarkdown(
-          `${u.name} (${u.email}) paid ${time(
-            u.lastPaymentTime,
-            TimestampStyles.RelativeTime
-          )}`
+          `${u.name} (${u.email}${
+            u.discordId ? `, ${userMention(u.discordId)}` : ""
+          }) paid ${time(u.lastPaymentTime, TimestampStyles.RelativeTime)}`
         )
       )
     )
