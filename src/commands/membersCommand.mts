@@ -117,9 +117,9 @@ export class MembersCommand extends ChatInputCommand {
       return
     }
 
-    await interaction.reply(messages[0])
+    await interaction.reply({ ...messages[0], ephemeral: true })
     for (const message of messages.splice(1)) {
-      await interaction.followUp(message)
+      await interaction.followUp({ ...message, ephemeral: true })
     }
   }
 
