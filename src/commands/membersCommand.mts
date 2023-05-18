@@ -31,7 +31,7 @@ export class MembersCommand extends ChatInputCommand {
     const guild =
       interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
 
-    const categories = new Map<string, string[]>([["Unknown", []]])
+    const categories = new Map<string, string[]>()
     const unknownCategory: string[] = []
     categories.set("Unknown", unknownCategory)
 
@@ -81,32 +81,32 @@ export class MembersCommand extends ChatInputCommand {
         messages.push(message)
       }
 
-      let embed = message.embeds.at(-1)
-      if (!embed) {
-        embed = new EmbedBuilder()
-        message.embeds.push(embed)
-      }
+      let embed = new EmbedBuilder()
+      message.embeds.push(embed)
 
       let fieldName = name
       let fieldValue = ""
       for (const value of values) {
+        let nextFieldValueLength = fieldValue.length + value.length
+        if (fieldValue) {
+          nextFieldValueLength += 1
+        }
+
         if (
           embedsLength(message.embeds) +
-            fieldName.length +
-            fieldValue.length +
-            value.length +
-            1 >
+          fieldName.length +
+          nextFieldValueLength +
           6000
         ) {
-          embed.addFields({ name: fieldName, value: fieldValue })
+          embed.addFields({ name: fieldName, value: fieldValue, inline: true })
           message = { embeds: [] }
           messages.push(message)
           embed = new EmbedBuilder()
           message.embeds.push(embed)
           fieldName = name
           fieldValue = ""
-        } else if (fieldValue.length + value.length + 1 > 1024) {
-          embed.addFields({ name: fieldName, value: fieldValue })
+        } else if (nextFieldValueLength > 1024) {
+          embed.addFields({ name: fieldName, value: fieldValue, inline: true })
           fieldName = "\u200b"
           fieldValue = ""
         }
