@@ -58,7 +58,7 @@ export class MembersCommand extends ChatInputCommand {
       }
 
       let value = escapeMarkdown(
-        `${userMention(member.id)} (${user.name}) last paid ${time(
+        `${userMention(member.id)} (${user.name}) paid ${time(
           user.lastPaymentTime,
           TimestampStyles.RelativeTime
         )}`
