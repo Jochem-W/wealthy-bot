@@ -12,7 +12,7 @@ model User {
   id        Int     @id @default(autoincrement())
   email     String  @unique
   name      String
-  discordId String?
+  discordId String? @unique
 
   lastPaymentTier String
   lastPaymentTime DateTime
