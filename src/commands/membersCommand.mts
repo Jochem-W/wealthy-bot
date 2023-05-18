@@ -100,7 +100,7 @@ export class MembersCommand extends ChatInputCommand {
           fieldName = name
         } else if (newLength > 1024) {
           embed.addFields({ name: fieldName, value: fieldValue })
-          fieldName = ""
+          fieldName = "\u200b"
           fieldValue = ""
         }
 
