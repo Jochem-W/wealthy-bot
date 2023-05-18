@@ -58,10 +58,9 @@ export class MembersCommand extends ChatInputCommand {
       }
 
       let value = escapeMarkdown(
-        `${userMention(member.id)} (${user.name}) paid ${time(
-          user.lastPaymentTime,
-          TimestampStyles.RelativeTime
-        )}`
+        `${userMention(member.id)}${
+          member.user.username !== user.name ? ` (${user.name})` : ""
+        } paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`
       )
       if (expiredMillis(user) < 0) {
         value = strikethrough(value)
