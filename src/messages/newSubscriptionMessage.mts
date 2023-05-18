@@ -13,9 +13,16 @@ export function newSubscriptionMessage(user: User) {
   const embed = new EmbedBuilder()
     .setTitle("New subscription")
     .setFields(
-      { name: "Name", value: user.name },
-      { name: "Email", value: user.email },
-      { name: "Tier", value: user.lastPaymentTier }
+      user.discordId
+        ? [
+            { name: "Member", value: userMention(user.discordId) },
+            { name: "Tier", value: user.lastPaymentTier },
+          ]
+        : [
+            { name: "Name", value: user.name },
+            { name: "Email", value: user.email },
+            { name: "Tier", value: user.lastPaymentTier },
+          ]
     )
     .setTimestamp(user.lastPaymentTime)
 
