@@ -98,7 +98,14 @@ export class MembersCommand extends ChatInputCommand {
           nextFieldValueLength +
           6000
         ) {
-          embed.addFields({ name: fieldName, value: fieldValue, inline: true })
+          if (fieldValue) {
+            embed.addFields({
+              name: fieldName,
+              value: fieldValue,
+              inline: true,
+            })
+          }
+
           message = { embeds: [] }
           messages.push(message)
           embed = new EmbedBuilder()
@@ -115,7 +122,9 @@ export class MembersCommand extends ChatInputCommand {
         fieldValue = fieldValue.trim()
       }
 
-      embed.addFields({ name: fieldName, value: fieldValue, inline: true })
+      if (fieldValue) {
+        embed.addFields({ name: fieldName, value: fieldValue, inline: true })
+      }
     }
 
     if (!messages[0]) {
