@@ -35,7 +35,7 @@ export class MembersCommand extends ChatInputCommand {
     const unknownCategory: string[] = []
     categories.set("Unknown", unknownCategory)
 
-    let users = await Prisma.user.findMany()
+    const users = await Prisma.user.findMany()
 
     for (const [, member] of await guild.members.fetch()) {
       const userIndex = users.findIndex((u) => u.discordId === member.id)
@@ -45,7 +45,7 @@ export class MembersCommand extends ChatInputCommand {
         continue
       }
 
-      users = users.splice(userIndex, 1)
+      users.splice(userIndex, 1)
       let category = categories.get(user.lastPaymentTier)
       if (!category) {
         category = []
@@ -115,7 +115,7 @@ export class MembersCommand extends ChatInputCommand {
         fieldValue = fieldValue.trim()
       }
 
-      embed.addFields({ name: fieldName, value: fieldValue })
+      embed.addFields({ name: fieldName, value: fieldValue, inline: true })
     }
 
     if (!messages[0]) {
