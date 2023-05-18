@@ -46,7 +46,10 @@ export class MembersCommand extends ChatInputCommand {
       const userIndex = users.findIndex((u) => u.discordId === member.id)
       const user = users[userIndex]
       if (!user) {
-        unknownCategory.push(userMention(member.id))
+        if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
+          unknownCategory.push(userMention(member.id))
+        }
+
         continue
       }
 
