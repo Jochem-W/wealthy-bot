@@ -106,7 +106,7 @@ export class MembersCommand extends ChatInputCommand {
           fieldValue = ""
         }
 
-        fieldValue += `${value}\n`
+        fieldValue += `\n${value}`
         fieldValue = fieldValue.trim()
       }
 
