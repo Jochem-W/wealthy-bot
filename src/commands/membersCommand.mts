@@ -72,15 +72,19 @@ export class MembersCommand extends ChatInputCommand {
       category.push(value)
     }
 
-    unknownCategory.push(
-      ...users.map((u) =>
-        escapeMarkdown(
-          `${u.name} (${u.email}${
-            u.discordId ? `, ${userMention(u.discordId)}` : ""
-          }) paid ${time(u.lastPaymentTime, TimestampStyles.RelativeTime)}`
-        )
+    for (const user of users) {
+      let value = escapeMarkdown(
+        `${user.name} (${user.email}${
+          user.discordId ? `, ${userMention(user.discordId)}` : ""
+        }) paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`
       )
-    )
+
+      if (expiredMillis(user) < 0) {
+        value = strikethrough(value)
+      }
+
+      unknownCategory.push(value)
+    }
 
     const messages = []
     for (const [name, values] of categories) {
