@@ -5,7 +5,7 @@ export function tierChangedMessage(oldUser: User, newUser: User) {
   return {
     embeds: [
       new EmbedBuilder()
-        .setTitle("Subscription tier changed")
+        .setTitle("Tier changed")
         .setFields(
           {
             name: newUser.discordId ? "Member" : "Email",

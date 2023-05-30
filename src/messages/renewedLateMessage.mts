@@ -5,7 +5,7 @@ export function renewedLateMessage(user: User) {
   return {
     embeds: [
       new EmbedBuilder()
-        .setTitle("Subscription renewed late")
+        .setTitle("Late renewal")
         .setFields(
           {
             name: user.discordId ? "Member" : "Email",

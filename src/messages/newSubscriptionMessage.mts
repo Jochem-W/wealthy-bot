@@ -12,6 +12,7 @@ import type { MessageActionRowComponentBuilder } from "discord.js"
 export function newSubscriptionMessage(user: User) {
   const embed = new EmbedBuilder()
     .setTitle("New subscription")
+    .setDescription("This could also mean that a member changed their email address.")
     .setFields(
       { name: "Name", value: user.name },
       { name: "Email", value: user.email },
