@@ -84,6 +84,10 @@ export class MembersCommand extends ChatInputCommand {
 
     const users = await Prisma.user.findMany()
     for (const [, member] of await guild.members.fetch()) {
+      if (member.user.bot) {
+        continue
+      }
+
       const user = remove(users, (u) => u.discordId === member.id)
       if (!user) {
         if (member.permissions.has(PermissionFlagsBits.Administrator)) {
