@@ -9,11 +9,12 @@ services:
       - ./persisted/bot:/app/persisted/bot
     restart: unless-stopped
     networks:
-      - default
+      - wealthy
       - ubuntu_caddy
     depends_on:
       - db
   db:
+    container_name: wealthy-db
     image: postgres:15
     env_file: .env.db
     environment:
@@ -21,7 +22,10 @@ services:
     volumes:
       - ./persisted/db/data:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - wealthy
 
 networks:
   ubuntu_caddy:
     external: true
+  wealthy:
