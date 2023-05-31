@@ -16,4 +16,13 @@ model User {
 
   lastPaymentTier String
   lastPaymentTime DateTime
+
+  invitee Invitee?
+}
+
+model Invitee {
+  discordId String @id
+
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
 }
