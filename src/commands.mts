@@ -1,5 +1,6 @@
 import { ColourCommand } from "./commands/colourCommand.mjs"
 import { ImportCommand } from "./commands/importCommand.mjs"
+import { InviteCommand } from "./commands/inviteCommand.mjs"
 import { MembersCommand } from "./commands/membersCommand.mjs"
 import type { ChatInputCommand } from "./models/chatInputCommand.mjs"
 import type { MessageContextMenuCommand } from "./models/messageContextMenuCommand.mjs"
@@ -12,6 +13,7 @@ export const SlashCommands: ChatInputCommand[] = [
   new ColourCommand(),
   new MembersCommand(),
   new ImportCommand(),
+  new InviteCommand(),
 ]
 
 export const MessageContextMenuCommands: MessageContextMenuCommand[] = []

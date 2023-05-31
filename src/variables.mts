@@ -9,6 +9,8 @@ const model = z
     NODE_ENV: z.string().optional(),
     HTTP_PORT: z.coerce.number().optional().default(80),
     VERIFICATION_TOKEN: z.string().uuid(),
+    SECRET_KEY: z.string(),
+    INVITE_URL: z.string().url(),
   })
   .transform((arg) => camelcaseKeys(arg))
 
