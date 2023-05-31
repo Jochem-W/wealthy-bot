@@ -1,12 +1,16 @@
 import { Discord, Prisma } from "../clients.mjs"
 import { GuildOnlyError } from "../errors.mjs"
 import { ChatInputCommand } from "../models/chatInputCommand.mjs"
+import { remove } from "../utilities/arrayUtilities.mjs"
 import { embedsLength } from "../utilities/embedUtilities.mjs"
 import { expiredMillis } from "../utilities/subscriptionUtilities.mjs"
-import type { ChatInputCommandInteraction } from "discord.js"
+import type { User } from "@prisma/client"
 import {
+  ChatInputCommandInteraction,
   EmbedBuilder,
   escapeMarkdown,
+  Guild,
+  GuildMember,
   PermissionFlagsBits,
   strikethrough,
   time,
@@ -26,64 +30,83 @@ export class MembersCommand extends ChatInputCommand {
     )
   }
 
-  private async list(
-    interaction: ChatInputCommandInteraction<"raw" | "cached">
-  ) {
-    const guild =
-      interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
+  private memberToString({
+    user,
+    member,
+  }: {
+    user?: User
+    member?: GuildMember
+  }) {
+    if (!user) {
+      if (!member) {
+        return null
+      }
 
-    const categories = new Map<string, string[]>()
-    const unknownCategory: string[] = []
-    categories.set("Unlinked/not in server", unknownCategory)
+      return userMention(member.id)
+    }
+
+    let value
+    if (!member) {
+      value = `${user.name} (${user.email}`
+      if (user.discordId) {
+        value += `, ${userMention(user.discordId)}`
+      }
+
+      value += ")"
+    } else {
+      value = userMention(member.id)
+      if (member.user.username !== user.name) {
+        value += ` (${user.name})`
+      }
+    }
+
+    value += ` paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`
+    value = escapeMarkdown(value)
+    if (expiredMillis(user) <= 0) {
+      value = strikethrough(value)
+    }
+
+    return `- ${value}`
+  }
+
+  private async groupMembers(guild: Guild) {
+    const categories = new Map<
+      string,
+      { member?: GuildMember; user?: User }[]
+    >()
+    const miscCategory = "Unlinked/not in server"
+    const staffCategory = "Staff without subscription"
+    categories.set(miscCategory, [])
+    categories.set(staffCategory, [])
 
     const users = await Prisma.user.findMany()
-
     for (const [, member] of await guild.members.fetch()) {
-      if (member.user.bot) {
-        continue
-      }
-
-      const userIndex = users.findIndex((u) => u.discordId === member.id)
-      const user = users[userIndex]
+      const user = remove(users, (u) => u.discordId === member.id)
       if (!user) {
-        if (!member.permissions.has(PermissionFlagsBits.Administrator)) {
-          unknownCategory.push(userMention(member.id))
+        if (member.permissions.has(PermissionFlagsBits.Administrator)) {
+          categories.get(staffCategory)?.push({ member })
+          continue
         }
 
+        categories.get(miscCategory)?.push({ member })
         continue
       }
 
-      users.splice(userIndex, 1)
-      let category = categories.get(user.lastPaymentTier)
-      if (!category) {
-        category = []
-        categories.set(user.lastPaymentTier, category)
+      if (categories.get(user.lastPaymentTier) === undefined) {
+        categories.set(user.lastPaymentTier, [])
       }
 
-      let value = escapeMarkdown(
-        `${userMention(member.id)}${
-          member.user.username !== user.name ? ` (${user.name})` : ""
-        } paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`
-      )
-      if (expiredMillis(user) < 0) {
-        value = strikethrough(value)
-      }
-
-      category.push(value)
+      categories.get(user.lastPaymentTier)?.push({ member, user })
     }
 
-    for (const user of users) {
-      if (expiredMillis(user) < 0) {
-        continue
-      }
+    categories.get(miscCategory)?.push(...users.map((user) => ({ user })))
 
-      unknownCategory.push(escapeMarkdown(
-        `${user.name} (${user.email}${
-          user.discordId ? `, ${userMention(user.discordId)}` : ""
-        }) paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`
-      ))
-    }
+    return categories
+  }
 
+  private categoriesToMessages(
+    categories: Map<string, { member?: GuildMember; user?: User }[]>
+  ) {
     const messages = []
     for (const [name, values] of categories) {
       let inlineCount = 0
@@ -96,7 +119,12 @@ export class MembersCommand extends ChatInputCommand {
 
       let fieldName = name
       let fieldValue = ""
-      for (const value of values) {
+      for (const rawValue of values) {
+        const value = this.memberToString(rawValue)
+        if (!value) {
+          continue
+        }
+
         let nextFieldValueLength = fieldValue.length + value.length
         if (fieldValue) {
           nextFieldValueLength += 1
@@ -154,6 +182,18 @@ export class MembersCommand extends ChatInputCommand {
         embed.addFields({ name: fieldName, value: fieldValue, inline: true })
       }
     }
+
+    return messages
+  }
+
+  private async list(
+    interaction: ChatInputCommandInteraction<"raw" | "cached">
+  ) {
+    const guild =
+      interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
+
+    const categories = await this.groupMembers(guild)
+    const messages = this.categoriesToMessages(categories)
 
     if (!messages[0]) {
       await interaction.reply({
