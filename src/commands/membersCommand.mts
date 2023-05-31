@@ -55,7 +55,10 @@ export class MembersCommand extends ChatInputCommand {
       value += ")"
     } else {
       value = userMention(member.id)
-      if (member.user.username !== user.name) {
+      if (
+        member.user.username !== user.name &&
+        member.displayName !== user.name
+      ) {
         value += ` (${user.name})`
       }
     }
