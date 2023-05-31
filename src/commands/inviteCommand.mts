@@ -32,6 +32,7 @@ export class InviteCommand extends ChatInputCommand {
             )}.\n\nThis link will be valid for 12 hours, and every time the link is used, the previous invitee will be kicked.`
           ),
       ],
+      ephemeral: true,
     })
   }
 }
