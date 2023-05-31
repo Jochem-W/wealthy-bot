@@ -6,7 +6,9 @@ export function didntRenewMessage(user: User) {
     embeds: [
       new EmbedBuilder()
         .setTitle("Overdue payment")
-        .setDescription("This could mean that the subscription was cancelled, or that the payment is still pending.")
+        .setDescription(
+          "This could mean that the subscription was cancelled, or that the payment is still pending."
+        )
         .setFields(
           {
             name: user.discordId ? "Member" : "Email",
