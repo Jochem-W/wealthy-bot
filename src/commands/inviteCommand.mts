@@ -27,9 +27,15 @@ export class InviteCommand extends ChatInputCommand {
         new EmbedBuilder()
           .setTitle("Invite link generated")
           .setDescription(
-            `To invite someone to the server, please send them the following link ${inlineCode(
-              url.toString()
-            )}.\n\nThis link will be valid for 12 hours, and every time the link is used, the previous invitee will be kicked.`
+            `To invite someone to the server, please send them the following link:`
+          )
+          .setFields(
+            { name: "\u200b", value: inlineCode(url.toString()) },
+            {
+              name: "\u200b",
+              value:
+                "This link will be valid for 12 hours, and every time the link is used, the previous invitee will be kicked.",
+            }
           ),
       ],
       ephemeral: true,
