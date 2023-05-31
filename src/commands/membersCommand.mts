@@ -42,7 +42,7 @@ export class MembersCommand extends ChatInputCommand {
         return null
       }
 
-      return userMention(member.id)
+      return `- ${userMention(member.id)}`
     }
 
     let value
