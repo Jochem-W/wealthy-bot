@@ -11,7 +11,7 @@ export const NewSubscriberSelect = registerUserSelectMenuHandler(
       throw new InvalidCustomIdError(interaction.customId)
     }
 
-    const userId = parseInt(rawUserId)
+    const userId = parseInt(rawUserId, 10)
 
     const discordUser = interaction.users.first()
     if (interaction.users.size !== 1 || !discordUser) {

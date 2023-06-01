@@ -46,14 +46,7 @@ export class MembersCommand extends ChatInputCommand {
     }
 
     let value
-    if (!member) {
-      value = `${user.name} (${user.email}`
-      if (user.discordId) {
-        value += `, ${userMention(user.discordId)}`
-      }
-
-      value += ")"
-    } else {
+    if (member) {
       value = userMention(member.id)
       if (
         member.user.username !== user.name &&
@@ -61,6 +54,13 @@ export class MembersCommand extends ChatInputCommand {
       ) {
         value += ` (${user.name})`
       }
+    } else {
+      value = `${user.name} (${user.email}`
+      if (user.discordId) {
+        value += `, ${userMention(user.discordId)}`
+      }
+
+      value += ")"
     }
 
     value += ` paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`
@@ -223,7 +223,10 @@ export class MembersCommand extends ChatInputCommand {
     switch (interaction.options.getSubcommand()) {
       case "list": {
         await this.list(interaction)
+        break
       }
+      default:
+        break
     }
   }
 }

@@ -33,11 +33,14 @@ export function snowflakeToDateTime(snowflake: Snowflake) {
 }
 
 export async function tryFetchMember(
-  guild: Snowflake | Guild,
+  guildOrSnowflake: Snowflake | Guild,
   options: FetchMemberOptions | UserResolvable
 ) {
-  if (!(guild instanceof Guild)) {
-    guild = await Discord.guilds.fetch(guild)
+  let guild
+  if (guildOrSnowflake instanceof Guild) {
+    guild = guildOrSnowflake
+  } else {
+    guild = await Discord.guilds.fetch(guildOrSnowflake)
   }
 
   try {
@@ -87,7 +90,7 @@ export async function fetchInteractionGuild(interaction: Interaction) {
 }
 
 export async function ensureOwner(interaction: Interaction) {
-  let application = interaction.client.application
+  let { application } = interaction.client
   if (!application.owner) {
     application = await application.fetch()
   }

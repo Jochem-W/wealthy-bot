@@ -25,7 +25,7 @@ function badRequest(response: ServerResponse, log?: object | string) {
 async function endHandler(response: ServerResponse, body: string) {
   try {
     const formData = parse(body)
-    const data = formData["data"]
+    const { data } = formData
     if (typeof data !== "string") {
       badRequest(response, body)
       return
@@ -69,7 +69,9 @@ async function requestHandler(
 
     let body = ""
     request.on("data", (chunk) => (body += chunk))
-    request.on("end", () => void endHandler(response, body))
+    request.on("end", () => {
+      void endHandler(response, body)
+    })
   } catch (e) {
     badRequest(response)
     if (e instanceof Error) {
@@ -83,11 +85,12 @@ export const HttpServer: Handler<"ready"> = {
   once: true,
   handle() {
     const server = createServer()
-    server.on("error", (e) => void logError(e))
-    server.on(
-      "request",
-      (request, response) => void requestHandler(request, response)
-    )
+    server.on("error", (e) => {
+      void logError(e)
+    })
+    server.on("request", (request, response) => {
+      void requestHandler(request, response)
+    })
     server.on("listening", () => console.log("Listening on", server.address()))
     server.listen(Variables.httpPort)
   },

@@ -53,7 +53,5 @@ export const CommandHandler: Handler<"interactionCreate"> = {
         })
       }
     }
-
-    return
   },
 }

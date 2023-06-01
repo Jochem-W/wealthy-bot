@@ -26,6 +26,9 @@ export const StartupHandler: Handler<"ready"> = {
       case "RECREATE":
         title += "redeployed"
         break
+      default:
+        title += "unknown"
+        break
     }
 
     const message = {
@@ -87,7 +90,7 @@ async function getChangelog() {
   response.data.commits.reverse()
   for (const commit of response.data.commits) {
     description += `\n  ${commit.sha.slice(0, 7)}`
-    const message = commit.commit.message.split("\n")[0]
+    const [message] = commit.commit.message.split("\n")
     if (message) {
       description += ` ${message}`
     }

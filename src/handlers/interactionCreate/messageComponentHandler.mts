@@ -44,6 +44,8 @@ async function handleMessageComponent(
       await userSelectMenu(interaction, data.args)
       break
     }
+    default:
+      break
   }
 }
 
@@ -65,7 +67,5 @@ export const MessageComponentHandler: Handler<"interactionCreate"> = {
       await logError(e)
       await interaction.editReply({ embeds: [makeErrorEmbed(e)] })
     }
-
-    return
   },
 }

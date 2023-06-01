@@ -40,18 +40,20 @@ for (const applicationCommand of applicationCommands) {
   switch (applicationCommand.type) {
     case ApplicationCommandType.ChatInput:
       command = SlashCommands.find(
-        (command) => command.builder.name === applicationCommand.name
+        (c) => c.builder.name === applicationCommand.name
       )
       break
     case ApplicationCommandType.User:
       command = UserContextMenuCommands.find(
-        (command) => command.builder.name === applicationCommand.name
+        (c) => c.builder.name === applicationCommand.name
       )
       break
     case ApplicationCommandType.Message:
       command = MessageContextMenuCommands.find(
-        (command) => command.builder.name === applicationCommand.name
+        (c) => c.builder.name === applicationCommand.name
       )
+      break
+    default:
       break
   }
 

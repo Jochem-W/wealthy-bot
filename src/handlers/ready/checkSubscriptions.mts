@@ -36,7 +36,9 @@ export const CheckSubscriptions: Handler<"ready"> = {
   event: "ready",
   once: true,
   async handle() {
-    setInterval(() => void callback(), interval)
+    setInterval(() => {
+      void callback()
+    }, interval)
     await callback()
   },
 }

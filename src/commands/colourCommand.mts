@@ -126,7 +126,10 @@ export class ColourCommand extends ChatInputCommand {
           ],
           ephemeral: true,
         })
+        break
       }
+      default:
+        break
     }
   }
 }

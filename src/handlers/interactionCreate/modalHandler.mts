@@ -38,7 +38,5 @@ export const ModalHandler: Handler<"interactionCreate"> = {
       await logError(e)
       await interaction.editReply({ embeds: [makeErrorEmbed(e)] })
     }
-
-    return
   },
 }
