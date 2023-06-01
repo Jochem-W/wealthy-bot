@@ -77,13 +77,18 @@ export class MembersCommand extends ChatInputCommand {
     value += ` paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`
     value = escapeMarkdown(value)
 
-    value = `- ${value}`
-    if (user.invitee) {
-      value += `\n - Invited ${userMention(user.invitee.discordId)}`
-    }
-
     if (expiredMillis(user) <= 0) {
       value = strikethrough(value)
+    }
+
+    value = `- ${value}`
+    if (user.invitee) {
+      let inviteeValue = `Invited ${userMention(user.invitee.discordId)}`
+      if (expiredMillis(user) <= 0) {
+        inviteeValue = strikethrough(inviteeValue)
+      }
+
+      value += `\n - ${inviteeValue}`
     }
 
     return value
