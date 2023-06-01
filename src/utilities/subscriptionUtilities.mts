@@ -49,6 +49,7 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
       lastPaymentTier: data.tierName,
       lastPaymentTime: data.timestamp,
     },
+    include: { invitee: true },
   })
 
   if (expiredMillis(user) < 0) {

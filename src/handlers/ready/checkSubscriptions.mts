@@ -17,7 +17,9 @@ const interval = Duration.fromObject({ minutes: 1 }).toMillis()
 
 async function callback() {
   try {
-    for (const user of await Prisma.user.findMany()) {
+    for (const user of await Prisma.user.findMany({
+      include: { invitee: true },
+    })) {
       const millis = expiredMillis(user)
       if (millis < 0 || millis > interval) {
         continue
