@@ -103,10 +103,10 @@ export class MembersCommand extends ChatInputCommand {
         invitee?: Invitee & { user: User }
       }[]
     >()
-    const miscCategory = "Unlinked/not in server"
+    const unlinkedCategory = "Unlinked"
     const staffCategory = "Staff without subscription"
     const invitedCategory = "Invited"
-    categories.set(miscCategory, [])
+    categories.set(unlinkedCategory, [])
     categories.set(staffCategory, [])
     categories.set(invitedCategory, [])
 
@@ -132,7 +132,7 @@ export class MembersCommand extends ChatInputCommand {
           continue
         }
 
-        categories.get(miscCategory)?.push({ member })
+        categories.get(unlinkedCategory)?.push({ member })
         continue
       }
 
@@ -143,7 +143,7 @@ export class MembersCommand extends ChatInputCommand {
       categories.get(user.lastPaymentTier)?.push({ member, user })
     }
 
-    categories.get(miscCategory)?.push(...users.map((user) => ({ user })))
+    // categories.get(unlinkedCategory)?.push(...users.map((user) => ({ user })))
 
     return categories
   }
