@@ -151,6 +151,10 @@ export class MembersCommand extends ChatInputCommand {
   ) {
     const messages = []
     for (const [name, values] of categories) {
+      if (values.length === 0) {
+        continue
+      }
+
       let inlineCount = 0
 
       let message: { embeds: EmbedBuilder[] } = { embeds: [] }
@@ -225,7 +229,7 @@ export class MembersCommand extends ChatInputCommand {
       }
     }
 
-    return messages.filter((m) => m.embeds.length > 0)
+    return messages
   }
 
   private async list(
