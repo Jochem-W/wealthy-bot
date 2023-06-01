@@ -46,11 +46,16 @@ export class MembersCommand extends ChatInputCommand {
       }
 
       if (invitee) {
-        return `- ${userMention(member.id)} invited by ${
+        let value = `${userMention(member.id)} invited by ${
           invitee.user.discordId
             ? userMention(invitee.user.discordId)
-            : `${invitee.user.name} (${invitee.user.email})`
+            : escapeMarkdown(`${invitee.user.name} (${invitee.user.email})`)
         }`
+        if (expiredMillis(invitee.user) <= 0) {
+          value = strikethrough(value)
+        }
+
+        return `- ${value}`
       }
 
       return `- ${userMention(member.id)}`
