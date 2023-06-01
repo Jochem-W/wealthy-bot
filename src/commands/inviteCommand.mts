@@ -2,7 +2,7 @@ import { ChatInputCommand } from "../models/chatInputCommand.mjs"
 import { Variables } from "../variables.mjs"
 import { createSecretKey } from "crypto"
 import type { ChatInputCommandInteraction } from "discord.js"
-import { EmbedBuilder, inlineCode } from "discord.js"
+import { EmbedBuilder } from "discord.js"
 import { SignJWT } from "jose"
 
 const key = createSecretKey(Variables.secretKey, "utf-8")
@@ -29,14 +29,10 @@ export class InviteCommand extends ChatInputCommand {
           .setDescription(
             `To invite someone to the server, please send them the following link:`
           )
-          .setFields(
-            { name: "\u200b", value: inlineCode(url.toString()) },
-            {
-              name: "\u200b",
-              value:
-                "This link will be valid for 12 hours, and every time the link is used, the previous invitee will be kicked.",
-            }
-          ),
+          .setFields({ name: "Invite link", value: url.toString() })
+          .setFooter({
+            text: "This link will be valid for 12 hours. Every time the link is used, the previous invitee will be kicked.",
+          }),
       ],
       ephemeral: true,
     })
