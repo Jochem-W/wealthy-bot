@@ -11,11 +11,11 @@ export function inviteMessage(
       new EmbedBuilder()
         .setTitle("New user invited")
         .setFields(
-          { name: "User", value: invitee.discordId },
+          { name: "User", value: userMention(invitee.discordId) },
           {
             name: "Invited by",
             value: invitee.user.discordId
-              ? userMention(invitee.discordId)
+              ? userMention(invitee.user.discordId)
               : escapeMarkdown(`${invitee.user.name} (${invitee.user.email})`),
           }
         )
