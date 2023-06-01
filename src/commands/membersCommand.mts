@@ -5,6 +5,7 @@ import { remove } from "../utilities/arrayUtilities.mjs"
 import { embedsLength } from "../utilities/embedUtilities.mjs"
 import { expiredMillis } from "../utilities/subscriptionUtilities.mjs"
 import type { User } from "@prisma/client"
+import type { Invitee } from "@prisma/client"
 import {
   ChatInputCommandInteraction,
   EmbedBuilder,
@@ -34,7 +35,7 @@ export class MembersCommand extends ChatInputCommand {
     user,
     member,
   }: {
-    user?: User
+    user?: User & { invitee: Invitee | null }
     member?: GuildMember
   }) {
     if (!user) {
@@ -69,20 +70,25 @@ export class MembersCommand extends ChatInputCommand {
       value = strikethrough(value)
     }
 
-    return `- ${value}`
+    value = `- ${value}`
+    if (!user.invitee) {
+      return value
+    }
+
+    return `${value}\n - Invited ${userMention(user.invitee.discordId)}`
   }
 
   private async groupMembers(guild: Guild) {
     const categories = new Map<
       string,
-      { member?: GuildMember; user?: User }[]
+      { member?: GuildMember; user?: User & { invitee: Invitee | null } }[]
     >()
     const miscCategory = "Unlinked/not in server"
     const staffCategory = "Staff without subscription"
     categories.set(miscCategory, [])
     categories.set(staffCategory, [])
 
-    const users = await Prisma.user.findMany()
+    const users = await Prisma.user.findMany({ include: { invitee: true } })
     for (const [, member] of await guild.members.fetch()) {
       if (member.user.bot) {
         continue
@@ -112,7 +118,10 @@ export class MembersCommand extends ChatInputCommand {
   }
 
   private categoriesToMessages(
-    categories: Map<string, { member?: GuildMember; user?: User }[]>
+    categories: Map<
+      string,
+      { member?: GuildMember; user?: User & { invitee: Invitee | null } }[]
+    >
   ) {
     const messages = []
     for (const [name, values] of categories) {
