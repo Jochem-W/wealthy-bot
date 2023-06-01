@@ -34,13 +34,23 @@ export class MembersCommand extends ChatInputCommand {
   private memberToString({
     user,
     member,
+    invitee,
   }: {
     user?: User & { invitee: Invitee | null }
     member?: GuildMember
+    invitee?: Invitee & { user: User }
   }) {
     if (!user) {
       if (!member) {
         return null
+      }
+
+      if (invitee) {
+        return `- ${userMention(member.id)} invited by ${
+          invitee.user.discordId
+            ? userMention(invitee.user.discordId)
+            : `${invitee.user.name} (${invitee.user.email})`
+        }`
       }
 
       return `- ${userMention(member.id)}`
@@ -66,27 +76,34 @@ export class MembersCommand extends ChatInputCommand {
 
     value += ` paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`
     value = escapeMarkdown(value)
+
+    value = `- ${value}`
+    if (user.invitee) {
+      value += `\n - Invited ${userMention(user.invitee.discordId)}`
+    }
+
     if (expiredMillis(user) <= 0) {
       value = strikethrough(value)
     }
 
-    value = `- ${value}`
-    if (!user.invitee) {
-      return value
-    }
-
-    return `${value}\n - Invited ${userMention(user.invitee.discordId)}`
+    return value
   }
 
   private async groupMembers(guild: Guild) {
     const categories = new Map<
       string,
-      { member?: GuildMember; user?: User & { invitee: Invitee | null } }[]
+      {
+        member?: GuildMember
+        user?: User & { invitee: Invitee | null }
+        invitee?: Invitee & { user: User }
+      }[]
     >()
     const miscCategory = "Unlinked/not in server"
     const staffCategory = "Staff without subscription"
+    const invitedCategory = "Invited"
     categories.set(miscCategory, [])
     categories.set(staffCategory, [])
+    categories.set(invitedCategory, [])
 
     const users = await Prisma.user.findMany({ include: { invitee: true } })
     for (const [, member] of await guild.members.fetch()) {
@@ -96,6 +113,15 @@ export class MembersCommand extends ChatInputCommand {
 
       const user = remove(users, (u) => u.discordId === member.id)
       if (!user) {
+        const invitee = await Prisma.invitee.findFirst({
+          where: { discordId: member.id },
+          include: { user: true },
+        })
+        if (invitee) {
+          categories.get(invitedCategory)?.push({ member, invitee })
+          continue
+        }
+
         if (member.permissions.has(PermissionFlagsBits.Administrator)) {
           categories.get(staffCategory)?.push({ member })
           continue
