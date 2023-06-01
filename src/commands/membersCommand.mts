@@ -225,7 +225,7 @@ export class MembersCommand extends ChatInputCommand {
       }
     }
 
-    return messages
+    return messages.filter((m) => m.embeds.length > 0)
   }
 
   private async list(
