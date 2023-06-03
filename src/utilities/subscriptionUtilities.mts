@@ -52,6 +52,17 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
     include: { invitee: true },
   })
 
+  const oldDate = DateTime.fromJSDate(user.lastPaymentTime)
+  const newDate = DateTime.fromJSDate(updatedUser.lastPaymentTime)
+  const diff = newDate.diff(oldDate)
+
+  console.log(
+    expiredMillis(user) < 0,
+    oldDate,
+    newDate,
+    diff.shiftTo("day", "hour", "minutes", "seconds")
+  )
+
   if (expiredMillis(user) < 0) {
     await textChannel.send(renewedLateMessage(updatedUser))
   }
