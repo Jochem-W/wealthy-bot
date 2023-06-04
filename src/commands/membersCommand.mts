@@ -19,6 +19,13 @@ import {
   userMention,
 } from "discord.js"
 
+type CategoryEntry = {
+  user?: User & { invitee: Invitee | null }
+  member?: GuildMember
+  invitee?: Invitee & { user: User }
+  noStrikethrough?: boolean
+}
+
 export class MembersCommand extends ChatInputCommand {
   public constructor() {
     super(
@@ -35,11 +42,8 @@ export class MembersCommand extends ChatInputCommand {
     user,
     member,
     invitee,
-  }: {
-    user?: User & { invitee: Invitee | null }
-    member?: GuildMember
-    invitee?: Invitee & { user: User }
-  }) {
+    noStrikethrough,
+  }: CategoryEntry) {
     if (!user) {
       if (!member) {
         return null
@@ -51,7 +55,7 @@ export class MembersCommand extends ChatInputCommand {
             ? userMention(invitee.user.discordId)
             : escapeMarkdown(`${invitee.user.name} (${invitee.user.email})`)
         }`
-        if (expiredMillis(invitee.user) <= 0) {
+        if (expiredMillis(invitee.user) <= 0 && !noStrikethrough) {
           value = strikethrough(value)
         }
 
@@ -82,14 +86,14 @@ export class MembersCommand extends ChatInputCommand {
     value += ` paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`
     value = escapeMarkdown(value)
 
-    if (expiredMillis(user) <= 0) {
+    if (expiredMillis(user) <= 0 && !noStrikethrough) {
       value = strikethrough(value)
     }
 
     value = `- ${value}`
     if (user.invitee) {
       let inviteeValue = `Invited ${userMention(user.invitee.discordId)}`
-      if (expiredMillis(user) <= 0) {
+      if (expiredMillis(user) <= 0 && !noStrikethrough) {
         inviteeValue = strikethrough(inviteeValue)
       }
 
@@ -100,20 +104,15 @@ export class MembersCommand extends ChatInputCommand {
   }
 
   private async groupMembers(guild: Guild) {
-    const categories = new Map<
-      string,
-      {
-        member?: GuildMember
-        user?: User & { invitee: Invitee | null }
-        invitee?: Invitee & { user: User }
-      }[]
-    >()
+    const categories = new Map<string, CategoryEntry[]>()
     const unlinkedCategory = "Unlinked"
     const staffCategory = "Staff without subscription"
     const invitedCategory = "Invited"
+    const expiredCategory = "Expired"
     categories.set(unlinkedCategory, [])
     categories.set(staffCategory, [])
     categories.set(invitedCategory, [])
+    categories.set(expiredCategory, [])
 
     const users = await Prisma.user.findMany({ include: { invitee: true } })
     for (const [, member] of await guild.members.fetch()) {
@@ -141,14 +140,18 @@ export class MembersCommand extends ChatInputCommand {
         continue
       }
 
+      if (expiredMillis(user) < 0) {
+        categories
+          .get(expiredCategory)
+          ?.push({ member, user, noStrikethrough: true })
+      }
+
       if (categories.get(user.lastPaymentTier) === undefined) {
         categories.set(user.lastPaymentTier, [])
       }
 
       categories.get(user.lastPaymentTier)?.push({ member, user })
     }
-
-    // categories.get(unlinkedCategory)?.push(...users.map((user) => ({ user })))
 
     return categories
   }
