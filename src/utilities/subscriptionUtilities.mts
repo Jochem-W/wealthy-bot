@@ -58,9 +58,9 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
 
   console.log(
     expiredMillis(user) < 0,
-    oldDate,
-    newDate,
-    diff.shiftTo("day", "hour", "minutes", "seconds")
+    oldDate.toISO(),
+    newDate.toISO(),
+    diff.shiftTo("day", "hour", "minutes", "seconds").toISO()
   )
 
   if (expiredMillis(user) < 0) {
