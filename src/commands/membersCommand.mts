@@ -7,7 +7,6 @@ import { expiredMillis } from "../utilities/subscriptionUtilities.mjs"
 import type { User } from "@prisma/client"
 import type { Invitee } from "@prisma/client"
 import {
-  bold,
   ChatInputCommandInteraction,
   EmbedBuilder,
   escapeMarkdown,
@@ -53,7 +52,7 @@ export class MembersCommand extends ChatInputCommand {
             : escapeMarkdown(`${invitee.user.name} (${invitee.user.email})`)
         }`
         if (expiredMillis(invitee.user) <= 0) {
-          value = strikethrough(bold(value))
+          value = strikethrough(value)
         }
 
         return `- ${value}`
@@ -84,14 +83,14 @@ export class MembersCommand extends ChatInputCommand {
     value = escapeMarkdown(value)
 
     if (expiredMillis(user) <= 0) {
-      value = strikethrough(bold(value))
+      value = strikethrough(value)
     }
 
     value = `- ${value}`
     if (user.invitee) {
       let inviteeValue = `Invited ${userMention(user.invitee.discordId)}`
       if (expiredMillis(user) <= 0) {
-        inviteeValue = strikethrough(bold(inviteeValue))
+        inviteeValue = strikethrough(inviteeValue)
       }
 
       value += `\n - ${inviteeValue}`
