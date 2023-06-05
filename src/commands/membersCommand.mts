@@ -20,7 +20,7 @@ import {
   userMention,
   type InteractionReplyOptions,
   ActionRowBuilder,
-  MessageActionRowComponentBuilder,
+  type MessageActionRowComponentBuilder,
   ButtonBuilder,
   ButtonStyle,
 } from "discord.js"
