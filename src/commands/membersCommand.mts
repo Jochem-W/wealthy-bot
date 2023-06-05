@@ -4,6 +4,7 @@ import { ChatInputCommand } from "../models/chatInputCommand.mjs"
 import { remove } from "../utilities/arrayUtilities.mjs"
 import { embedsLength } from "../utilities/embedUtilities.mjs"
 import { expiredMillis } from "../utilities/subscriptionUtilities.mjs"
+import { SecretKey, Variables } from "../variables.mjs"
 import type { User } from "@prisma/client"
 import type { Invitee } from "@prisma/client"
 import {
@@ -17,7 +18,13 @@ import {
   time,
   TimestampStyles,
   userMention,
+  type InteractionReplyOptions,
+  ActionRowBuilder,
+  MessageActionRowComponentBuilder,
+  ButtonBuilder,
+  ButtonStyle,
 } from "discord.js"
+import { SignJWT } from "jose"
 
 type CategoryEntry = {
   user?: User & { invitee: Invitee | null }
@@ -170,7 +177,9 @@ export class MembersCommand extends ChatInputCommand {
 
       let inlineCount = 0
 
-      let message: { embeds: EmbedBuilder[] } = { embeds: [] }
+      let message: InteractionReplyOptions & { embeds: EmbedBuilder[] } = {
+        embeds: [],
+      }
       messages.push(message)
 
       let embed = new EmbedBuilder()
@@ -254,12 +263,35 @@ export class MembersCommand extends ChatInputCommand {
     const categories = await this.groupMembers(guild)
     const messages = this.categoriesToMessages(categories)
 
-    if (!messages[0]) {
+    const lastMessage = messages.at(-1)
+    if (!lastMessage) {
       await interaction.reply({
         embeds: [new EmbedBuilder().setTitle("No data")],
       })
       return
     }
+
+    if (!lastMessage.components) {
+      lastMessage.components = []
+    }
+
+    const token = await new SignJWT({ sub: interaction.client.user.id })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("1h")
+      .sign(SecretKey)
+
+    const url = new URL("/members", Variables.inviteUrl)
+    url.searchParams.set("token", token)
+
+    lastMessage.components.push(
+      new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
+        new ButtonBuilder()
+          .setLabel("View online")
+          .setStyle(ButtonStyle.Link)
+          .setURL(url.toString())
+      )
+    )
 
     await interaction.reply({ ...messages[0], ephemeral: true })
     for (const message of messages.splice(1)) {

@@ -1,11 +1,8 @@
 import { ChatInputCommand } from "../models/chatInputCommand.mjs"
-import { Variables } from "../variables.mjs"
-import { createSecretKey } from "crypto"
+import { SecretKey, Variables } from "../variables.mjs"
 import type { ChatInputCommandInteraction } from "discord.js"
 import { EmbedBuilder } from "discord.js"
 import { SignJWT } from "jose"
-
-const key = createSecretKey(Variables.secretKey, "utf-8")
 
 export class InviteCommand extends ChatInputCommand {
   public constructor() {
@@ -17,7 +14,7 @@ export class InviteCommand extends ChatInputCommand {
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime("12h")
-      .sign(key)
+      .sign(SecretKey)
 
     const url = new URL(Variables.inviteUrl)
     url.searchParams.set("token", token)

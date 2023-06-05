@@ -90,6 +90,7 @@
       "no-plusplus": "off",
       "max-depth": "off",
       "class-methods-use-this": "off",
+      "max-lines": "off",
 
       "@typescript-eslint/non-nullable-type-assertion-style": "off",
       "@typescript-eslint/consistent-type-definitions": [
