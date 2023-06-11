@@ -2,45 +2,56 @@ import { Prisma } from "../../clients.mjs"
 import { logError } from "../../errors.mjs"
 import { didntRenewMessage } from "../../messages/didntRenewMessage.mjs"
 import { Config } from "../../models/config.mjs"
+import { LongTimeout } from "../../models/longTimeout.mjs"
 import type { Handler } from "../../types/handler.mjs"
 import { fetchChannel } from "../../utilities/discordUtilities.mjs"
 import { expiredMillis } from "../../utilities/subscriptionUtilities.mjs"
+import type { User } from "@prisma/client"
 import { ChannelType } from "discord.js"
-import { Duration } from "luxon"
 
+const timeouts = new Map<number, LongTimeout>()
 const textChannel = await fetchChannel(
   Config.loggingChannel,
   ChannelType.GuildText
 )
 
-const interval = Duration.fromObject({ minutes: 1 }).toMillis()
+export function replaceTimeout(user: User) {
+  removeTimeout(user.id)
+  timeouts.set(
+    user.id,
+    // eslint-disable-next-line no-loop-func
+    new LongTimeout(() => {
+      callback(user.id).catch((e) =>
+        e instanceof Error ? logError(e) : console.log(e)
+      )
+    }, expiredMillis(user))
+  )
+}
 
-async function callback() {
-  try {
-    for (const user of await Prisma.user.findMany({
-      include: { invitee: true },
-    })) {
-      const millis = expiredMillis(user)
-      if (millis < 0 || millis > interval) {
-        continue
-      }
-
-      await textChannel.send(didntRenewMessage(user))
-    }
-  } catch (e) {
-    if (e instanceof Error) {
-      await logError(e)
-    }
+export function removeTimeout(id: number) {
+  const value = timeouts.get(id)
+  if (!value) {
+    return
   }
+
+  value.clear()
+  timeouts.delete(id)
+}
+
+async function callback(id: number) {
+  const user = await Prisma.user.findFirstOrThrow({
+    where: { id },
+    include: { invitee: true },
+  })
+  await textChannel.send(didntRenewMessage(user))
 }
 
 export const CheckSubscriptions: Handler<"ready"> = {
   event: "ready",
   once: true,
   async handle() {
-    setInterval(() => {
-      void callback()
-    }, interval)
-    await callback()
+    for (const user of await Prisma.user.findMany()) {
+      replaceTimeout(user)
+    }
   },
 }

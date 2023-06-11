@@ -1,4 +1,8 @@
 import { Prisma } from "../clients.mjs"
+import {
+  replaceTimeout,
+  removeTimeout,
+} from "../handlers/ready/checkSubscriptions.mjs"
 import { newSubscriptionMessage } from "../messages/newSubscriptionMessage.mjs"
 import { renewedLateMessage } from "../messages/renewedLateMessage.mjs"
 import { tierChangedMessage } from "../messages/tierChangedMessage.mjs"
@@ -52,6 +56,8 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
     include: { invitee: true },
   })
 
+  replaceTimeout(updatedUser)
+
   const oldDate = DateTime.fromJSDate(user.lastPaymentTime)
   const newDate = DateTime.fromJSDate(updatedUser.lastPaymentTime)
   const diff = newDate.diff(oldDate)
@@ -85,6 +91,7 @@ async function newSubscription(
       lastPaymentTime: data.timestamp,
     },
   })
+  replaceTimeout(user)
 
   await textChannel.send(newSubscriptionMessage(user))
 }
@@ -118,9 +125,23 @@ async function updateRoles(user: User) {
 }
 
 export async function linkDiscord(id: number, discordId: string) {
-  await Prisma.user.deleteMany({ where: { id: { not: id }, discordId } })
+  const users = await Prisma.user.findMany({
+    where: { id: { not: id }, discordId },
+    select: { id: true },
+  })
+  const userIds = users.map((u) => u.id)
+  await Prisma.user.deleteMany({
+    where: { id: { in: userIds } },
+  })
+
+  for (const deletedId of userIds) {
+    removeTimeout(deletedId)
+  }
+
   const user = await Prisma.user.update({ where: { id }, data: { discordId } })
+  replaceTimeout(user)
   await updateRoles(user)
+
   return user
 }
 
