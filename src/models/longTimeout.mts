@@ -9,6 +9,11 @@ export class LongTimeout {
     this.callback = callback
     this.ms = ms
 
+    if (this.ms <= 0) {
+      this.callback()
+      return
+    }
+
     this.setTimer()
   }
 
