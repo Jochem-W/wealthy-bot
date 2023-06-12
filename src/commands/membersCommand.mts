@@ -2,6 +2,7 @@ import { Discord, Prisma } from "../clients.mjs"
 import { GuildOnlyError } from "../errors.mjs"
 import { ChatInputCommand } from "../models/chatInputCommand.mjs"
 import { remove } from "../utilities/arrayUtilities.mjs"
+import { displayName } from "../utilities/discordUtilities.mjs"
 import { embedsLength } from "../utilities/embedUtilities.mjs"
 import { expiredMillis } from "../utilities/subscriptionUtilities.mjs"
 import { SecretKey, Variables } from "../variables.mjs"
@@ -25,10 +26,11 @@ import {
   ButtonStyle,
 } from "discord.js"
 import { SignJWT } from "jose"
+import { DateTime } from "luxon"
 
 type CategoryEntry = {
   user?: User & { invitee: Invitee | null }
-  member?: GuildMember
+  member: GuildMember
   invitee?: Invitee & { user: User }
   noStrikethrough?: boolean
 }
@@ -160,15 +162,22 @@ export class MembersCommand extends ChatInputCommand {
       categories.get(user.lastPaymentTier)?.push({ member, user })
     }
 
+    for (const value of categories.values()) {
+      value.sort((a, b) => {
+        if (a.user && b.user) {
+          return DateTime.fromJSDate(a.user.lastPaymentTime)
+            .diff(DateTime.fromJSDate(b.user.lastPaymentTime))
+            .toMillis()
+        }
+
+        return displayName(a.member).localeCompare(displayName(b.member))
+      })
+    }
+
     return categories
   }
 
-  private categoriesToMessages(
-    categories: Map<
-      string,
-      { member?: GuildMember; user?: User & { invitee: Invitee | null } }[]
-    >
-  ) {
+  private categoriesToMessages(categories: Map<string, CategoryEntry[]>) {
     const messages = []
     for (const [name, values] of categories) {
       if (values.length === 0) {
