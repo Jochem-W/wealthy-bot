@@ -275,7 +275,7 @@ export class MembersCommand extends ChatInputCommand {
       lastMessage.components = []
     }
 
-    const token = await new SignJWT({ sub: interaction.user.id })
+    const token = await new SignJWT({ sub: interaction.client.user.id })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
       .setExpirationTime("1h")
