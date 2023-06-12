@@ -52,7 +52,7 @@ export const CheckSubscriptions: Handler<"ready"> = {
   async handle() {
     for (const user of await Prisma.user.findMany()) {
       if (expiredMillis(user) <= 0) {
-        return
+        continue
       }
 
       replaceTimeout(user)
