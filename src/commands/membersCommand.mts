@@ -121,10 +121,7 @@ export class MembersCommand extends ChatInputCommand {
     categories.set(invitedCategory, [])
     categories.set(expiredCategory, [])
 
-    const users = await Prisma.user.findMany({
-      include: { invitee: true },
-      orderBy: { lastPaymentTime: "asc" },
-    })
+    const users = await Prisma.user.findMany({ include: { invitee: true } })
     for (const [, member] of await guild.members.fetch()) {
       if (member.user.bot) {
         continue
