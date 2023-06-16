@@ -10,8 +10,8 @@ export function didntRenewMessage(user: User & { invitee: Invitee | null }) {
     .setTitle("Overdue payment")
     .setFields(
       {
-        name: user.discordId ? "Member" : "Email",
-        value: user.discordId ? userMention(user.discordId) : user.email,
+        name: "Member",
+        value: user.discordId ? userMention(user.discordId) : user.name,
       },
       { name: "Tier", value: user.lastPaymentTier },
       {

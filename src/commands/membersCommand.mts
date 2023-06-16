@@ -62,7 +62,7 @@ export class MembersCommand extends ChatInputCommand {
         let value = `${userMention(member.id)} invited by ${
           invitee.user.discordId
             ? userMention(invitee.user.discordId)
-            : escapeMarkdown(`${invitee.user.name} (${invitee.user.email})`)
+            : escapeMarkdown(invitee.user.name)
         }`
         if (expiredMillis(invitee.user) <= 0 && !noStrikethrough) {
           value = strikethrough(value)
@@ -84,12 +84,10 @@ export class MembersCommand extends ChatInputCommand {
         value += ` (${user.name})`
       }
     } else {
-      value = `${user.name} (${user.email}`
+      value = user.name
       if (user.discordId) {
-        value += `, ${userMention(user.discordId)}`
+        value += ` (${userMention(user.discordId)})`
       }
-
-      value += ")"
     }
 
     value += ` paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`

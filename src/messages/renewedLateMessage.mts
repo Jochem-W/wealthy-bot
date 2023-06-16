@@ -7,8 +7,8 @@ export function renewedLateMessage(user: User & { invitee: Invitee | null }) {
     .setTitle("Late renewal")
     .setFields(
       {
-        name: user.discordId ? "Member" : "Email",
-        value: user.discordId ? userMention(user.discordId) : user.email,
+        name: "Member",
+        value: user.discordId ? userMention(user.discordId) : user.name,
       },
       { name: "Tier", value: user.lastPaymentTier }
     )

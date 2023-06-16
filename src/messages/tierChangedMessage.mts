@@ -10,10 +10,10 @@ export function tierChangedMessage(
     .setTitle("Tier changed")
     .setFields(
       {
-        name: newUser.discordId ? "Member" : "Email",
+        name: "Member",
         value: newUser.discordId
           ? userMention(newUser.discordId)
-          : newUser.email,
+          : newUser.name,
       },
       { name: "Old tier", value: oldUser.lastPaymentTier },
       { name: "New tier", value: newUser.lastPaymentTier }

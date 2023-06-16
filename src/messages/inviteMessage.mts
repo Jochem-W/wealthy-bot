@@ -1,6 +1,6 @@
 import type { Invitee, User } from "@prisma/client"
 import type { GuildMember } from "discord.js"
-import { EmbedBuilder, escapeMarkdown, userMention } from "discord.js"
+import { EmbedBuilder, userMention } from "discord.js"
 
 export function inviteMessage(
   member: GuildMember,
@@ -16,7 +16,7 @@ export function inviteMessage(
             name: "Invited by",
             value: invitee.user.discordId
               ? userMention(invitee.user.discordId)
-              : escapeMarkdown(`${invitee.user.name} (${invitee.user.email})`),
+              : invitee.user.name,
           }
         )
         .setThumbnail(member.displayAvatarURL())
