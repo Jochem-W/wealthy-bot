@@ -54,10 +54,6 @@ export class MembersCommand extends ChatInputCommand {
     noStrikethrough,
   }: CategoryEntry) {
     if (!user) {
-      if (!member) {
-        return null
-      }
-
       if (invitee) {
         let value = `${userMention(member.id)} invited by ${
           invitee.user.discordId
@@ -74,20 +70,12 @@ export class MembersCommand extends ChatInputCommand {
       return `- ${userMention(member.id)}`
     }
 
-    let value
-    if (member) {
-      value = userMention(member.id)
-      if (
-        member.user.username !== user.name &&
-        member.displayName !== user.name
-      ) {
-        value += ` (${user.name})`
-      }
-    } else {
-      value = user.name
-      if (user.discordId) {
-        value += ` (${userMention(user.discordId)})`
-      }
+    let value: string = userMention(member.id)
+    if (
+      member.user.username !== user.name &&
+      member.displayName !== user.name
+    ) {
+      value += ` (${user.name})`
     }
 
     value += ` paid ${time(user.lastPaymentTime, TimestampStyles.RelativeTime)}`
