@@ -13,7 +13,7 @@ export const StartupHandler: Handler<"ready"> = {
   event: "ready",
   once: true,
   async handle(client: Client<true>) {
-    console.log(`Running as: ${client.user.tag}`)
+    console.log(`Running as: ${client.user.globalName ?? client.user.username}`)
 
     let title = "Bot "
     switch (await getState()) {
