@@ -1,10 +1,10 @@
 import { Discord, GitHubClient } from "../../clients.mjs"
+import { logError } from "../../errors.mjs"
 import { Config } from "../../models/config.mjs"
 import type { Handler } from "../../types/handler.mjs"
 import { fetchChannel } from "../../utilities/discordUtilities.mjs"
 import { Variables } from "../../variables.mjs"
 import { ChannelType, Client, codeBlock, EmbedBuilder } from "discord.js"
-import { writeFileSync } from "fs"
 import { mkdir, readFile, writeFile } from "fs/promises"
 
 type State = "UP" | "DOWN" | "RECREATE"
@@ -45,12 +45,8 @@ export const StartupHandler: Handler<"ready"> = {
     await setState("UP")
     await setVersion()
 
-    process.on("SIGINT", () => process.exit())
-    process.on("SIGTERM", () => process.exit())
-    process.on("exit", () => {
-      Discord.destroy()
-      setStateSync("DOWN")
-    })
+    process.on("SIGINT", () => exitListener())
+    process.on("SIGTERM", () => exitListener())
   },
 }
 
@@ -128,6 +124,14 @@ async function getChangelog() {
   return codeBlock(description)
 }
 
+function exitListener() {
+  Discord.destroy()
+    .then(() => setState("DOWN"))
+    .catch((e) => {
+      void (e instanceof Error ? logError(e) : console.error(e))
+    })
+}
+
 type ArbitraryObject = Record<string, unknown>
 
 function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
@@ -171,10 +175,6 @@ async function setVersion() {
 
 async function setState(status: State) {
   await writeFile("status", status, { encoding: "utf8" })
-}
-
-function setStateSync(status: State) {
-  writeFileSync("status", status, { encoding: "utf8" })
 }
 
 async function getState() {
