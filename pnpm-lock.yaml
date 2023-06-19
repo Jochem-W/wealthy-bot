@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 dependencies:
   '@octokit/rest':
     specifier: ^19.0.13
@@ -21,8 +17,8 @@ dependencies:
     specifier: ^5.4.0
     version: 5.4.0
   discord.js:
-    specifier: 14.11.1-dev.1687089871-75d91b5.0
-    version: 14.11.1-dev.1687089871-75d91b5.0(bufferutil@4.0.7)(utf-8-validate@6.0.3)
+    specifier: 14.11.1-dev.1687133441-75d91b5.0
+    version: 14.11.1-dev.1687133441-75d91b5.0(bufferutil@4.0.7)(utf-8-validate@6.0.3)
   jose:
     specifier: ^4.14.4
     version: 4.14.4
@@ -1030,8 +1026,8 @@ packages:
     resolution: {integrity: sha512-r9m/g+YQfo7XWMrl645jvMlYoWF8lvns/ch4NCxsz/FbingrECu97LFSD2zKOvgHaSc90BHP8wgshaMcA2/c6Q==}
     dev: false
 
-  /discord.js@14.11.1-dev.1687089871-75d91b5.0(bufferutil@4.0.7)(utf-8-validate@6.0.3):
-    resolution: {integrity: sha512-r6JXcnBchQy0gcZraQn5LXJ2zTrK6iAhkNdbg6JGwrCf1RLZH5oQkQsKR0VdQdbBxwAGQNiYixnYmwkw8op+OA==}
+  /discord.js@14.11.1-dev.1687133441-75d91b5.0(bufferutil@4.0.7)(utf-8-validate@6.0.3):
+    resolution: {integrity: sha512-iz08BSLeUODAP3KmRf5QPM+1C84FVDnpXQ+JOBSFOj+D6ZKlVs640wFdtVgp9nXyfsLJsQ17yN542cZ/IBwwGA==}
     engines: {node: '>=16.9.0'}
     dependencies:
       '@discordjs/builders': 1.6.3
@@ -2027,3 +2023,7 @@ packages:
   /zod@3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
