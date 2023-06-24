@@ -4,6 +4,7 @@ import { Config } from "../../models/config.mjs"
 import type { Handler } from "../../types/handler.mjs"
 import { fetchChannel } from "../../utilities/discordUtilities.mjs"
 import { Variables } from "../../variables.mjs"
+import { Server } from "./httpServer.mjs"
 import { ChannelType, Client, codeBlock, EmbedBuilder } from "discord.js"
 import { mkdir, readFile, writeFile } from "fs/promises"
 
@@ -125,6 +126,8 @@ async function getChangelog() {
 }
 
 function exitListener() {
+  Server.close()
+
   Discord.destroy()
     .then(() => setState("DOWN"))
     .catch((e) => {

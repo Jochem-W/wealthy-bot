@@ -8,6 +8,8 @@ import { Variables } from "../../variables.mjs"
 import { createServer, IncomingMessage, ServerResponse } from "http"
 import { parse } from "querystring"
 
+export const Server = createServer()
+
 function ok(response: ServerResponse) {
   response.writeHead(200, { "Content-Length": "0" })
   response.end()
@@ -84,14 +86,13 @@ export const HttpServer: Handler<"ready"> = {
   event: "ready",
   once: true,
   handle() {
-    const server = createServer()
-    server.on("error", (e) => {
+    Server.on("error", (e) => {
       void logError(e)
     })
-    server.on("request", (request, response) => {
+    Server.on("request", (request, response) => {
       void requestHandler(request, response)
     })
-    server.on("listening", () => console.log("Listening on", server.address()))
-    server.listen(Variables.httpPort)
+    Server.on("listening", () => console.log("Listening on", Server.address()))
+    Server.listen(Variables.httpPort)
   },
 }
