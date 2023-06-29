@@ -7,13 +7,11 @@
   "dependencies": {
     "@octokit/rest": "^19.0.13",
     "@prisma/client": "^4.16.1",
-    "archiver": "^5.3.1",
     "camelcase-keys": "^8.0.2",
     "csv-parse": "^5.4.0",
     "discord.js": "14.11.1-dev.1688040280-75d91b5.0",
     "jose": "^4.14.4",
     "luxon": "^3.3.0",
-    "whatwg-mimetype": "^3.0.0",
     "zod": "^3.21.4"
   },
   "devDependencies": {
@@ -21,12 +19,8 @@
     "@tsconfig/esm": "^1.0.4",
     "@tsconfig/node18": "^18.2.0",
     "@tsconfig/strictest": "^2.0.1",
-    "@types/archiver": "^5.3.2",
-    "@types/cron": "^2.0.1",
     "@types/luxon": "^3.3.0",
-    "@types/nanoid-dictionary": "^4.2.0",
     "@types/node": "^20.3.2",
-    "@types/whatwg-mimetype": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^5.60.1",
     "@typescript-eslint/parser": "^5.60.1",
     "eslint": "^8.43.0",
