@@ -18,8 +18,8 @@ dependencies:
     specifier: ^5.4.0
     version: 5.4.0
   discord.js:
-    specifier: 14.11.1-dev.1688040280-75d91b5.0
-    version: 14.11.1-dev.1688040280-75d91b5.0(bufferutil@4.0.7)(utf-8-validate@6.0.3)
+    specifier: 14.11.1-dev.1688083840-75d91b5.0
+    version: 14.11.1-dev.1688083840-75d91b5.0(bufferutil@4.0.7)(utf-8-validate@6.0.3)
   jose:
     specifier: ^4.14.4
     version: 4.14.4
@@ -903,8 +903,8 @@ packages:
     resolution: {integrity: sha512-rNif8IAv6duS2z47BMXq/V9kkrLfkAoiwpFY3sLxxbyKprk065zqf3HLTg4bEoxRSmi+Lhc7yqGDrG8C3j8GFA==}
     dev: false
 
-  /discord.js@14.11.1-dev.1688040280-75d91b5.0(bufferutil@4.0.7)(utf-8-validate@6.0.3):
-    resolution: {integrity: sha512-xMcgMah4AXjLtbvpE7W9WCyfB6B7Dt5AGh+MRaUrNtJLY79nud+DAVZQtkjH2sISqpuivlDt6upR5pz/wduDhg==}
+  /discord.js@14.11.1-dev.1688083840-75d91b5.0(bufferutil@4.0.7)(utf-8-validate@6.0.3):
+    resolution: {integrity: sha512-8hgMcPt3J8UEPDDSfyF1yEIzP3SBVZjbLld+thrMBXURXd07EaJ8DMnRkXdhd8wue1Qkp+eLRtSB1FRbcDJcIw==}
     engines: {node: '>=16.9.0'}
     dependencies:
       '@discordjs/builders': 1.6.3
