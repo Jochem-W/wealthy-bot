@@ -6,7 +6,7 @@
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@octokit/rest": "^19.0.13",
-    "@prisma/client": "^4.16.1",
+    "@prisma/client": "^4.16.2",
     "camelcase-keys": "^8.0.2",
     "csv-parse": "^5.4.0",
     "discord.js": "14.11.1-dev.1688040280-75d91b5.0",
