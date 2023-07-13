@@ -10,7 +10,7 @@ import type {
   ComponentType,
 } from "discord.js"
 import type { DateTime } from "luxon"
-import type { MIMEType } from "util"
+import type MIMEType from "whatwg-mimetype"
 
 class CustomError extends Error {
   public constructor(message: string) {
@@ -34,8 +34,10 @@ export class FileSizeError extends CustomError {
 }
 
 export class MIMETypeError extends CustomError {
-  public constructor(type: MIMEType) {
-    super(`The MIME type ${type.essence} is invalid`)
+  public constructor(type?: MIMEType) {
+    super(
+      `The MIME type ${type?.essence ?? "application/octet-stream"} is invalid`
+    )
   }
 }
 
