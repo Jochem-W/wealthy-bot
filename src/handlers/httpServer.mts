@@ -48,9 +48,7 @@ async function endHandler(
     ok(response)
   } catch (e) {
     badRequest(response)
-    if (e instanceof Error) {
-      await logError(e)
-    }
+    console.log(e)
   }
 }
 
