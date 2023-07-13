@@ -123,6 +123,10 @@ async function getChangelog() {
     )}-`
   }
 
+  if (description.length > 4000) {
+    description = `${description.substring(0, 4000)}…`
+  }
+
   return codeBlock(description)
 }
 
