@@ -4,12 +4,23 @@
   "main": "dist/index.js",
   "author": "Jochem-W",
   "license": "AGPL-3.0-only",
+  "pnpm": {
+    "overrides": {
+      "discord.js": "dev",
+      "@discordjs/builders": "dev",
+      "@discordjs/collection": "dev",
+      "@discordjs/formatters": "dev",
+      "@discordjs/util": "dev",
+      "@discordjs/rest": "dev",
+      "@discordjs/ws": "dev"
+    }
+  },
   "dependencies": {
-    "@octokit/rest": "^19.0.13",
-    "@prisma/client": "^4.16.1",
+    "@octokit/rest": "^20.0.1",
+    "@prisma/client": "^5.0.0",
     "camelcase-keys": "^8.0.2",
     "csv-parse": "^5.4.0",
-    "discord.js": "14.11.1-dev.1688040280-75d91b5.0",
+    "discord.js": "dev",
     "jose": "^4.14.4",
     "luxon": "^3.3.0",
     "zod": "^3.21.4"
@@ -20,13 +31,13 @@
     "@tsconfig/node18": "^18.2.0",
     "@tsconfig/strictest": "^2.0.1",
     "@types/luxon": "^3.3.0",
-    "@types/node": "^20.3.2",
-    "@typescript-eslint/eslint-plugin": "^5.60.1",
-    "@typescript-eslint/parser": "^5.60.1",
-    "eslint": "^8.43.0",
+    "@types/node": "^20.4.2",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
     "prettier": "^2.8.8",
-    "prisma": "^4.16.1",
+    "prisma": "^5.0.0",
     "typescript": "^5.1.6"
   },
   "optionalDependencies": {
