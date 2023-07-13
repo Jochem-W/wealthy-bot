@@ -10,7 +10,7 @@ import { Handlers } from "./handlers.mjs"
 import { Config } from "./models/config.mjs"
 import type { Command } from "./types/command.mjs"
 import { Variables } from "./variables.mjs"
-import { ApplicationCommandType, CommandInteraction, Routes } from "discord.js"
+import { ApplicationCommandType, Routes } from "discord.js"
 import type {
   RESTPutAPIApplicationGuildCommandsJSONBody,
   RESTPutAPIApplicationGuildCommandsResult,
@@ -22,7 +22,7 @@ for (const command of [
   ...MessageContextMenuCommands,
   ...UserContextMenuCommands,
 ]) {
-  commandsBody.push(command.toJSON())
+  commandsBody.push(command.builder.toJSON())
   console.log(`Constructed command '${command.builder.name}'`)
 }
 
@@ -36,7 +36,7 @@ const applicationCommands = (await Discord.rest.put(route, {
 })) as RESTPutAPIApplicationGuildCommandsResult
 console.log("Commands updated")
 for (const applicationCommand of applicationCommands) {
-  let command: Command<CommandInteraction> | undefined
+  let command: Command<ApplicationCommandType> | undefined
   switch (applicationCommand.type) {
     case ApplicationCommandType.ChatInput:
       command = SlashCommands.find(

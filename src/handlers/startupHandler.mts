@@ -1,19 +1,19 @@
-import { Discord, GitHubClient } from "../../clients.mjs"
-import { logError } from "../../errors.mjs"
-import { Config } from "../../models/config.mjs"
-import type { Handler } from "../../types/handler.mjs"
-import { fetchChannel } from "../../utilities/discordUtilities.mjs"
-import { Variables } from "../../variables.mjs"
+import { Discord, GitHubClient } from "../clients.mjs"
+import { logError } from "../errors.mjs"
+import { Config } from "../models/config.mjs"
+import { handler } from "../models/handler.mjs"
+import { fetchChannel } from "../utilities/discordUtilities.mjs"
+import { Variables } from "../variables.mjs"
 import { Server } from "./httpServer.mjs"
-import { ChannelType, Client, codeBlock, EmbedBuilder } from "discord.js"
+import { ChannelType, codeBlock, EmbedBuilder } from "discord.js"
 import { mkdir, readFile, writeFile } from "fs/promises"
 
 type State = "UP" | "DOWN" | "RECREATE"
 
-export const StartupHandler: Handler<"ready"> = {
+export const StartupHandler = handler({
   event: "ready",
   once: true,
-  async handle(client: Client<true>) {
+  async handle(client) {
     console.log(`Running as: ${client.user.globalName ?? client.user.username}`)
 
     let title = "Bot "
@@ -49,7 +49,7 @@ export const StartupHandler: Handler<"ready"> = {
     process.on("SIGINT", () => exitListener())
     process.on("SIGTERM", () => exitListener())
   },
-}
+})
 
 async function getChangelog() {
   if (!Variables.commitHash) {

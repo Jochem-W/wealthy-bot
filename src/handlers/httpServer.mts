@@ -1,10 +1,10 @@
-import { logError } from "../../errors.mjs"
-import type { Handler } from "../../types/handler.mjs"
+import { logError } from "../errors.mjs"
+import { handler } from "../models/handler.mjs"
 import {
   DonationModel,
   processDonation,
-} from "../../utilities/subscriptionUtilities.mjs"
-import { Variables } from "../../variables.mjs"
+} from "../utilities/subscriptionUtilities.mjs"
+import { Variables } from "../variables.mjs"
 import { createServer, IncomingMessage, ServerResponse } from "http"
 import { parse } from "querystring"
 
@@ -82,7 +82,7 @@ async function requestHandler(
   }
 }
 
-export const HttpServer: Handler<"ready"> = {
+export const HttpServer = handler({
   event: "ready",
   once: true,
   handle() {
@@ -95,4 +95,4 @@ export const HttpServer: Handler<"ready"> = {
     Server.on("listening", () => console.log("Listening on", Server.address()))
     Server.listen(Variables.httpPort)
   },
-}
+})

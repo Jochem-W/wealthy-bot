@@ -1,11 +1,11 @@
-import { Prisma } from "../../clients.mjs"
-import { inviteMessage } from "../../messages/inviteMessage.mjs"
-import { Config } from "../../models/config.mjs"
-import type { Handler } from "../../types/handler.mjs"
-import { fetchChannel } from "../../utilities/discordUtilities.mjs"
+import { Prisma } from "../clients.mjs"
+import { inviteMessage } from "../messages/inviteMessage.mjs"
+import { Config } from "../models/config.mjs"
+import { handler } from "../models/handler.mjs"
+import { fetchChannel } from "../utilities/discordUtilities.mjs"
 import { ChannelType } from "discord.js"
 
-export const CheckInvite: Handler<"guildMemberAdd"> = {
+export const CheckInvite = handler({
   event: "guildMemberAdd",
   once: false,
   async handle(member) {
@@ -23,4 +23,4 @@ export const CheckInvite: Handler<"guildMemberAdd"> = {
     )
     await channel.send(inviteMessage(member, invitee))
   },
-}
+})

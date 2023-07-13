@@ -1,61 +1,56 @@
 import { Discord } from "../clients.mjs"
 import { GuildOnlyError } from "../errors.mjs"
-import { ChatInputCommand } from "../models/chatInputCommand.mjs"
-import type { ChatInputCommandInteraction } from "discord.js"
-import { EmbedBuilder, inlineCode } from "discord.js"
+import {
+  slashCommand,
+  slashOption,
+  subcommand,
+} from "../models/slashCommand.mjs"
+import { EmbedBuilder, SlashCommandStringOption, inlineCode } from "discord.js"
 
 function colorToHex(color: number) {
   return `#${color.toString(16).padStart(6, "0")}`
 }
 
-export class ColourCommand extends ChatInputCommand {
-  public constructor() {
-    super("colour", "Change your role colour", null)
-    this.builder
-      .addSubcommand((subcommandGroup) =>
-        subcommandGroup
-          .setName("set")
-          .setDescription("Set your role colour")
-          .addStringOption((builder) =>
-            builder
-              .setName("colour")
-              .setDescription("Hex code, with or without the number sign")
-              .setRequired(true)
-          )
-      )
-      .addSubcommand((subcommandGroup) =>
-        subcommandGroup
-          .setName("remove")
-          .setDescription("Remove your custom role colour")
-      )
-  }
-
-  public async handle(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inGuild()) {
-      throw new GuildOnlyError()
-    }
-
-    const guild =
-      interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
-    const member = await guild.members.fetch(interaction.user.id)
-    const name = `c${interaction.user.id}`
-    let role = member.roles.cache.find((r) => r.name === name)
-
-    const bot = await guild.members.fetchMe()
-
-    const subcommand = interaction.options.getSubcommand()
-    switch (subcommand) {
-      case "set": {
-        let code = interaction.options.getString("colour", true)
-        if (code.startsWith("#")) {
-          code = code.substring(1)
+export const ColourCommand = slashCommand({
+  name: "colour",
+  description: "Change your role colour",
+  defaultMemberPermissions: null,
+  dmPermission: false,
+  subcommands: [
+    subcommand({
+      name: "set",
+      description: "Set your role colour",
+      options: [
+        slashOption(
+          true,
+          new SlashCommandStringOption()
+            .setName("colour")
+            .setDescription("Hex code, with or without the number sign")
+        ),
+      ],
+      async handle(interaction, colour) {
+        if (!interaction.inGuild()) {
+          throw new GuildOnlyError()
         }
 
-        if (code.length === 8) {
-          code = code.substring(0, 6)
+        const guild =
+          interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
+        const member = await guild.members.fetch(interaction.user.id)
+        const name = `c${interaction.user.id}`
+        let role = member.roles.cache.find((r) => r.name === name)
+
+        const bot = await guild.members.fetchMe()
+
+        let formattedColour = colour
+        if (formattedColour.startsWith("#")) {
+          formattedColour = formattedColour.substring(1)
         }
 
-        const color = parseInt(code, 16)
+        if (formattedColour.length === 8) {
+          formattedColour = formattedColour.substring(0, 6)
+        }
+
+        const color = parseInt(formattedColour, 16)
         if (isNaN(color)) {
           const originalCode = interaction.options.getString("colour", true)
           await interaction.reply({
@@ -71,13 +66,13 @@ export class ColourCommand extends ChatInputCommand {
             ],
           })
         }
-        code = colorToHex(color)
+        formattedColour = colorToHex(color)
 
         const reason = "Custom role colour changed"
         const embeds = [
           new EmbedBuilder()
             .setTitle("Role colour updated")
-            .setDescription(inlineCode(code))
+            .setDescription(inlineCode(formattedColour))
             .setTimestamp(Date.now())
             .setColor(color),
         ]
@@ -85,7 +80,7 @@ export class ColourCommand extends ChatInputCommand {
         if (role) {
           await role.edit({ reason, color })
           await interaction.reply({ ephemeral: true, embeds })
-          break
+          return
         }
 
         role = await guild.roles.create({
@@ -100,9 +95,22 @@ export class ColourCommand extends ChatInputCommand {
 
         await member.roles.add(role)
         await interaction.reply({ ephemeral: true, embeds })
-        break
-      }
-      case "remove": {
+      },
+    }),
+    subcommand({
+      name: "remove",
+      description: "Remove your custom role colour",
+      async handle(interaction) {
+        if (!interaction.inGuild()) {
+          throw new GuildOnlyError()
+        }
+
+        const guild =
+          interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
+        const member = await guild.members.fetch(interaction.user.id)
+        const name = `c${interaction.user.id}`
+        const role = member.roles.cache.find((r) => r.name === name)
+
         if (!role) {
           await interaction.reply({
             embeds: [
@@ -112,7 +120,7 @@ export class ColourCommand extends ChatInputCommand {
             ],
             ephemeral: true,
           })
-          break
+          return
         }
 
         await role.delete()
@@ -126,10 +134,7 @@ export class ColourCommand extends ChatInputCommand {
           ],
           ephemeral: true,
         })
-        break
-      }
-      default:
-        break
-    }
-  }
-}
+      },
+    }),
+  ],
+})

@@ -1,11 +1,11 @@
-import { Prisma } from "../../clients.mjs"
-import { logError } from "../../errors.mjs"
-import { didntRenewMessage } from "../../messages/didntRenewMessage.mjs"
-import { Config } from "../../models/config.mjs"
-import { LongTimeout } from "../../models/longTimeout.mjs"
-import type { Handler } from "../../types/handler.mjs"
-import { fetchChannel } from "../../utilities/discordUtilities.mjs"
-import { expiredMillis } from "../../utilities/subscriptionUtilities.mjs"
+import { Prisma } from "../clients.mjs"
+import { logError } from "../errors.mjs"
+import { didntRenewMessage } from "../messages/didntRenewMessage.mjs"
+import { Config } from "../models/config.mjs"
+import { handler } from "../models/handler.mjs"
+import { LongTimeout } from "../models/longTimeout.mjs"
+import { fetchChannel } from "../utilities/discordUtilities.mjs"
+import { expiredMillis } from "../utilities/subscriptionUtilities.mjs"
 import type { User } from "@prisma/client"
 import { ChannelType } from "discord.js"
 
@@ -46,7 +46,7 @@ async function callback(id: number) {
   await textChannel.send(didntRenewMessage(user))
 }
 
-export const CheckSubscriptions: Handler<"ready"> = {
+export const CheckSubscriptions = handler({
   event: "ready",
   once: true,
   async handle() {
@@ -58,4 +58,4 @@ export const CheckSubscriptions: Handler<"ready"> = {
       replaceTimeout(user)
     }
   },
-}
+})

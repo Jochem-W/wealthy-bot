@@ -1,15 +1,14 @@
-import { ChatInputCommand } from "../models/chatInputCommand.mjs"
+import { slashCommand } from "../models/slashCommand.mjs"
 import { SecretKey, Variables } from "../variables.mjs"
-import type { ChatInputCommandInteraction } from "discord.js"
 import { EmbedBuilder } from "discord.js"
 import { SignJWT } from "jose"
 
-export class InviteCommand extends ChatInputCommand {
-  public constructor() {
-    super("invite", "Invite a user to the server", null)
-  }
-
-  public async handle(interaction: ChatInputCommandInteraction) {
+export const InviteCommand = slashCommand({
+  name: "invite",
+  description: "Invite a user to the server",
+  defaultMemberPermissions: null,
+  dmPermission: false,
+  async handle(interaction) {
     const token = await new SignJWT({ sub: interaction.user.id })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
@@ -33,5 +32,5 @@ export class InviteCommand extends ChatInputCommand {
       ],
       ephemeral: true,
     })
-  }
-}
+  },
+})

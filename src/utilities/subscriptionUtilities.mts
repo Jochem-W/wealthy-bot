@@ -2,7 +2,7 @@ import { Prisma } from "../clients.mjs"
 import {
   replaceTimeout,
   removeTimeout,
-} from "../handlers/ready/checkSubscriptions.mjs"
+} from "../handlers/checkSubscriptions.mjs"
 import { newSubscriptionMessage } from "../messages/newSubscriptionMessage.mjs"
 import { renewedLateMessage } from "../messages/renewedLateMessage.mjs"
 import { tierChangedMessage } from "../messages/tierChangedMessage.mjs"

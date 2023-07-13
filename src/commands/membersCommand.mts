@@ -1,8 +1,6 @@
-import { GuildOnlyError } from "../errors.mjs"
-import { ChatInputCommand } from "../models/chatInputCommand.mjs"
+import { slashCommand } from "../models/slashCommand.mjs"
 import { SecretKey, Variables } from "../variables.mjs"
 import {
-  ChatInputCommandInteraction,
   PermissionFlagsBits,
   ActionRowBuilder,
   type MessageActionRowComponentBuilder,
@@ -11,21 +9,12 @@ import {
 } from "discord.js"
 import { SignJWT } from "jose"
 
-export class MembersCommand extends ChatInputCommand {
-  public constructor() {
-    super(
-      "members",
-      "Commands related to Ko-fi members",
-      PermissionFlagsBits.Administrator
-    )
-    this.builder.addSubcommand((subcommandGroup) =>
-      subcommandGroup.setName("list").setDescription("List all members by tier")
-    )
-  }
-
-  private async list(
-    interaction: ChatInputCommandInteraction<"raw" | "cached">
-  ) {
+export const MembersCommand = slashCommand({
+  name: "members",
+  description: "List all Discord members by tier",
+  defaultMemberPermissions: PermissionFlagsBits.Administrator,
+  dmPermission: false,
+  async handle(interaction) {
     const token = await new SignJWT({ sub: interaction.client.user.id })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
@@ -46,20 +35,5 @@ export class MembersCommand extends ChatInputCommand {
       ],
       ephemeral: true,
     })
-  }
-
-  public async handle(interaction: ChatInputCommandInteraction) {
-    if (!interaction.inGuild()) {
-      throw new GuildOnlyError()
-    }
-
-    switch (interaction.options.getSubcommand()) {
-      case "list": {
-        await this.list(interaction)
-        break
-      }
-      default:
-        break
-    }
-  }
-}
+  },
+})

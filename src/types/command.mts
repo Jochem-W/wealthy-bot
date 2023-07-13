@@ -1,31 +1,35 @@
-import type { CustomId } from "../models/customId.mjs"
 import type {
-  ApplicationCommandOptionChoiceData,
+  ApplicationCommandType,
   AutocompleteInteraction,
+  ChatInputCommandInteraction,
   ContextMenuCommandBuilder,
-  JSONEncodable,
-  MessageComponentInteraction,
-  ModalSubmitInteraction,
-  RESTPostAPIApplicationCommandsJSONBody,
+  MessageContextMenuCommandInteraction,
   SlashCommandBuilder,
+  UserContextMenuCommandInteraction,
 } from "discord.js"
 
-export type Command<T> = {
-  readonly builder: SlashCommandBuilder | ContextMenuCommandBuilder
-
-  handle(interaction: T): Promise<void>
-
-  handleMessageComponent?(
-    interaction: MessageComponentInteraction,
-    data: CustomId
-  ): Promise<void>
-
-  handleModalSubmit?(
-    interaction: ModalSubmitInteraction,
-    data: CustomId
-  ): Promise<void>
-
-  handleAutocomplete?(
-    interaction: AutocompleteInteraction
-  ): Promise<ApplicationCommandOptionChoiceData[]>
-} & JSONEncodable<RESTPostAPIApplicationCommandsJSONBody>
+export type Command<T extends ApplicationCommandType> =
+  T extends ApplicationCommandType.ChatInput
+    ? {
+        type: T
+        builder: SlashCommandBuilder
+        handle: (interaction: ChatInputCommandInteraction) => void
+        autocomplete: (interaction: AutocompleteInteraction) => Promise<void>
+      }
+    : T extends ApplicationCommandType.Message
+    ? {
+        type: T
+        builder: ContextMenuCommandBuilder
+        handle: (
+          interaction: MessageContextMenuCommandInteraction
+        ) => Promise<void>
+      }
+    : T extends ApplicationCommandType.User
+    ? {
+        type: T
+        builder: ContextMenuCommandBuilder
+        handle: (
+          interaction: UserContextMenuCommandInteraction
+        ) => Promise<void>
+      }
+    : never
