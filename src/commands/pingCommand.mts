@@ -282,7 +282,7 @@ export const PingCommand = slashCommand({
 
         if (own) {
           description += `\n## Your ping\nYour ping to each location\n${format(
-            (p) => `${p.toFixed(1)} ms`,
+            (p) => `${p} ms`,
             own
           )}`
         }
