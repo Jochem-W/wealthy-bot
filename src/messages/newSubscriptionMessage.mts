@@ -29,7 +29,11 @@ const newSubscriberSelect = component({
       return
     }
 
-    const prismaUser = await linkDiscord(userId, discordUser.id)
+    const prismaUser = await linkDiscord(
+      interaction.client,
+      userId,
+      discordUser.id
+    )
 
     await interaction.update(newSubscriptionMessage(prismaUser))
   },

@@ -5,6 +5,7 @@ import {
   processDonation,
 } from "../utilities/subscriptionUtilities.mjs"
 import { Variables } from "../variables.mjs"
+import type { Client } from "discord.js"
 import { createServer, IncomingMessage, ServerResponse } from "http"
 import { parse } from "querystring"
 
@@ -24,7 +25,11 @@ function badRequest(response: ServerResponse, log?: object | string) {
   response.end()
 }
 
-async function endHandler(response: ServerResponse, body: string) {
+async function endHandler(
+  client: Client<true>,
+  response: ServerResponse,
+  body: string
+) {
   try {
     const formData = parse(body)
     const { data } = formData
@@ -39,7 +44,7 @@ async function endHandler(response: ServerResponse, body: string) {
       return
     }
 
-    await processDonation(info)
+    await processDonation(client, info)
     ok(response)
   } catch (e) {
     badRequest(response)
@@ -50,6 +55,7 @@ async function endHandler(response: ServerResponse, body: string) {
 }
 
 async function requestHandler(
+  client: Client<true>,
   request: IncomingMessage,
   response: ServerResponse
 ) {
@@ -72,7 +78,7 @@ async function requestHandler(
     let body = ""
     request.on("data", (chunk) => (body += chunk))
     request.on("end", () => {
-      void endHandler(response, body)
+      void endHandler(client, response, body)
     })
   } catch (e) {
     badRequest(response)
@@ -85,12 +91,12 @@ async function requestHandler(
 export const HttpServer = handler({
   event: "ready",
   once: true,
-  handle() {
+  handle(client) {
     Server.on("error", (e) => {
       void logError(e)
     })
     Server.on("request", (request, response) => {
-      void requestHandler(request, response)
+      void requestHandler(client, request, response)
     })
     Server.on("listening", () => console.log("Listening on", Server.address()))
     Server.listen(Variables.httpPort)

@@ -1,11 +1,11 @@
-import { Discord, GitHubClient } from "../clients.mjs"
+import { GitHubClient } from "../clients.mjs"
 import { logError } from "../errors.mjs"
 import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
 import { fetchChannel } from "../utilities/discordUtilities.mjs"
 import { Variables } from "../variables.mjs"
 import { Server } from "./httpServer.mjs"
-import { ChannelType, codeBlock, EmbedBuilder } from "discord.js"
+import { ChannelType, Client, codeBlock, EmbedBuilder } from "discord.js"
 import { mkdir, readFile, writeFile } from "fs/promises"
 
 type State = "UP" | "DOWN" | "RECREATE"
@@ -38,6 +38,7 @@ export const StartupHandler = handler({
       ],
     }
     const channel = await fetchChannel(
+      client,
       Config.restartChannel,
       ChannelType.GuildText
     )
@@ -46,8 +47,8 @@ export const StartupHandler = handler({
     await setState("UP")
     await setVersion()
 
-    process.on("SIGINT", () => exitListener())
-    process.on("SIGTERM", () => exitListener())
+    process.on("SIGINT", () => exitListener(client))
+    process.on("SIGTERM", () => exitListener(client))
   },
 })
 
@@ -125,10 +126,11 @@ async function getChangelog() {
   return codeBlock(description)
 }
 
-function exitListener() {
+function exitListener(client: Client<true>) {
   Server.close()
 
-  Discord.destroy()
+  client
+    .destroy()
     .then(() => setState("DOWN"))
     .catch((e) => {
       void (e instanceof Error ? logError(e) : console.error(e))

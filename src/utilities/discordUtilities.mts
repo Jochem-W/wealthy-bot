@@ -1,7 +1,5 @@
-import { Discord } from "../clients.mjs"
 import {
   ChannelNotFoundError,
-  GuildOnlyError,
   InvalidChannelTypeError,
   OwnerOnlyError,
 } from "../errors.mjs"
@@ -21,6 +19,7 @@ import {
   Team,
 } from "discord.js"
 import type {
+  Client,
   FetchMemberOptions,
   Interaction,
   UserResolvable,
@@ -35,24 +34,20 @@ export function uniqueName(user: User) {
   return user.username
 }
 
-export function displayName(userOrMember: User | GuildMember) {
-  if (userOrMember instanceof User) {
-    return userDisplayName(userOrMember)
-  }
-
-  if (userOrMember.nickname) {
-    return userOrMember.nickname
-  }
-
-  return userDisplayName(userOrMember.user)
-}
-
-function userDisplayName(user: User) {
+export function userDisplayName(user: User) {
   if (user.globalName) {
     return user.globalName
   }
 
-  return uniqueName(user)
+  return user.username
+}
+
+export function memberDisplayName(member: GuildMember) {
+  if (member.nickname) {
+    return member.nickname
+  }
+
+  return userDisplayName(member.user)
 }
 
 export function snowflakeToDateTime(snowflake: Snowflake) {
@@ -63,14 +58,15 @@ export function snowflakeToDateTime(snowflake: Snowflake) {
 }
 
 export async function tryFetchMember(
-  guildOrSnowflake: Snowflake | Guild,
+  data: { id: Snowflake; client: Client<true> } | Guild,
   options: FetchMemberOptions | UserResolvable
 ) {
   let guild
-  if (guildOrSnowflake instanceof Guild) {
-    guild = guildOrSnowflake
+  if (!(data instanceof Guild)) {
+    const { id, client } = data
+    guild = await client.guilds.fetch(id)
   } else {
-    guild = await Discord.guilds.fetch(guildOrSnowflake)
+    guild = data
   }
 
   try {
@@ -88,11 +84,12 @@ export async function tryFetchMember(
 }
 
 export async function fetchChannel<T extends ChannelType>(
+  client: Client<true>,
   id: Snowflake,
-  type: T,
+  type: T | T[],
   options?: FetchChannelOptions
 ) {
-  const channel = await Discord.channels.fetch(id, {
+  const channel = await client.channels.fetch(id, {
     allowUnknownGuild: true,
     ...options,
   })
@@ -100,23 +97,19 @@ export async function fetchChannel<T extends ChannelType>(
     throw new ChannelNotFoundError(id)
   }
 
-  if (channel.type !== type) {
-    throw new InvalidChannelTypeError(channel, type)
-  }
+  if (
+    (typeof type === "number" && channel.type !== type) ||
+    (typeof type === "object" && !type.includes(channel.type as T))
+  )
+    if (channel.type !== type) {
+      throw new InvalidChannelTypeError(channel, type)
+    }
 
   return channel as T extends
     | ChannelType.PublicThread
     | ChannelType.AnnouncementThread
     ? PublicThreadChannel
     : Extract<Channel, { type: T }>
-}
-
-export async function fetchInteractionGuild(interaction: Interaction) {
-  if (!interaction.inGuild()) {
-    throw new GuildOnlyError()
-  }
-
-  return interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
 }
 
 export async function ensureOwner(interaction: Interaction) {

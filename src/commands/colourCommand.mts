@@ -1,10 +1,9 @@
-import { Discord } from "../clients.mjs"
-import { GuildOnlyError } from "../errors.mjs"
 import {
   slashCommand,
   slashOption,
   subcommand,
 } from "../models/slashCommand.mjs"
+import { interactionMember } from "../utilities/interactionUtilities.mjs"
 import { EmbedBuilder, SlashCommandStringOption, inlineCode } from "discord.js"
 
 function colorToHex(color: number) {
@@ -29,17 +28,11 @@ export const ColourCommand = slashCommand({
         ),
       ],
       async handle(interaction, colour) {
-        if (!interaction.inGuild()) {
-          throw new GuildOnlyError()
-        }
-
-        const guild =
-          interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
-        const member = await guild.members.fetch(interaction.user.id)
+        const member = await interactionMember(interaction, { force: true })
         const name = `c${interaction.user.id}`
         let role = member.roles.cache.find((r) => r.name === name)
 
-        const bot = await guild.members.fetchMe()
+        const bot = await member.guild.members.fetchMe()
 
         let formattedColour = colour
         if (formattedColour.startsWith("#")) {
@@ -83,7 +76,7 @@ export const ColourCommand = slashCommand({
           return
         }
 
-        role = await guild.roles.create({
+        role = await member.guild.roles.create({
           position: Math.min(
             member.roles.highest.position + 1,
             bot.roles.highest.position
@@ -101,13 +94,7 @@ export const ColourCommand = slashCommand({
       name: "remove",
       description: "Remove your custom role colour",
       async handle(interaction) {
-        if (!interaction.inGuild()) {
-          throw new GuildOnlyError()
-        }
-
-        const guild =
-          interaction.guild ?? (await Discord.guilds.fetch(interaction.guildId))
-        const member = await guild.members.fetch(interaction.user.id)
+        const member = await interactionMember(interaction, { force: true })
         const name = `c${interaction.user.id}`
         const role = member.roles.cache.find((r) => r.name === name)
 

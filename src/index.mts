@@ -1,4 +1,3 @@
-import { Discord } from "./clients.mjs"
 import {
   MessageContextMenuCommands,
   RegisteredCommands,
@@ -10,11 +9,38 @@ import { Handlers } from "./handlers.mjs"
 import { Config } from "./models/config.mjs"
 import type { Command } from "./types/command.mjs"
 import { Variables } from "./variables.mjs"
-import { ApplicationCommandType, Routes } from "discord.js"
+import {
+  ApplicationCommandType,
+  Client,
+  GatewayIntentBits,
+  Partials,
+  Routes,
+} from "discord.js"
 import type {
   RESTPutAPIApplicationGuildCommandsJSONBody,
   RESTPutAPIApplicationGuildCommandsResult,
 } from "discord.js"
+
+const discord = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildBans,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.DirectMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+  partials: [
+    Partials.User,
+    Partials.Channel,
+    Partials.GuildMember,
+    Partials.Message,
+    Partials.Reaction,
+    Partials.GuildScheduledEvent,
+    Partials.ThreadMember,
+  ],
+})
+discord.rest.setToken(Variables.discordBotToken)
 
 const commandsBody: RESTPutAPIApplicationGuildCommandsJSONBody = []
 for (const command of [
@@ -31,7 +57,7 @@ const route =
     ? Routes.applicationCommands(Config.applicationId)
     : Routes.applicationGuildCommands(Config.applicationId, Config.guildId)
 
-const applicationCommands = (await Discord.rest.put(route, {
+const applicationCommands = (await discord.rest.put(route, {
   body: commandsBody,
 })) as RESTPutAPIApplicationGuildCommandsResult
 console.log("Commands updated")
@@ -66,7 +92,7 @@ for (const applicationCommand of applicationCommands) {
 
 for (const handler of Handlers) {
   if (handler.once) {
-    Discord.once(handler.event, async (...args) => {
+    discord.once(handler.event, async (...args) => {
       try {
         await handler.handle(...args)
       } catch (e) {
@@ -80,7 +106,7 @@ for (const handler of Handlers) {
     continue
   }
 
-  Discord.on(handler.event, async (...args) => {
+  discord.on(handler.event, async (...args) => {
     try {
       await handler.handle(...args)
     } catch (e) {
@@ -93,4 +119,4 @@ for (const handler of Handlers) {
   })
 }
 
-await Discord.login(Variables.discordBotToken)
+await discord.login(Variables.discordBotToken)

@@ -10,14 +10,11 @@ import { Config } from "../models/config.mjs"
 import { fetchChannel, tryFetchMember } from "./discordUtilities.mjs"
 import type { User } from "@prisma/client"
 import camelcaseKeys from "camelcase-keys"
-import { ChannelType } from "discord.js"
+import { ChannelType, Client, TextChannel } from "discord.js"
 import { DateTime } from "luxon"
 import { z } from "zod"
 
-const textChannel = await fetchChannel(
-  Config.loggingChannel,
-  ChannelType.GuildText
-)
+let channel: TextChannel | undefined
 
 export const DonationModel = z
   .object({
@@ -31,7 +28,10 @@ export const DonationModel = z
   })
   .transform((arg) => camelcaseKeys(arg))
 
-export async function processDonation(data: z.infer<typeof DonationModel>) {
+export async function processDonation(
+  client: Client<true>,
+  data: z.infer<typeof DonationModel>
+) {
   if (
     !data.isSubscriptionPayment ||
     !data.tierName ||
@@ -42,7 +42,7 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
 
   const user = await Prisma.user.findFirst({ where: { email: data.email } })
   if (!user) {
-    await newSubscription({ ...data, tierName: data.tierName })
+    await newSubscription(client, { ...data, tierName: data.tierName })
     return
   }
 
@@ -56,7 +56,7 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
     include: { invitee: true },
   })
 
-  replaceTimeout(updatedUser)
+  replaceTimeout(client, updatedUser)
 
   const oldDate = DateTime.fromJSDate(user.lastPaymentTime)
   const newDate = DateTime.fromJSDate(updatedUser.lastPaymentTime)
@@ -69,18 +69,26 @@ export async function processDonation(data: z.infer<typeof DonationModel>) {
     diff.shiftTo("day", "hour", "minutes", "seconds").toISO()
   )
 
+  const fetched = await fetchChannel(
+    client,
+    Config.loggingChannel,
+    ChannelType.GuildText
+  )
+  channel ??= fetched
+
   if (expiredMillis(user) < 0) {
-    await textChannel.send(renewedLateMessage(updatedUser))
+    await channel.send(renewedLateMessage(updatedUser))
   }
 
   if (user.lastPaymentTier !== updatedUser.lastPaymentTier) {
-    await textChannel.send(tierChangedMessage(user, updatedUser))
+    await channel.send(tierChangedMessage(user, updatedUser))
   }
 
-  await updateRoles(updatedUser)
+  await updateRoles(client, updatedUser)
 }
 
 async function newSubscription(
+  client: Client<true>,
   data: z.infer<typeof DonationModel> & { tierName: string }
 ) {
   const user = await Prisma.user.create({
@@ -91,17 +99,27 @@ async function newSubscription(
       lastPaymentTime: data.timestamp,
     },
   })
-  replaceTimeout(user)
+  replaceTimeout(client, user)
 
-  await textChannel.send(newSubscriptionMessage(user))
+  const fetched = await fetchChannel(
+    client,
+    Config.loggingChannel,
+    ChannelType.GuildText
+  )
+  channel ??= fetched
+
+  await channel.send(newSubscriptionMessage(user))
 }
 
-async function updateRoles(user: User) {
+async function updateRoles(client: Client<true>, user: User) {
   if (!Config.assignRoles || !user.discordId) {
     return
   }
 
-  const discordMember = await tryFetchMember(Config.guildId, user.discordId)
+  const discordMember = await tryFetchMember(
+    { client, id: Config.guildId },
+    user.discordId
+  )
   if (!discordMember) {
     return
   }
@@ -124,7 +142,11 @@ async function updateRoles(user: User) {
   }
 }
 
-export async function linkDiscord(id: number, discordId: string) {
+export async function linkDiscord(
+  client: Client<true>,
+  id: number,
+  discordId: string
+) {
   const users = await Prisma.user.findMany({
     where: { id: { not: id }, discordId },
     select: { id: true },
@@ -139,8 +161,8 @@ export async function linkDiscord(id: number, discordId: string) {
   }
 
   const user = await Prisma.user.update({ where: { id }, data: { discordId } })
-  replaceTimeout(user)
-  await updateRoles(user)
+  replaceTimeout(client, user)
+  await updateRoles(client, user)
 
   return user
 }
