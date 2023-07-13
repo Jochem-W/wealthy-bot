@@ -5,9 +5,9 @@ const model = z.object({
   applicationId: z.string(),
   assignRoles: z.boolean(),
   channels: z.object({
-    restart: z.string(),
-    logs: z.string(),
     error: z.string(),
+    logs: z.string(),
+    restart: z.string(),
   }),
   gracePeriod: z.number(),
   guild: z.string(),
