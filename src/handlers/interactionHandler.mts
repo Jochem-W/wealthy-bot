@@ -116,7 +116,7 @@ export const InteractionHandler = handler({
         throw e
       }
 
-      await logError(e)
+      await logError(interaction.client, e)
 
       if (!interaction.isRepliable()) {
         return

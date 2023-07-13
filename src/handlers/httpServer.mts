@@ -81,7 +81,7 @@ async function requestHandler(
   } catch (e) {
     badRequest(response)
     if (e instanceof Error) {
-      await logError(e)
+      await logError(client, e)
     }
   }
 }
@@ -91,7 +91,7 @@ export const HttpServer = handler({
   once: true,
   handle(client) {
     Server.on("error", (e) => {
-      void logError(e)
+      void logError(client, e)
     })
     Server.on("request", (request, response) => {
       void requestHandler(client, request, response)

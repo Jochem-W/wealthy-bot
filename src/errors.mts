@@ -1,4 +1,7 @@
+import { Config } from "./models/config.mjs"
 import type { Command } from "./types/command.mjs"
+import { fetchChannel } from "./utilities/discordUtilities.mjs"
+import { makeErrorMessage } from "./utilities/embedUtilities.mjs"
 import { Attachment, ChannelType, CommandInteraction } from "discord.js"
 import type {
   Snowflake,
@@ -8,6 +11,7 @@ import type {
   AutocompleteFocusedOption,
   AutocompleteInteraction,
   ComponentType,
+  Client,
 } from "discord.js"
 import type { DateTime } from "luxon"
 import type MIMEType from "whatwg-mimetype"
@@ -320,6 +324,12 @@ export class InvalidDateTimeError extends CustomError {
   }
 }
 
-export async function logError(error: Error) {
+export async function logError(client: Client<true>, error: Error) {
   console.error(error)
+  const channel = await fetchChannel(
+    client,
+    Config.channels.error,
+    ChannelType.GuildText
+  )
+  await channel.send(makeErrorMessage(error))
 }

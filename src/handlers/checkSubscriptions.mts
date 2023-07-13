@@ -18,7 +18,7 @@ export function replaceTimeout(client: Client<true>, user: User) {
     // eslint-disable-next-line no-loop-func
     new LongTimeout(() => {
       callback(client, user.id).catch((e) =>
-        e instanceof Error ? logError(e) : console.log(e)
+        e instanceof Error ? logError(client, e) : console.log(e)
       )
     }, expiredMillis(user))
   )

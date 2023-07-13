@@ -100,7 +100,7 @@ for (const handler of Handlers) {
           throw e
         }
 
-        await logError(e)
+        await logError(discord, e)
       }
     })
     continue
@@ -114,7 +114,7 @@ for (const handler of Handlers) {
         throw e
       }
 
-      await logError(e)
+      await logError(discord, e)
     }
   })
 }
