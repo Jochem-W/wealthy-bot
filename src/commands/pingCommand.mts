@@ -267,7 +267,7 @@ export const PingCommand = slashCommand({
           embeds: [
             new EmbedBuilder().setDescription(
               `## Average\nThe average ping for each location\n${format(
-                (p) => (p ? `${p} ms` : "-"),
+                (p) => (p ? `${p.toFixed(1)} ms` : "-"),
                 _avg
               )}\n\n## Playable percentage\nThe percentage of players that can play with less than ${playablePing} ping\n${format(
                 (p) => (p ? `${((100 * p) / all.length).toFixed(1)}%` : "0%"),
