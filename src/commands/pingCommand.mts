@@ -54,20 +54,26 @@ async function extract(id: Snowflake, text: string) {
 }
 
 type Nullable<T> = { [K in keyof T]: T[K] | null }
+type Input = Omit<Ping, "discordId">
+type Value<T extends Input | Nullable<Input>> = T extends Input
+  ? number
+  : number | null
 
-function format(
-  formatter: (ping: number | null) => string,
-  data: Nullable<Omit<Ping, "discordId">>
+function format<T extends Input | Nullable<Input>>(
+  formatter: (ping: Value<T>) => string,
+  data: T
 ) {
-  return `- ${bold("Dallas, Texas")}: ${formatter(data.texas)}\n- ${bold(
-    "Ashburn, Virginia"
-  )}: ${formatter(data.virginia)}\n- ${bold(
-    "Los Angeles, California"
-  )}: ${formatter(data.california)}\n- ${bold("Miami, Florida")}: ${formatter(
-    data.florida
-  )}\n- ${bold("Falkenstein, Germany")}: ${formatter(data.germany)}\n- ${bold(
-    "Singapore"
-  )}: ${formatter(data.singapore)}`
+  return `- ${bold("Dallas, Texas")}: ${formatter(
+    data.texas as Value<T>
+  )}\n- ${bold("Ashburn, Virginia")}: ${formatter(
+    data.virginia as Value<T>
+  )}\n- ${bold("Los Angeles, California")}: ${formatter(
+    data.california as Value<T>
+  )}\n- ${bold("Miami, Florida")}: ${formatter(
+    data.florida as Value<T>
+  )}\n- ${bold("Falkenstein, Germany")}: ${formatter(
+    data.germany as Value<T>
+  )}\n- ${bold("Singapore")}: ${formatter(data.singapore as Value<T>)}`
 }
 
 export const PingCommand = slashCommand({
@@ -262,19 +268,28 @@ export const PingCommand = slashCommand({
           }
         )
 
+        const own = await Prisma.ping.findFirst({
+          where: { discordId: interaction.user.id },
+        })
+
+        let description = `## Average\nThe average ping for each location\n${format(
+          (p) => (p ? `${p.toFixed(1)} ms` : "-"),
+          _avg
+        )}\n## Playable percentage\nThe percentage of players that can play with less than ${playablePing} ping\n${format(
+          (p) => `${((100 * p) / all.length).toFixed(1)}%`,
+          playableCounts
+        )}`
+
+        if (own) {
+          description += `\n## Your ping\nYour ping to each location\n${format(
+            (p) => `${p.toFixed(1)} ms`,
+            own
+          )}`
+        }
+
         await interaction.reply({
           ephemeral: true,
-          embeds: [
-            new EmbedBuilder().setDescription(
-              `## Average\nThe average ping for each location\n${format(
-                (p) => (p ? `${p.toFixed(1)} ms` : "-"),
-                _avg
-              )}\n\n## Playable percentage\nThe percentage of players that can play with less than ${playablePing} ping\n${format(
-                (p) => (p ? `${((100 * p) / all.length).toFixed(1)}%` : "0%"),
-                playableCounts
-              )}`
-            ),
-          ],
+          embeds: [new EmbedBuilder().setDescription(description)],
         })
       },
     }),
