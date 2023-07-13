@@ -238,8 +238,16 @@ export const PingCommand = slashCommand({
       async handle(interaction, ping) {
         const playablePing = ping ?? 100
         const all = await Prisma.ping.findMany()
-        const { _avg } = await Prisma.ping.aggregate({
+        const { _avg, _max } = await Prisma.ping.aggregate({
           _avg: {
+            texas: true,
+            virginia: true,
+            california: true,
+            florida: true,
+            germany: true,
+            singapore: true,
+          },
+          _max: {
             texas: true,
             virginia: true,
             california: true,
@@ -272,9 +280,12 @@ export const PingCommand = slashCommand({
           where: { discordId: interaction.user.id },
         })
 
-        let description = `## Average\nThe average ping for each location\n${format(
+        let description = `## Average\nThe average ping to each location\n${format(
           (p) => (p ? `${p.toFixed(1)} ms` : "-"),
           _avg
+        )}\n## Maximum\nThe maximum ping to each location\n${format(
+          (p) => (p ? `${p} ms` : "-"),
+          _max
         )}\n## Playable percentage\nThe percentage of players that can play with less than ${playablePing} ping\n${format(
           (p) => `${((100 * p) / all.length).toFixed(1)}%`,
           playableCounts
