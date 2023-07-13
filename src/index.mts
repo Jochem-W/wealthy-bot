@@ -55,7 +55,7 @@ for (const command of [
 const route =
   Variables.nodeEnv === "production"
     ? Routes.applicationCommands(Config.applicationId)
-    : Routes.applicationGuildCommands(Config.applicationId, Config.guildId)
+    : Routes.applicationGuildCommands(Config.applicationId, Config.guild)
 
 const applicationCommands = (await discord.rest.put(route, {
   body: commandsBody,

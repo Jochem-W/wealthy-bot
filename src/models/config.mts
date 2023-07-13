@@ -4,14 +4,19 @@ import { z } from "zod"
 const model = z.object({
   applicationId: z.string(),
   assignRoles: z.boolean(),
-  gracePeriod: z.number(),
-  guildId: z.string(),
-  loggingChannel: z.string(),
-  repository: z.object({
-    name: z.string(),
-    owner: z.string(),
+  channels: z.object({
+    restart: z.string(),
+    logs: z.string(),
+    error: z.string(),
   }),
-  restartChannel: z.string(),
+  gracePeriod: z.number(),
+  guild: z.string(),
+  repository: z
+    .object({
+      name: z.string(),
+      owner: z.string(),
+    })
+    .optional(),
   tiers: z
     .record(
       z.string(),

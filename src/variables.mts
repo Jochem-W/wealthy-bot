@@ -6,8 +6,8 @@ const model = z
   .object({
     COMMIT_HASH: z.string().optional(),
     DISCORD_BOT_TOKEN: z.string(),
-    GITHUB_TOKEN: z.string(),
-    NODE_ENV: z.string().optional(),
+    GITHUB_TOKEN: z.string().optional(),
+    NODE_ENV: z.string().optional().default("development"),
     HTTP_PORT: z.coerce.number().optional().default(80),
     VERIFICATION_TOKEN: z.string().uuid(),
     SECRET_KEY: z.string(),

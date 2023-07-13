@@ -71,7 +71,7 @@ export async function processDonation(
 
   const fetched = await fetchChannel(
     client,
-    Config.loggingChannel,
+    Config.channels.logs,
     ChannelType.GuildText
   )
   channel ??= fetched
@@ -103,7 +103,7 @@ async function newSubscription(
 
   const fetched = await fetchChannel(
     client,
-    Config.loggingChannel,
+    Config.channels.logs,
     ChannelType.GuildText
   )
   channel ??= fetched
@@ -117,7 +117,7 @@ async function updateRoles(client: Client<true>, user: User) {
   }
 
   const discordMember = await tryFetchMember(
-    { client, id: Config.guildId },
+    { client, id: Config.guild },
     user.discordId
   )
   if (!discordMember) {

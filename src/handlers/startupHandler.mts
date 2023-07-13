@@ -39,7 +39,7 @@ export const StartupHandler = handler({
     }
     const channel = await fetchChannel(
       client,
-      Config.restartChannel,
+      Config.channels.restart,
       ChannelType.GuildText
     )
     await channel.send(message)
@@ -53,7 +53,7 @@ export const StartupHandler = handler({
 })
 
 async function getChangelog() {
-  if (!Variables.commitHash) {
+  if (!Variables.commitHash || !Config.repository || !Variables.githubToken) {
     return null
   }
 
