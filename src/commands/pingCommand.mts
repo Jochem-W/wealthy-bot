@@ -7,7 +7,6 @@ import {
   subcommand,
   subcommandGroup,
 } from "../models/slashCommand.mjs"
-import type { Ping } from "@prisma/client"
 import {
   EmbedBuilder,
   SlashCommandAttachmentOption,
@@ -31,6 +30,14 @@ const model = z.object({
   singapore: z.coerce.number().int(),
 })
 
+function std(...xs: number[]) {
+  const mean = xs.reduce((prev, current) => prev + current) / xs.length
+  return Math.sqrt(
+    xs.map((x) => (x - mean) ** 2).reduce((prev, current) => prev + current) /
+      xs.length
+  )
+}
+
 function playable(actual: number, target: number) {
   if (actual <= target) {
     return 1
@@ -53,27 +60,27 @@ async function extract(id: Snowflake, text: string) {
   return await model.safeParseAsync(data)
 }
 
-type Nullable<T> = { [K in keyof T]: T[K] | null }
-type Input = Omit<Ping, "discordId">
-type Value<T extends Input | Nullable<Input>> = T extends Input
-  ? number
-  : number | null
-
-function format<T extends Input | Nullable<Input>>(
-  formatter: (ping: Value<T>) => string,
-  data: T
+function format<T extends string | number | null>(
+  data: {
+    texas: T
+    virginia: T
+    california: T
+    florida: T
+    germany: T
+    singapore: T
+  },
+  formatter?: (ping: T) => string
 ) {
-  return `- ${bold("Dallas, Texas")}: ${formatter(
-    data.texas as Value<T>
-  )}\n- ${bold("Ashburn, Virginia")}: ${formatter(
-    data.virginia as Value<T>
-  )}\n- ${bold("Los Angeles, California")}: ${formatter(
-    data.california as Value<T>
-  )}\n- ${bold("Miami, Florida")}: ${formatter(
-    data.florida as Value<T>
-  )}\n- ${bold("Falkenstein, Germany")}: ${formatter(
-    data.germany as Value<T>
-  )}\n- ${bold("Singapore")}: ${formatter(data.singapore as Value<T>)}`
+  const f =
+    formatter ??
+    ((ping) => (typeof ping === "string" ? ping : ping?.toString()))
+  return `- ${bold("Dallas, Texas")}: ${f(data.texas)}\n- ${bold(
+    "Ashburn, Virginia"
+  )}: ${f(data.virginia)}\n- ${bold("Los Angeles, California")}: ${f(
+    data.california
+  )}\n- ${bold("Miami, Florida")}: ${f(data.florida)}\n- ${bold(
+    "Falkenstein, Germany"
+  )}: ${f(data.germany)}\n- ${bold("Singapore")}: ${f(data.singapore)}`
 }
 
 export const PingCommand = slashCommand({
@@ -123,7 +130,7 @@ export const PingCommand = slashCommand({
               embeds: [
                 new EmbedBuilder()
                   .setTitle("Ping successfully set!")
-                  .setDescription(format((p) => `${p} ms`, upserted))
+                  .setDescription(format(upserted, (p) => `${p} ms`))
                   .setColor(0x22c55e),
               ],
             })
@@ -212,7 +219,7 @@ export const PingCommand = slashCommand({
               embeds: [
                 new EmbedBuilder()
                   .setTitle("Ping successfully set!")
-                  .setDescription(format((p) => `${p} ms`, upserted))
+                  .setDescription(format(upserted, (p) => `${p} ms`))
                   .setColor(0x22c55e),
               ],
             })
@@ -238,6 +245,7 @@ export const PingCommand = slashCommand({
       async handle(interaction, ping) {
         const playablePing = ping ?? 100
         const all = await Prisma.ping.findMany()
+
         const { _avg, _max } = await Prisma.ping.aggregate({
           _avg: {
             texas: true,
@@ -256,6 +264,27 @@ export const PingCommand = slashCommand({
             singapore: true,
           },
         })
+
+        const means = {
+          texas: `${_avg.texas}±${std(...all.map((p) => p.texas)).toFixed(
+            1
+          )} ms`,
+          virginia: `${_avg.virginia}±${std(
+            ...all.map((p) => p.virginia)
+          ).toFixed(1)} ms`,
+          california: `${_avg.california}±${std(
+            ...all.map((p) => p.california)
+          ).toFixed(1)} ms`,
+          florida: `${_avg.florida}±${std(...all.map((p) => p.florida)).toFixed(
+            1
+          )} ms`,
+          germany: `${_avg.germany}±${std(...all.map((p) => p.germany)).toFixed(
+            1
+          )} ms`,
+          singapore: `${_avg.singapore}±${std(
+            ...all.map((p) => p.singapore)
+          ).toFixed(1)} ms`,
+        }
 
         const playableCounts = all.reduce(
           (p, c) => ({
@@ -280,21 +309,20 @@ export const PingCommand = slashCommand({
           where: { discordId: interaction.user.id },
         })
 
-        let description = `## Average\nThe average ping to each location\n${format(
-          (p) => (p ? `${p.toFixed(1)} ms` : "-"),
-          _avg
-        )}\n## Maximum\nThe maximum ping to each location\n${format(
-          (p) => (p ? `${p} ms` : "-"),
-          _max
+        let description = `## Average ping\nThe average ping to each location\n${format(
+          means
+        )}\n## Maximum ping\nThe maximum ping to each location\n${format(
+          _max,
+          (p) => (p ? `${p} ms` : "-")
         )}\n## Playable percentage\nThe percentage of players that can play with less than ${playablePing} ping\n${format(
-          (p) => `${((100 * p) / all.length).toFixed(1)}%`,
-          playableCounts
+          playableCounts,
+          (p) => `${((100 * p) / all.length).toFixed(1)}%`
         )}`
 
         if (own) {
           description += `\n## Your ping\nYour ping to each location\n${format(
-            (p) => `${p} ms`,
-            own
+            own,
+            (p) => `${p} ms`
           )}`
         }
 
