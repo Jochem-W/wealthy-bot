@@ -32,6 +32,8 @@ export async function processDonation(
   client: Client<true>,
   data: z.infer<typeof DonationModel>
 ) {
+  console.log(data)
+
   if (
     !data.isSubscriptionPayment ||
     !data.tierName ||
