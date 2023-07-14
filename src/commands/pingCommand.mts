@@ -30,12 +30,25 @@ const model = z.object({
   singapore: z.coerce.number().int(),
 })
 
-function std(...xs: number[]) {
-  const mean = xs.reduce((prev, current) => prev + current) / xs.length
+function std(xs: number[], mean?: number) {
+  const actualMean =
+    mean ?? xs.reduce((prev, current) => prev + current) / xs.length
   return Math.sqrt(
-    xs.map((x) => (x - mean) ** 2).reduce((prev, current) => prev + current) /
-      xs.length
+    xs
+      .map((x) => (x - actualMean) ** 2)
+      .reduce((prev, current) => prev + current) / xs.length
   )
+}
+
+function meanWithStd(xs: number[], unit: string = "", decimals: number = 1) {
+  const mean = xs.reduce((prev, current) => prev + current) / xs.length
+  const stdev = std(xs, mean)
+  let formatted = `${mean.toFixed(decimals)}±${stdev.toFixed(decimals)}`
+  if (unit) {
+    formatted = `${formatted} ${unit}`
+  }
+
+  return formatted
 }
 
 function playable(actual: number, target: number) {
@@ -246,15 +259,7 @@ export const PingCommand = slashCommand({
         const playablePing = ping ?? 100
         const all = await Prisma.ping.findMany()
 
-        const { _avg, _max } = await Prisma.ping.aggregate({
-          _avg: {
-            texas: true,
-            virginia: true,
-            california: true,
-            florida: true,
-            germany: true,
-            singapore: true,
-          },
+        const { _max } = await Prisma.ping.aggregate({
           _max: {
             texas: true,
             virginia: true,
@@ -266,24 +271,30 @@ export const PingCommand = slashCommand({
         })
 
         const means = {
-          texas: `${_avg.texas}±${std(...all.map((p) => p.texas)).toFixed(
-            1
-          )} ms`,
-          virginia: `${_avg.virginia}±${std(
-            ...all.map((p) => p.virginia)
-          ).toFixed(1)} ms`,
-          california: `${_avg.california}±${std(
-            ...all.map((p) => p.california)
-          ).toFixed(1)} ms`,
-          florida: `${_avg.florida}±${std(...all.map((p) => p.florida)).toFixed(
-            1
-          )} ms`,
-          germany: `${_avg.germany}±${std(...all.map((p) => p.germany)).toFixed(
-            1
-          )} ms`,
-          singapore: `${_avg.singapore}±${std(
-            ...all.map((p) => p.singapore)
-          ).toFixed(1)} ms`,
+          texas: meanWithStd(
+            all.map((p) => p.texas),
+            "ms"
+          ),
+          virginia: meanWithStd(
+            all.map((p) => p.virginia),
+            "ms"
+          ),
+          california: meanWithStd(
+            all.map((p) => p.california),
+            "ms"
+          ),
+          florida: meanWithStd(
+            all.map((p) => p.florida),
+            "ms"
+          ),
+          germany: meanWithStd(
+            all.map((p) => p.germany),
+            "ms"
+          ),
+          singapore: meanWithStd(
+            all.map((p) => p.singapore),
+            "ms"
+          ),
         }
 
         const playableCounts = all.reduce(
