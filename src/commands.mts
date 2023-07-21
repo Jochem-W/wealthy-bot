@@ -1,7 +1,6 @@
 import { ColourCommand } from "./commands/colourCommand.mjs"
 import { InviteCommand } from "./commands/inviteCommand.mjs"
 import { MembersCommand } from "./commands/membersCommand.mjs"
-import { PingCommand } from "./commands/pingCommand.mjs"
 import type { Command } from "./types/command.mjs"
 import { Collection } from "discord.js"
 import type { ApplicationCommandType, Snowflake } from "discord.js"
@@ -10,7 +9,6 @@ export const SlashCommands: Command<ApplicationCommandType.ChatInput>[] = [
   ColourCommand,
   InviteCommand,
   MembersCommand,
-  PingCommand,
 ]
 
 export const MessageContextMenuCommands: Command<ApplicationCommandType.Message>[] =

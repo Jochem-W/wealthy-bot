@@ -26,14 +26,3 @@ model Invitee {
   user   User @relation(fields: [userId], references: [id])
   userId Int  @unique
 }
-
-model Ping {
-  discordId String @id
-
-  texas Int
-  virginia Int
-  california Int
-  florida Int
-  germany Int
-  singapore Int
-}
