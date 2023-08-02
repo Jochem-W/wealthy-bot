@@ -30,7 +30,7 @@ export const DonationModel = z
 
 export async function processDonation(
   client: Client<true>,
-  data: z.infer<typeof DonationModel>
+  data: z.infer<typeof DonationModel>,
 ) {
   console.log(data)
 
@@ -68,13 +68,13 @@ export async function processDonation(
     expiredMillis(user) < 0,
     oldDate.toISO(),
     newDate.toISO(),
-    diff.shiftTo("day", "hour", "minutes", "seconds").toISO()
+    diff.shiftTo("day", "hour", "minutes", "seconds").toISO(),
   )
 
   const fetched = await fetchChannel(
     client,
     Config.channels.logs,
-    ChannelType.GuildText
+    ChannelType.GuildText,
   )
   channel ??= fetched
 
@@ -91,7 +91,7 @@ export async function processDonation(
 
 async function newSubscription(
   client: Client<true>,
-  data: z.infer<typeof DonationModel> & { tierName: string }
+  data: z.infer<typeof DonationModel> & { tierName: string },
 ) {
   const user = await Prisma.user.create({
     data: {
@@ -106,7 +106,7 @@ async function newSubscription(
   const fetched = await fetchChannel(
     client,
     Config.channels.logs,
-    ChannelType.GuildText
+    ChannelType.GuildText,
   )
   channel ??= fetched
 
@@ -120,7 +120,7 @@ async function updateRoles(client: Client<true>, user: User) {
 
   const discordMember = await tryFetchMember(
     { client, id: Config.guild },
-    user.discordId
+    user.discordId,
   )
   if (!discordMember) {
     return
@@ -147,7 +147,7 @@ async function updateRoles(client: Client<true>, user: User) {
 export async function linkDiscord(
   client: Client<true>,
   id: number,
-  discordId: string
+  discordId: string,
 ) {
   const users = await Prisma.user.findMany({
     where: { id: { not: id }, discordId },

@@ -32,7 +32,7 @@ const newSubscriberSelect = component({
     const prismaUser = await linkDiscord(
       interaction.client,
       userId,
-      discordUser.id
+      discordUser.id,
     )
 
     await interaction.update(newSubscriptionMessage(prismaUser))
@@ -43,12 +43,12 @@ export function newSubscriptionMessage(user: User) {
   const embed = new EmbedBuilder()
     .setTitle("New subscription")
     .setDescription(
-      "This could also mean that a member changed their email address."
+      "This could also mean that a member changed their email address.",
     )
     .setFields(
       { name: "Name", value: user.name },
       { name: "Email", value: user.email },
-      { name: "Tier", value: user.lastPaymentTier }
+      { name: "Tier", value: user.lastPaymentTier },
     )
     .setTimestamp(user.lastPaymentTime)
 
@@ -65,7 +65,7 @@ export function newSubscriptionMessage(user: User) {
           .setPlaceholder("Select the corresponding user")
           .setCustomId(newSubscriberSelect(user.id.toString(10)))
           .setMaxValues(1)
-          .setMinValues(1)
+          .setMinValues(1),
       ),
     ],
   }

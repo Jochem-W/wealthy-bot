@@ -49,7 +49,7 @@ export function staticComponent<T extends ComponentType, TT extends string>({
         throw new ComponentTypeMismatchError(
           name,
           type,
-          interaction.componentType
+          interaction.componentType,
         )
       }
 
@@ -63,7 +63,7 @@ export function staticComponent<T extends ComponentType, TT extends string>({
 export function component<
   T extends ComponentType,
   TT extends string,
-  TTT extends readonly string[]
+  TTT extends readonly string[],
 >({
   type,
   name,
@@ -84,13 +84,13 @@ export function component<
         throw new ComponentTypeMismatchError(
           name,
           type,
-          interaction.componentType
+          interaction.componentType,
         )
       }
 
       await handle(
         interaction as Interaction<T>,
-        ...(interaction.customId.split(":").slice(1) as [...TTT])
+        ...(interaction.customId.split(":").slice(1) as [...TTT]),
       )
     },
   })

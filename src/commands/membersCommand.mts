@@ -30,7 +30,7 @@ export const MembersCommand = slashCommand({
           new ButtonBuilder()
             .setLabel("View online")
             .setStyle(ButtonStyle.Link)
-            .setURL(url.toString())
+            .setURL(url.toString()),
         ),
       ],
       ephemeral: true,

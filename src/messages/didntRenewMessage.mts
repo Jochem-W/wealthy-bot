@@ -18,9 +18,9 @@ export function didntRenewMessage(user: User & { invitee: Invitee | null }) {
         name: "Last paid",
         value: `${time(
           user.lastPaymentTime,
-          TimestampStyles.ShortDate
+          TimestampStyles.ShortDate,
         )} (${time(user.lastPaymentTime, TimestampStyles.RelativeTime)})`,
-      }
+      },
     )
     .setColor(0xff0000)
 

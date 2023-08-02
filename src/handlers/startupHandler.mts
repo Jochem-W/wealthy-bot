@@ -40,7 +40,7 @@ export const StartupHandler = handler({
     const channel = await fetchChannel(
       client,
       Config.channels.restart,
-      ChannelType.GuildText
+      ChannelType.GuildText,
     )
     await channel.send(message)
 
@@ -83,7 +83,7 @@ async function getChangelog() {
 
   let description = `${previousVersion.slice(
     0,
-    7
+    7,
   )}..${Variables.commitHash.slice(0, 7)}\n\ncommit log:`
   response.data.commits.reverse()
   for (const commit of response.data.commits) {
@@ -117,9 +117,9 @@ async function getChangelog() {
 
   for (const file of files) {
     description += `\n  ${file.name.padEnd(
-      namePad
+      namePad,
     )} | ${file.additions.padStart(additionsPad)}+ ${file.deletions.padStart(
-      deletionsPad
+      deletionsPad,
     )}-`
   }
 
@@ -160,7 +160,7 @@ function isErrnoException(error: unknown): error is NodeJS.ErrnoException {
 }
 
 function isArbitraryObject(
-  potentialObject: unknown
+  potentialObject: unknown,
 ): potentialObject is ArbitraryObject {
   return typeof potentialObject === "object" && potentialObject !== null
 }

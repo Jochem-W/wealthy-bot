@@ -30,7 +30,7 @@ async function handleCommand(interaction: CommandInteraction) {
     throw new CommandTypeMismatchError(
       interaction.commandId,
       interaction.commandType,
-      command.type
+      command.type,
     )
   }
 
@@ -52,7 +52,7 @@ async function handleComponent(interaction: MessageComponentInteraction) {
     throw new ComponentTypeMismatchError(
       componentName,
       interaction.componentType,
-      component.type
+      component.type,
     )
   }
 
@@ -69,7 +69,7 @@ async function handleAutocomplete(interaction: AutocompleteInteraction) {
     throw new CommandTypeMismatchError(
       interaction.commandId,
       interaction.commandType,
-      command.type
+      command.type,
     )
   }
 

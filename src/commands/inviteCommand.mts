@@ -23,7 +23,7 @@ export const InviteCommand = slashCommand({
         new EmbedBuilder()
           .setTitle("Invite link generated")
           .setDescription(
-            `To invite someone to the server, please send them the following link:`
+            `To invite someone to the server, please send them the following link:`,
           )
           .setFields({ name: "Invite link", value: url.toString() })
           .setFooter({

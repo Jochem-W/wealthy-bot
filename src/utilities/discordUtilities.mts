@@ -53,13 +53,13 @@ export function memberDisplayName(member: GuildMember) {
 export function snowflakeToDateTime(snowflake: Snowflake) {
   return DateTime.fromMillis(
     Number((BigInt(snowflake) >> 22n) + 1420070400000n),
-    { zone: "utc" }
+    { zone: "utc" },
   )
 }
 
 export async function tryFetchMember(
   data: { id: Snowflake; client: Client<true> } | Guild,
-  options: FetchMemberOptions | UserResolvable
+  options: FetchMemberOptions | UserResolvable,
 ) {
   let guild
   if (!(data instanceof Guild)) {
@@ -87,7 +87,7 @@ export async function fetchChannel<T extends ChannelType>(
   client: Client<true>,
   id: Snowflake,
   type: T | T[],
-  options?: FetchChannelOptions
+  options?: FetchChannelOptions,
 ) {
   const channel = await client.channels.fetch(id, {
     allowUnknownGuild: true,

@@ -4,7 +4,7 @@ import { EmbedBuilder, userMention } from "discord.js"
 
 export function inviteMessage(
   member: GuildMember,
-  invitee: Invitee & { user: User }
+  invitee: Invitee & { user: User },
 ) {
   return {
     embeds: [
@@ -17,7 +17,7 @@ export function inviteMessage(
             value: invitee.user.discordId
               ? userMention(invitee.user.discordId)
               : invitee.user.name,
-          }
+          },
         )
         .setThumbnail(member.displayAvatarURL())
         .setTimestamp(Date.now()),

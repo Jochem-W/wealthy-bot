@@ -4,7 +4,7 @@ import { EmbedBuilder, userMention } from "discord.js"
 
 export function tierChangedMessage(
   oldUser: User,
-  newUser: User & { invitee: Invitee | null }
+  newUser: User & { invitee: Invitee | null },
 ) {
   const embed = new EmbedBuilder()
     .setTitle("Tier changed")
@@ -16,7 +16,7 @@ export function tierChangedMessage(
           : newUser.name,
       },
       { name: "Old tier", value: oldUser.lastPaymentTier },
-      { name: "New tier", value: newUser.lastPaymentTier }
+      { name: "New tier", value: newUser.lastPaymentTier },
     )
     .setTimestamp(newUser.lastPaymentTime)
 
@@ -26,7 +26,7 @@ export function tierChangedMessage(
       value: userMention(newUser.invitee.discordId),
     })
     embed.setDescription(
-      "Make sure to check if the invited member should be removed."
+      "Make sure to check if the invited member should be removed.",
     )
   }
 

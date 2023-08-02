@@ -20,7 +20,7 @@ export const CheckInvite = handler({
     const channel = await fetchChannel(
       member.client,
       Config.channels.logs,
-      ChannelType.GuildText
+      ChannelType.GuildText,
     )
     await channel.send(inviteMessage(member, invitee))
   },

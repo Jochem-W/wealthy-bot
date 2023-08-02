@@ -28,7 +28,7 @@ function badRequest(response: ServerResponse, log?: object | string) {
 async function endHandler(
   client: Client<true>,
   response: ServerResponse,
-  body: string
+  body: string,
 ) {
   try {
     const formData = parse(body)
@@ -55,7 +55,7 @@ async function endHandler(
 async function requestHandler(
   client: Client<true>,
   request: IncomingMessage,
-  response: ServerResponse
+  response: ServerResponse,
 ) {
   try {
     if (!request.url || !request.headers.host) {

@@ -23,11 +23,11 @@ const model = z.object({
       z.object({
         position: z.number(),
         roleId: z.string(),
-      })
+      }),
     )
     .transform((arg) => new Map(Object.entries(arg))),
 })
 
 export const Config = await model.parseAsync(
-  JSON.parse(await readFile("config.json", "utf-8"))
+  JSON.parse(await readFile("config.json", "utf-8")),
 )

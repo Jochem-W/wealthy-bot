@@ -24,7 +24,7 @@ export const ColourCommand = slashCommand({
           true,
           new SlashCommandStringOption()
             .setName("colour")
-            .setDescription("Hex code, with or without the number sign")
+            .setDescription("Hex code, with or without the number sign"),
         ),
       ],
       async handle(interaction, colour) {
@@ -52,8 +52,8 @@ export const ColourCommand = slashCommand({
                 .setTitle("Invalid colour")
                 .setDescription(
                   `The colour ${inlineCode(
-                    originalCode
-                  )} appears to be invalid.`
+                    originalCode,
+                  )} appears to be invalid.`,
                 )
                 .setTimestamp(Date.now()),
             ],
@@ -79,7 +79,7 @@ export const ColourCommand = slashCommand({
         role = await member.guild.roles.create({
           position: Math.min(
             member.roles.highest.position + 1,
-            bot.roles.highest.position
+            bot.roles.highest.position,
           ),
           name,
           reason,

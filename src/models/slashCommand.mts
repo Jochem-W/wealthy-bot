@@ -64,12 +64,12 @@ type OptionValue<T extends Options> = T extends SlashCommandStringOption
 
 type OptionValueWithRequired<
   T extends Options,
-  TT extends boolean
+  TT extends boolean,
 > = TT extends true ? OptionValue<T> : OptionValue<T> | null
 
 type InferOptionValuesWithRequired<
   T extends readonly unknown[],
-  R extends readonly unknown[] = readonly []
+  R extends readonly unknown[] = readonly [],
 > = T extends readonly [infer TH, ...infer TT]
   ? InferOptionValuesWithRequired<
       TT,
@@ -80,7 +80,7 @@ type InferOptionValuesWithRequired<
   : R
 
 type Handler<
-  T extends readonly [...(readonly SlashOption<Options, boolean>[])]
+  T extends readonly [...(readonly SlashOption<Options, boolean>[])],
 > = (
   interaction: ChatInputCommandInteraction,
   ...values: readonly [...InferOptionValuesWithRequired<T>]
@@ -93,7 +93,7 @@ type AutocompleteHandler<T extends Options> = T extends
   | SlashCommandNumberOption
   ? (
       interaction: AutocompleteInteraction,
-      value: AutocompleteFocusedOption & { type: T["type"] }
+      value: AutocompleteFocusedOption & { type: T["type"] },
     ) =>
       | ApplicationCommandOptionChoiceData[]
       | Promise<ApplicationCommandOptionChoiceData[]>
@@ -130,7 +130,7 @@ type SlashCommandInput<T extends readonly SlashOption<Options, boolean>[]> =
 
 function registerOption<T extends Options>(
   builder: SlashCommandBuilder | SlashCommandSubcommandBuilder,
-  option: T
+  option: T,
 ) {
   switch (option.type) {
     case ApplicationCommandOptionType.String:
@@ -166,7 +166,7 @@ function registerOption<T extends Options>(
 function getOptionValue<T extends Options, TT extends boolean>(
   interaction: ChatInputCommandInteraction,
   option: T,
-  required: TT
+  required: TT,
 ) {
   let value
   switch (option.type) {
@@ -203,7 +203,7 @@ function getOptionValue<T extends Options, TT extends boolean>(
 }
 
 export function slashCommand<
-  T extends readonly SlashOption<Options, boolean>[]
+  T extends readonly SlashOption<Options, boolean>[],
 >(input: SlashCommandInput<T>) {
   const {
     name,
@@ -228,13 +228,13 @@ export function slashCommand<
     autocomplete = async (interaction: AutocompleteInteraction) => {
       const autocompleteOption = interaction.options.getFocused(true)
       const option = options?.find(
-        ({ option }) => option.name === autocompleteOption.name
+        ({ option }) => option.name === autocompleteOption.name,
       )
 
       if (!option) {
         throw new AutocompleteOptionNotFoundError(
           interaction,
-          autocompleteOption
+          autocompleteOption,
         )
       }
 
@@ -243,13 +243,13 @@ export function slashCommand<
       }
 
       await interaction.respond(
-        await option.autocomplete(interaction, autocompleteOption as never)
+        await option.autocomplete(interaction, autocompleteOption as never),
       )
     }
 
     getOptionsAndHandle = async (interaction: ChatInputCommandInteraction) => {
       const values = (options?.map(({ option, required }) =>
-        getOptionValue(interaction, option, required)
+        getOptionValue(interaction, option, required),
       ) ?? []) as [...InferOptionValuesWithRequired<T>]
       await handle(interaction, ...values)
     }
@@ -275,17 +275,17 @@ export function slashCommand<
       let subcommand
       if (subcommandGroupName) {
         const subcommandGroup = subcommandGroups?.find(
-          (g) => g.builder.name === subcommandGroupName
+          (g) => g.builder.name === subcommandGroupName,
         )
         if (!subcommandGroup) {
           throw new SubcommandGroupNotFoundError(
             interaction,
-            subcommandGroupName
+            subcommandGroupName,
           )
         }
 
         subcommand = subcommandGroup.subcommands.find(
-          (s) => s.builder.name === subcommandName
+          (s) => s.builder.name === subcommandName,
         )
       } else {
         subcommand = subcommands?.find((s) => s.builder.name === subcommandName)
@@ -305,17 +305,17 @@ export function slashCommand<
       let subcommand
       if (subcommandGroupName) {
         const subcommandGroup = subcommandGroups?.find(
-          (g) => g.builder.name === subcommandGroupName
+          (g) => g.builder.name === subcommandGroupName,
         )
         if (!subcommandGroup) {
           throw new SubcommandGroupNotFoundError(
             interaction,
-            subcommandGroupName
+            subcommandGroupName,
           )
         }
 
         subcommand = subcommandGroup.subcommands.find(
-          (s) => s.builder.name === subcommandName
+          (s) => s.builder.name === subcommandName,
         )
       } else {
         subcommand = subcommands?.find((s) => s.builder.name === subcommandName)
@@ -354,7 +354,7 @@ export function slashOption<T extends Options, TT extends boolean>(
         option: T
         autocomplete?: AutocompleteHandler<T>
       }
-    | T
+    | T,
 ) {
   let option
   let autocomplete
@@ -392,7 +392,7 @@ export function slashOption<T extends Options, TT extends boolean>(
 }
 
 export function groupedSubcommand<
-  T extends readonly SlashOption<Options, boolean>[]
+  T extends readonly SlashOption<Options, boolean>[],
 >({
   name,
   description,
@@ -419,7 +419,7 @@ export function groupedSubcommand<
   const autocomplete = (interaction: AutocompleteInteraction) => {
     const autocompleteOption = interaction.options.getFocused(true)
     const option = options?.find(
-      ({ option }) => option.name === autocompleteOption.name
+      ({ option }) => option.name === autocompleteOption.name,
     )
 
     if (!option) {
@@ -434,10 +434,10 @@ export function groupedSubcommand<
   }
 
   const getOptionsAndHandle = async (
-    interaction: ChatInputCommandInteraction
+    interaction: ChatInputCommandInteraction,
   ) => {
     const values = (options?.map(({ option, required }) =>
-      getOptionValue(interaction, option, required)
+      getOptionValue(interaction, option, required),
     ) ?? []) as [...InferOptionValuesWithRequired<T>]
 
     await handle(interaction, ...values)
@@ -472,7 +472,7 @@ export function subcommand<T extends readonly SlashOption<Options, boolean>[]>({
   const autocomplete = (interaction: AutocompleteInteraction) => {
     const autocompleteOption = interaction.options.getFocused(true)
     const option = options?.find(
-      ({ option }) => option.name === autocompleteOption.name
+      ({ option }) => option.name === autocompleteOption.name,
     )
 
     if (!option) {
@@ -487,10 +487,10 @@ export function subcommand<T extends readonly SlashOption<Options, boolean>[]>({
   }
 
   const getOptionsAndHandle = async (
-    interaction: ChatInputCommandInteraction
+    interaction: ChatInputCommandInteraction,
   ) => {
     const values = (options?.map(({ option, required }) =>
-      getOptionValue(interaction, option, required)
+      getOptionValue(interaction, option, required),
     ) ?? []) as [...InferOptionValuesWithRequired<T>]
 
     await handle(interaction, ...values)

@@ -10,7 +10,7 @@ export function renewedLateMessage(user: User & { invitee: Invitee | null }) {
         name: "Member",
         value: user.discordId ? userMention(user.discordId) : user.name,
       },
-      { name: "Tier", value: user.lastPaymentTier }
+      { name: "Tier", value: user.lastPaymentTier },
     )
     .setTimestamp(user.lastPaymentTime)
 
