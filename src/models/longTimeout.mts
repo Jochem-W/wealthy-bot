@@ -3,7 +3,7 @@ const maximumTimeout = 2 ** 31 - 1
 export class LongTimeout {
   private callback: () => void
   private ms: number
-  private timer?: NodeJS.Timer
+  private timeout?: NodeJS.Timeout
 
   public constructor(callback: () => void, ms: number) {
     this.callback = callback
@@ -14,25 +14,23 @@ export class LongTimeout {
       return
     }
 
-    this.setTimer()
+    this.setTimeout()
   }
 
-  private setTimer() {
+  private setTimeout() {
     if (this.ms > maximumTimeout) {
-      this.timer = setTimeout(() => {
+      this.timeout = setTimeout(() => {
         this.ms -= maximumTimeout
-        this.setTimer()
+        this.setTimeout()
       }, maximumTimeout)
       return
     }
 
-    this.timer = setTimeout(this.callback, this.ms)
+    this.timeout = setTimeout(this.callback, this.ms)
   }
 
   public clear() {
-    if (!this.timer) {
-      clearTimeout(this.timer)
-    }
+    clearTimeout(this.timeout)
 
     this.callback = () => undefined
   }
