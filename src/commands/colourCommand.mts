@@ -18,6 +18,8 @@ export const ColourCommand = slashCommand({
   subcommands: [
     subcommand({
       name: "set",
+      transform: (builder) =>
+        builder.setNameLocalizations({ "en-US": "color" }),
       description: "Set your role colour",
       options: [
         slashOption(
