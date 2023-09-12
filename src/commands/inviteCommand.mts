@@ -12,7 +12,7 @@ export const InviteCommand = slashCommand({
     const token = await new SignJWT({ sub: interaction.user.id })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
-      .setExpirationTime("12h")
+      .setExpirationTime("24h")
       .sign(SecretKey)
 
     const url = new URL(Variables.inviteUrl)
@@ -27,7 +27,7 @@ export const InviteCommand = slashCommand({
           )
           .setFields({ name: "Invite link", value: url.toString() })
           .setFooter({
-            text: "This link will be valid for 12 hours. Every time the link is used, the previous invitee will be kicked.",
+            text: "This link will be valid for 24 hours. Every time the link is used, the previous invitee will be kicked.",
           }),
       ],
       ephemeral: true,
