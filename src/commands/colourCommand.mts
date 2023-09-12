@@ -12,14 +12,13 @@ function colorToHex(color: number) {
 
 export const ColourCommand = slashCommand({
   name: "colour",
+  transform: (builder) => builder.setNameLocalization("en-US", "color"),
   description: "Change your role colour",
   defaultMemberPermissions: null,
   dmPermission: false,
   subcommands: [
     subcommand({
       name: "set",
-      transform: (builder) =>
-        builder.setNameLocalizations({ "en-US": "color" }),
       description: "Set your role colour",
       options: [
         slashOption(
