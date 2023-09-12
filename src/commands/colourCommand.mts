@@ -57,7 +57,9 @@ export const ColourCommand = slashCommand({
                 )
                 .setTimestamp(Date.now()),
             ],
+            ephemeral: true,
           })
+          return
         }
         formattedColour = colorToHex(color)
 
