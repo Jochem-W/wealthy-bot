@@ -1,3 +1,4 @@
+import { Prisma } from "../clients.mjs"
 import { slashCommand } from "../models/slashCommand.mjs"
 import { SecretKey, Variables } from "../variables.mjs"
 import { EmbedBuilder } from "discord.js"
@@ -9,6 +10,41 @@ export const InviteCommand = slashCommand({
   defaultMemberPermissions: null,
   dmPermission: false,
   async handle(interaction) {
+    const user = await Prisma.user.findFirst({
+      where: { discordId: interaction.user.id },
+      include: { invitee: true },
+    })
+
+    if (!user) {
+      await interaction.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("You're not allowed to create an invite")
+            .setDescription(
+              "Currently, you're not allowed to create an invite link, since we haven't linked your Ko-fi account to your Discord account in our database. Please DM a staff member for assistance.",
+            )
+            .setColor(0xff0000),
+        ],
+        ephemeral: true,
+      })
+      return
+    }
+
+    if (user.invitee) {
+      await interaction.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("You're not allowed to create an invite")
+            .setDescription(
+              "Currently, you're not allowed to create an invite link, because you've previously invited someone.",
+            )
+            .setColor(0xff0000),
+        ],
+        ephemeral: true,
+      })
+      return
+    }
+
     const token = await new SignJWT({ sub: interaction.user.id })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()
@@ -27,7 +63,7 @@ export const InviteCommand = slashCommand({
           )
           .setFields({ name: "Invite link", value: url.toString() })
           .setFooter({
-            text: "This link will be valid for 24 hours. Every time the link is used, the previous invitee will be kicked.",
+            text: "This link will be valid for 24 hours. You'll be able to create a new link if the link doesn't get used.",
           }),
       ],
       ephemeral: true,
