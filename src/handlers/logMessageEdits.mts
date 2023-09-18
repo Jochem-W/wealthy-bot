@@ -19,7 +19,12 @@ export const LogMessageEdits = handler({
   event: "messageUpdate",
   once: false,
   async handle(oldMessage, newMessage) {
-    if (newMessage.author?.bot) {
+    if (newMessage.partial) {
+      // eslint-disable-next-line require-atomic-updates, no-param-reassign
+      newMessage = await newMessage.fetch()
+    }
+
+    if (newMessage.author.bot) {
       return
     }
 
@@ -56,6 +61,10 @@ export const LogMessageEdits = handler({
     }
 
     firstEmbed
+      .setAuthor({
+        name: newMessage.author.displayName,
+        iconURL: newMessage.author.displayAvatarURL({ size: 4096 }),
+      })
       .setTitle("✏️ Message edited")
       .setFooter({ text: newMessage.id })
       .setTimestamp(Date.now())
@@ -69,35 +78,23 @@ export const LogMessageEdits = handler({
         },
         {
           name: "After",
-          value: newMessage.partial
-            ? italic("Not cached")
-            : newMessage.content.substring(0, 1024) || "\u200b",
+          value: newMessage.content.substring(0, 1024) || "\u200b",
         },
       )
 
-    if (newMessage.author) {
-      firstEmbed
-        .setAuthor({
-          name: newMessage.author.displayName,
-          iconURL: newMessage.author.displayAvatarURL({ size: 4096 }),
-        })
-        .addFields(
-          {
-            name: "User",
-            value: userMention(newMessage.author.id),
-            inline: true,
-          },
-          { name: "User ID", value: newMessage.author.id, inline: true },
-        )
-    }
-
-    if (newMessage.channelId) {
-      firstEmbed.addFields({
+    firstEmbed.addFields(
+      {
+        name: "User",
+        value: userMention(newMessage.author.id),
+        inline: true,
+      },
+      { name: "User ID", value: newMessage.author.id, inline: true },
+      {
         name: "Channel",
         value: channelMention(newMessage.channelId),
         inline: true,
-      })
-    }
+      },
+    )
 
     if (newMessage.attachments.size > 0) {
       firstEmbed.addFields({
