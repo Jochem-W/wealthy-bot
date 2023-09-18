@@ -61,17 +61,6 @@ export const LogMessageDelete = handler({
       .setTimestamp(Date.now())
       .setColor(0xef4444)
 
-    if (message.attachments.size > 0) {
-      firstEmbed.setFields({
-        name: "Attachments",
-        value: message.attachments
-          .map(
-            (attachment) => `- ${hyperlink(attachment.name, attachment.url)}`,
-          )
-          .join("\n"),
-      })
-    }
-
     if (message.author) {
       firstEmbed
         .setAuthor({
@@ -79,8 +68,8 @@ export const LogMessageDelete = handler({
           iconURL: message.author.displayAvatarURL({ size: 4096 }),
         })
         .addFields(
-          { name: "User", value: userMention(message.author.id) },
-          { name: "User ID", value: message.author.id },
+          { name: "User", value: userMention(message.author.id), inline: true },
+          { name: "User ID", value: message.author.id, inline: true },
         )
     }
 
@@ -88,6 +77,18 @@ export const LogMessageDelete = handler({
       firstEmbed.addFields({
         name: "Channel",
         value: channelMention(message.channelId),
+        inline: true,
+      })
+    }
+
+    if (message.attachments.size > 0) {
+      firstEmbed.addFields({
+        name: "Attachments",
+        value: message.attachments
+          .map(
+            (attachment) => `- ${hyperlink(attachment.name, attachment.url)}`,
+          )
+          .join("\n"),
       })
     }
 

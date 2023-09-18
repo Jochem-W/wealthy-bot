@@ -75,6 +75,30 @@ export const LogMessageEdits = handler({
         },
       )
 
+    if (newMessage.author) {
+      firstEmbed
+        .setAuthor({
+          name: newMessage.author.displayName,
+          iconURL: newMessage.author.displayAvatarURL({ size: 4096 }),
+        })
+        .addFields(
+          {
+            name: "User",
+            value: userMention(newMessage.author.id),
+            inline: true,
+          },
+          { name: "User ID", value: newMessage.author.id, inline: true },
+        )
+    }
+
+    if (newMessage.channelId) {
+      firstEmbed.addFields({
+        name: "Channel",
+        value: channelMention(newMessage.channelId),
+        inline: true,
+      })
+    }
+
     if (newMessage.attachments.size > 0) {
       firstEmbed.addFields({
         name: "Attachments",
@@ -83,25 +107,6 @@ export const LogMessageEdits = handler({
             (attachment) => `- ${hyperlink(attachment.name, attachment.url)}`,
           )
           .join("\n"),
-      })
-    }
-
-    if (newMessage.author) {
-      firstEmbed
-        .setAuthor({
-          name: newMessage.author.displayName,
-          iconURL: newMessage.author.displayAvatarURL({ size: 4096 }),
-        })
-        .addFields(
-          { name: "User", value: userMention(newMessage.author.id) },
-          { name: "User ID", value: newMessage.author.id },
-        )
-    }
-
-    if (newMessage.channelId) {
-      firstEmbed.addFields({
-        name: "Channel",
-        value: channelMention(newMessage.channelId),
       })
     }
 
