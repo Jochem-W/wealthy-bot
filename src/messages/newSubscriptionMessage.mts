@@ -1,6 +1,6 @@
 import { component } from "../models/component.mjs"
+import { usersTable } from "../schema.mjs"
 import { linkDiscord } from "../utilities/subscriptionUtilities.mjs"
-import type { User } from "@prisma/client"
 import {
   ActionRowBuilder,
   ComponentType,
@@ -39,7 +39,7 @@ const newSubscriberSelect = component({
   },
 })
 
-export function newSubscriptionMessage(user: User) {
+export function newSubscriptionMessage(user: typeof usersTable.$inferSelect) {
   const embed = new EmbedBuilder()
     .setTitle("New subscription")
     .setDescription(
@@ -50,7 +50,7 @@ export function newSubscriptionMessage(user: User) {
       { name: "Email", value: user.email },
       { name: "Tier", value: user.lastPaymentTier },
     )
-    .setTimestamp(user.lastPaymentTime)
+    .setTimestamp(user.lastPaymentTimestamp)
 
   if (user.discordId) {
     embed.addFields({ name: "Member", value: userMention(user.discordId) })

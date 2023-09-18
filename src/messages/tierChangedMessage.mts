@@ -1,24 +1,26 @@
-import type { User } from "@prisma/client"
-import type { Invitee } from "@prisma/client"
+import { inviteesTable, usersTable } from "../schema.mjs"
 import { EmbedBuilder, userMention } from "discord.js"
 
 export function tierChangedMessage(
-  oldUser: User,
-  newUser: User & { invitee: Invitee | null },
+  oldUser: typeof usersTable.$inferSelect,
+  newUser: {
+    user: typeof usersTable.$inferSelect
+    invitee?: typeof inviteesTable.$inferSelect
+  },
 ) {
   const embed = new EmbedBuilder()
     .setTitle("Tier changed")
     .setFields(
       {
         name: "Member",
-        value: newUser.discordId
-          ? userMention(newUser.discordId)
-          : newUser.name,
+        value: newUser.user.discordId
+          ? userMention(newUser.user.discordId)
+          : newUser.user.name,
       },
       { name: "Old tier", value: oldUser.lastPaymentTier },
-      { name: "New tier", value: newUser.lastPaymentTier },
+      { name: "New tier", value: newUser.user.lastPaymentTier },
     )
-    .setTimestamp(newUser.lastPaymentTime)
+    .setTimestamp(newUser.user.lastPaymentTimestamp)
 
   if (newUser.invitee) {
     embed.addFields({

@@ -6,12 +6,13 @@
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@octokit/rest": "^20.0.1",
-    "@prisma/client": "^5.2.0",
     "camelcase-keys": "^9.0.0",
     "csv-parse": "^5.5.0",
     "discord.js": "^14.13.0",
+    "drizzle-orm": "^0.28.6",
     "jose": "^4.14.6",
     "luxon": "^3.4.3",
+    "postgres": "^3.3.5",
     "whatwg-mimetype": "^3.0.0",
     "zod": "^3.22.2"
   },
@@ -24,10 +25,10 @@
     "@types/whatwg-mimetype": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
+    "drizzle-kit": "^0.19.13",
     "eslint": "^8.49.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
-    "prisma": "^5.2.0",
     "typescript": "^5.2.2"
   },
   "optionalDependencies": {

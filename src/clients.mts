@@ -1,6 +1,8 @@
 import { Variables } from "./variables.mjs"
 import { Octokit } from "@octokit/rest"
-import { PrismaClient } from "@prisma/client"
+import { drizzle } from "drizzle-orm/postgres-js"
+import postgres from "postgres"
 
 export const GitHubClient = new Octokit({ auth: Variables.githubToken })
-export const Prisma = new PrismaClient()
+export const Db = postgres(Variables.databaseUrl)
+export const Drizzle = drizzle(Db)

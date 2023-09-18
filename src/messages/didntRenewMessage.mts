@@ -1,8 +1,13 @@
-import type { User } from "@prisma/client"
-import type { Invitee } from "@prisma/client"
+import { inviteesTable, usersTable } from "../schema.mjs"
 import { EmbedBuilder, time, TimestampStyles, userMention } from "discord.js"
 
-export function didntRenewMessage(user: User & { invitee: Invitee | null }) {
+export function didntRenewMessage({
+  user,
+  invitee,
+}: {
+  user: typeof usersTable.$inferSelect
+  invitee?: typeof inviteesTable.$inferSelect | null
+}) {
   let description =
     "This could mean that the subscription was cancelled, or that the payment is still pending."
 
@@ -17,17 +22,17 @@ export function didntRenewMessage(user: User & { invitee: Invitee | null }) {
       {
         name: "Last paid",
         value: `${time(
-          user.lastPaymentTime,
+          user.lastPaymentTimestamp,
           TimestampStyles.ShortDate,
-        )} (${time(user.lastPaymentTime, TimestampStyles.RelativeTime)})`,
+        )} (${time(user.lastPaymentTimestamp, TimestampStyles.RelativeTime)})`,
       },
     )
     .setColor(0xff0000)
 
-  if (user.invitee) {
+  if (invitee) {
     embed.addFields({
       name: "Invited",
-      value: userMention(user.invitee.discordId),
+      value: userMention(invitee.discordId),
     })
     description +=
       " Make sure to check if the invited member should be removed."

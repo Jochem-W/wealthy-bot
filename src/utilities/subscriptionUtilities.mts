@@ -1,4 +1,4 @@
-import { Prisma } from "../clients.mjs"
+import { Drizzle } from "../clients.mjs"
 import {
   replaceTimeout,
   removeTimeout,
@@ -7,10 +7,11 @@ import { newSubscriptionMessage } from "../messages/newSubscriptionMessage.mjs"
 import { renewedLateMessage } from "../messages/renewedLateMessage.mjs"
 import { tierChangedMessage } from "../messages/tierChangedMessage.mjs"
 import { Config } from "../models/config.mjs"
+import { inviteesTable, usersTable } from "../schema.mjs"
 import { fetchChannel, tryFetchMember } from "./discordUtilities.mjs"
-import type { User } from "@prisma/client"
 import camelcaseKeys from "camelcase-keys"
 import { ChannelType, Client, TextChannel } from "discord.js"
+import { and, eq, not } from "drizzle-orm"
 import { DateTime } from "luxon"
 import { z } from "zod"
 
@@ -42,26 +43,43 @@ export async function processDonation(
     return
   }
 
-  const user = await Prisma.user.findFirst({ where: { email: data.email } })
+  // FIXME: race condition
+  const [user] = await Drizzle.select()
+    .from(usersTable)
+    .where(eq(usersTable.email, data.email))
   if (!user) {
     await newSubscription(client, { ...data, tierName: data.tierName })
     return
   }
 
-  const updatedUser = await Prisma.user.update({
-    where: { email: data.email },
-    data: {
+  const [updatedUser] = await Drizzle.update(usersTable)
+    .set({
       name: data.fromName,
       lastPaymentTier: data.tierName,
-      lastPaymentTime: data.timestamp,
-    },
-    include: { invitee: true },
-  })
+      lastPaymentTimestamp: data.timestamp,
+    })
+    .where(eq(usersTable.email, data.email))
+    .returning()
+  if (!updatedUser) {
+    throw new Error("User not found")
+  }
+
+  const updatedUserData: {
+    user: typeof usersTable.$inferSelect
+    invitee?: typeof inviteesTable.$inferSelect
+  } = { user: updatedUser }
+
+  const [invitee] = await Drizzle.select()
+    .from(inviteesTable)
+    .where(eq(inviteesTable.userId, updatedUser.id))
+  if (invitee) {
+    updatedUserData.invitee = invitee
+  }
 
   replaceTimeout(client, updatedUser)
 
-  const oldDate = DateTime.fromJSDate(user.lastPaymentTime)
-  const newDate = DateTime.fromJSDate(updatedUser.lastPaymentTime)
+  const oldDate = DateTime.fromJSDate(user.lastPaymentTimestamp)
+  const newDate = DateTime.fromJSDate(updatedUser.lastPaymentTimestamp)
   const diff = newDate.diff(oldDate)
 
   console.log(
@@ -79,11 +97,11 @@ export async function processDonation(
   channel ??= fetched
 
   if (expiredMillis(user) < 0) {
-    await channel.send(renewedLateMessage(updatedUser))
+    await channel.send(renewedLateMessage(updatedUserData))
   }
 
   if (user.lastPaymentTier !== updatedUser.lastPaymentTier) {
-    await channel.send(tierChangedMessage(user, updatedUser))
+    await channel.send(tierChangedMessage(user, updatedUserData))
   }
 
   await updateRoles(client, updatedUser)
@@ -93,14 +111,18 @@ async function newSubscription(
   client: Client<true>,
   data: z.infer<typeof DonationModel> & { tierName: string },
 ) {
-  const user = await Prisma.user.create({
-    data: {
+  const [user] = await Drizzle.insert(usersTable)
+    .values({
       email: data.email,
       name: data.fromName,
       lastPaymentTier: data.tierName,
-      lastPaymentTime: data.timestamp,
-    },
-  })
+      lastPaymentTimestamp: data.timestamp,
+    })
+    .returning()
+  if (!user) {
+    throw new Error("User not found")
+  }
+
   replaceTimeout(client, user)
 
   const fetched = await fetchChannel(
@@ -113,7 +135,10 @@ async function newSubscription(
   await channel.send(newSubscriptionMessage(user))
 }
 
-async function updateRoles(client: Client<true>, user: User) {
+async function updateRoles(
+  client: Client<true>,
+  user: typeof usersTable.$inferSelect,
+) {
   if (!Config.assignRoles || !user.discordId) {
     return
   }
@@ -149,28 +174,29 @@ export async function linkDiscord(
   id: number,
   discordId: string,
 ) {
-  const users = await Prisma.user.findMany({
-    where: { id: { not: id }, discordId },
-    select: { id: true },
-  })
-  const userIds = users.map((u) => u.id)
-  await Prisma.user.deleteMany({
-    where: { id: { in: userIds } },
-  })
-
-  for (const deletedId of userIds) {
-    removeTimeout(deletedId)
+  const deletedUsers = await Drizzle.delete(usersTable)
+    .where(and(not(eq(usersTable.id, id)), eq(usersTable.discordId, discordId)))
+    .returning()
+  for (const deletedUser of deletedUsers) {
+    removeTimeout(deletedUser.id)
   }
 
-  const user = await Prisma.user.update({ where: { id }, data: { discordId } })
+  const [user] = await Drizzle.update(usersTable)
+    .set({ discordId })
+    .where(eq(usersTable.id, id))
+    .returning()
+  if (!user) {
+    throw new Error("User not found")
+  }
+
   replaceTimeout(client, user)
   await updateRoles(client, user)
 
   return user
 }
 
-export function expiredMillis(user: User) {
-  return DateTime.fromJSDate(user.lastPaymentTime)
+export function expiredMillis(user: typeof usersTable.$inferSelect) {
+  return DateTime.fromJSDate(user.lastPaymentTimestamp)
     .plus({ days: 30 + Config.gracePeriod })
     .diffNow()
     .toMillis()

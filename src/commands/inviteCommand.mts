@@ -1,7 +1,9 @@
-import { Prisma } from "../clients.mjs"
+import { Drizzle } from "../clients.mjs"
 import { slashCommand } from "../models/slashCommand.mjs"
+import { inviteesTable, usersTable } from "../schema.mjs"
 import { SecretKey, Variables } from "../variables.mjs"
 import { EmbedBuilder } from "discord.js"
+import { eq } from "drizzle-orm"
 import { SignJWT } from "jose"
 
 export const InviteCommand = slashCommand({
@@ -10,12 +12,12 @@ export const InviteCommand = slashCommand({
   defaultMemberPermissions: null,
   dmPermission: false,
   async handle(interaction) {
-    const user = await Prisma.user.findFirst({
-      where: { discordId: interaction.user.id },
-      include: { invitee: true },
-    })
+    const [userData] = await Drizzle.select()
+      .from(usersTable)
+      .where(eq(usersTable.discordId, interaction.user.id))
+      .leftJoin(inviteesTable, eq(inviteesTable.userId, usersTable.id))
 
-    if (!user) {
+    if (!userData) {
       await interaction.reply({
         embeds: [
           new EmbedBuilder()
@@ -30,7 +32,7 @@ export const InviteCommand = slashCommand({
       return
     }
 
-    if (user.invitee) {
+    if (userData.invitee) {
       await interaction.reply({
         embeds: [
           new EmbedBuilder()

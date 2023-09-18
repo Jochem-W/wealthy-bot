@@ -12,6 +12,7 @@ const model = z
     VERIFICATION_TOKEN: z.string().uuid(),
     SECRET_KEY: z.string(),
     INVITE_URL: z.string().url(),
+    DATABASE_URL: z.string(),
   })
   .transform((arg) => camelcaseKeys(arg))
 

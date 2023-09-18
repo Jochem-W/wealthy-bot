@@ -1,19 +1,21 @@
-import { Prisma } from "../clients.mjs"
+import { Drizzle } from "../clients.mjs"
 import { inviteMessage } from "../messages/inviteMessage.mjs"
 import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
+import { inviteesTable, usersTable } from "../schema.mjs"
 import { fetchChannel } from "../utilities/discordUtilities.mjs"
 import { ChannelType } from "discord.js"
+import { eq } from "drizzle-orm"
 
 export const CheckInvite = handler({
   event: "guildMemberAdd",
   once: false,
   async handle(member) {
-    const invitee = await Prisma.invitee.findFirst({
-      where: { discordId: member.id },
-      include: { user: true },
-    })
-    if (!invitee) {
+    const [inviteeData] = await Drizzle.select()
+      .from(inviteesTable)
+      .where(eq(inviteesTable.discordId, member.id))
+      .innerJoin(usersTable, eq(usersTable.id, inviteesTable.userId))
+    if (!inviteeData) {
       return
     }
 
@@ -22,6 +24,6 @@ export const CheckInvite = handler({
       Config.channels.logs,
       ChannelType.GuildText,
     )
-    await channel.send(inviteMessage(member, invitee))
+    await channel.send(inviteMessage(member, inviteeData))
   },
 })
