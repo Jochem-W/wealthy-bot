@@ -41,7 +41,7 @@ export function removeTimeout(id: number) {
 async function callback(client: Client<true>, id: number) {
   const channel = await fetchChannel(
     client,
-    Config.channels.logs,
+    Config.logs.koFi,
     ChannelType.GuildText,
   )
 

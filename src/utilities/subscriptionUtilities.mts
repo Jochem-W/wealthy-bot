@@ -91,7 +91,7 @@ export async function processDonation(
 
   const fetched = await fetchChannel(
     client,
-    Config.channels.logs,
+    Config.logs.koFi,
     ChannelType.GuildText,
   )
   channel ??= fetched
@@ -127,7 +127,7 @@ async function newSubscription(
 
   const fetched = await fetchChannel(
     client,
-    Config.channels.logs,
+    Config.logs.koFi,
     ChannelType.GuildText,
   )
   channel ??= fetched

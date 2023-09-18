@@ -21,7 +21,7 @@ export const CheckInvite = handler({
 
     const channel = await fetchChannel(
       member.client,
-      Config.channels.logs,
+      Config.logs.koFi,
       ChannelType.GuildText,
     )
     await channel.send(inviteMessage(member, inviteeData))

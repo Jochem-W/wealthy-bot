@@ -6,8 +6,12 @@ const model = z.object({
   assignRoles: z.boolean(),
   channels: z.object({
     error: z.string(),
-    logs: z.string(),
     restart: z.string(),
+  }),
+  logs: z.object({
+    koFi: z.string(),
+    members: z.string(),
+    messages: z.string(),
   }),
   gracePeriod: z.number(),
   guild: z.string(),
