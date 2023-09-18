@@ -1,4 +1,4 @@
-import { GitHubClient } from "../clients.mjs"
+import { Db, GitHubClient } from "../clients.mjs"
 import { logError } from "../errors.mjs"
 import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
@@ -135,6 +135,7 @@ function exitListener(client: Client<true>) {
 
   client
     .destroy()
+    .then(() => Db.end())
     .then(() => setState("DOWN"))
     .then(() => process.exit())
     .catch((e) => {
