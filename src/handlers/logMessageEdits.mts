@@ -28,6 +28,13 @@ export const LogMessageEdits = handler({
       return
     }
 
+    if (
+      oldMessage.content === newMessage.content &&
+      oldMessage.attachments.size === newMessage.attachments.size
+    ) {
+      return
+    }
+
     const channel = await fetchChannel(
       newMessage.client,
       Config.logs.messages,
