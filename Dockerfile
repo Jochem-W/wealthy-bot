@@ -4,11 +4,11 @@ ENV NODE_ENV=development
 
 WORKDIR /app
 
-# Copy package.json, lockfile, .npmrc and prisma
-COPY ["pnpm-lock.yaml", "package.json", ".npmrc", "prisma", "./"]
+# Copy package.json, lockfile, .npmrc
+COPY ["pnpm-lock.yaml", "package.json", ".npmrc", "./"]
 
 # Install build tools
-RUN apk add --no-cache alpine-sdk python3 openssl && \
+RUN apk add --no-cache alpine-sdk python3 && \
     npm install -g pnpm && \
     pnpm install
 
@@ -16,8 +16,7 @@ RUN apk add --no-cache alpine-sdk python3 openssl && \
 COPY . .
 
 # Compile Typescript and remove dev packages
-RUN pnpm prisma generate && \
-    pnpm tsc && \
+RUN pnpm tsc && \
     pnpm prune --prod
 
 # Set-up running image
@@ -26,9 +25,6 @@ ARG commit_hash
 ENV NODE_ENV=production \
     COMMIT_HASH=$commit_hash
 WORKDIR /app
-
-# Install openssl
-RUN apk add --no-cache openssl
 
 # Copy all files (including source :/)
 COPY --from=builder /app .
