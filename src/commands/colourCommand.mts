@@ -31,7 +31,7 @@ export const ColourCommand = slashCommand({
       async handle(interaction, colour) {
         const member = await interactionMember(interaction, { force: true })
         const name = `c${interaction.user.id}`
-        let role = member.roles.cache.find((r) => r.name === name)
+        let role = member.guild.roles.cache.find((r) => r.name === name)
 
         const bot = await member.guild.members.fetchMe()
 
@@ -74,7 +74,11 @@ export const ColourCommand = slashCommand({
         ]
 
         if (role) {
-          await role.edit({ reason, color })
+          await role.edit({ reason, color, permissions: [] })
+          if (!member.roles.cache.has(role.id)) {
+            await member.roles.add(role)
+          }
+
           await interaction.reply({ ephemeral: true, embeds })
           return
         }
@@ -87,6 +91,7 @@ export const ColourCommand = slashCommand({
           name,
           reason,
           color,
+          permissions: [],
         })
 
         await member.roles.add(role)
