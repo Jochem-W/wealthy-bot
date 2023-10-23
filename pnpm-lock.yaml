@@ -8,9 +8,6 @@ dependencies:
   '@octokit/rest':
     specifier: ^20.0.2
     version: 20.0.2
-  '@types/whatwg-mimetype':
-    specifier: ^3.0.1
-    version: 3.0.1
   camelcase-keys:
     specifier: ^9.1.2
     version: 9.1.2
@@ -32,9 +29,6 @@ dependencies:
   postgres:
     specifier: ^3.4.0
     version: 3.4.0
-  whatwg-mimetype:
-    specifier: ^3.0.0
-    version: 3.0.0
   zod:
     specifier: ^3.22.4
     version: 3.22.4
@@ -777,10 +771,6 @@ packages:
   /@types/semver@7.5.4:
     resolution: {integrity: sha512-MMzuxN3GdFwskAnb6fz0orFvhfqi752yjaXylr0Rp4oDg5H0Zn1IuyRhDVvYOwAXoJirx2xuS16I3WjxnAIHiQ==}
     dev: true
-
-  /@types/whatwg-mimetype@3.0.1:
-    resolution: {integrity: sha512-dy1Os16KVaOyiwS237oURk7v0IGezg06FUlW//WcoAJMqrMSQlHNiYmZz06MgXdqE/uARd9h+sOm4AWRsJvUnQ==}
-    dev: false
 
   /@types/ws@8.5.8:
     resolution: {integrity: sha512-flUksGIQCnJd6sZ1l5dqCEG/ksaoAg/eUwiLAGTJQcfgvZJKF++Ta4bJA6A5aPSJmsr+xlseHn4KLgVlNnvPTg==}
@@ -2210,11 +2200,6 @@ packages:
     requiresBuild: true
     dependencies:
       node-gyp-build: 4.6.1
-    dev: false
-
-  /whatwg-mimetype@3.0.0:
-    resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
-    engines: {node: '>=12'}
     dev: false
 
   /which@2.0.2:
