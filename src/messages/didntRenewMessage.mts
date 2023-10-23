@@ -1,7 +1,8 @@
 import { inviteesTable, usersTable } from "../schema.mjs"
-import { EmbedBuilder, time, TimestampStyles, userMention } from "discord.js"
+import { EmbedBuilder, Guild, time, TimestampStyles, userMention } from "discord.js"
+import { tryFetchMember } from "../utilities/discordUtilities.mjs"
 
-export function didntRenewMessage({
+export async function didntRenewMessage(guild: Guild, {
   user,
   invitee,
 }: {
@@ -11,12 +12,17 @@ export function didntRenewMessage({
   let description =
     "This could mean that the subscription was cancelled, or that the payment is still pending."
 
+  let member
+  if (user.discordId) {
+    member = await tryFetchMember(guild, user.discordId)
+  }
+
   const embed = new EmbedBuilder()
     .setTitle("Overdue payment")
     .setFields(
       {
         name: "Member",
-        value: user.discordId ? userMention(user.discordId) : user.name,
+        value: member ? userMention(member.id) : user.name
       },
       { name: "Tier", value: user.lastPaymentTier },
       {

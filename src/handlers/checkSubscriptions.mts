@@ -54,7 +54,7 @@ async function callback(client: Client<true>, id: number) {
     throw new Error("User not found")
   }
 
-  await channel.send(didntRenewMessage(userData))
+  await channel.send(await didntRenewMessage(channel.guild, userData))
 }
 
 export const CheckSubscriptions = handler({
