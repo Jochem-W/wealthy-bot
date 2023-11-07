@@ -1,10 +1,6 @@
-import {
-  slashCommand,
-  slashOption,
-  subcommand,
-} from "../models/slashCommand.mjs"
+import { slashCommand, slashSubcommand } from "../models/slashCommand.mjs"
 import { interactionMember } from "../utilities/interactionUtilities.mjs"
-import { EmbedBuilder, SlashCommandStringOption, inlineCode } from "discord.js"
+import { EmbedBuilder, inlineCode } from "discord.js"
 
 function colorToHex(color: number) {
   return `#${color.toString(16).padStart(6, "0")}`
@@ -12,21 +8,21 @@ function colorToHex(color: number) {
 
 export const ColourCommand = slashCommand({
   name: "colour",
-  transform: (builder) => builder.setNameLocalization("en-US", "color"),
   description: "Change your role colour",
   defaultMemberPermissions: null,
   dmPermission: false,
+  nsfw: false,
   subcommands: [
-    subcommand({
+    slashSubcommand({
       name: "set",
       description: "Set your role colour",
       options: [
-        slashOption(
-          true,
-          new SlashCommandStringOption()
-            .setName("colour")
-            .setDescription("Hex code, with or without the number sign"),
-        ),
+        {
+          name: "colour",
+          description: "Hex code, with or without the number sign",
+          type: "string",
+          required: true,
+        },
       ],
       async handle(interaction, colour) {
         const member = await interactionMember(interaction, { force: true })
@@ -98,7 +94,7 @@ export const ColourCommand = slashCommand({
         await interaction.reply({ ephemeral: true, embeds })
       },
     }),
-    subcommand({
+    slashSubcommand({
       name: "remove",
       description: "Remove your custom role colour",
       async handle(interaction) {

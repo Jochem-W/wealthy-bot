@@ -14,6 +14,7 @@ export const MembersCommand = slashCommand({
   description: "List all Discord members by tier",
   defaultMemberPermissions: PermissionFlagsBits.Administrator,
   dmPermission: false,
+  nsfw: false,
   async handle(interaction) {
     const token = await new SignJWT({ sub: interaction.client.user.id })
       .setProtectedHeader({ alg: "HS256" })

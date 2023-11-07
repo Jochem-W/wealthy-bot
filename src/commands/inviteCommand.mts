@@ -11,6 +11,7 @@ export const InviteCommand = slashCommand({
   description: "Invite a user to the server",
   defaultMemberPermissions: null,
   dmPermission: false,
+  nsfw: false,
   async handle(interaction) {
     const [userData] = await Drizzle.select()
       .from(usersTable)
