@@ -1,6 +1,6 @@
 import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
-import { GuildMemberFlags } from "discord.js"
+import { GuildMemberFlags, PermissionFlagsBits } from "discord.js"
 
 export const RoleOnJoin = handler({
   event: "guildMemberAdd",
@@ -8,7 +8,8 @@ export const RoleOnJoin = handler({
   async handle(member) {
     if (
       !member.flags.has(GuildMemberFlags.CompletedOnboarding) ||
-      member.pending === true
+      member.pending === true ||
+      member.permissions.has(PermissionFlagsBits.Administrator, true)
     ) {
       return
     }
