@@ -17,7 +17,8 @@ export const RoleOnJoin = handler({
     if (
       member.roles.cache.hasAny(
         ...[...Config.tiers.values()].map((tier) => tier.roleId),
-        ...Object.values(Config.roles),
+        Config.roles.invited,
+        Config.roles.exempt,
       )
     ) {
       if (member.roles.cache.has(Config.roles.unsubscribed)) {
