@@ -21,6 +21,8 @@ const model = z.object({
       owner: z.string(),
     })
     .optional(),
+  unsubscribed: z.string(),
+  exempt: z.string(),
   tiers: z
     .record(
       z.string(),
