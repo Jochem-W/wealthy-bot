@@ -6,6 +6,9 @@ import { LogJoins } from "./handlers/logJoins.mjs"
 import { LogLeaves } from "./handlers/logLeaves.mjs"
 import { LogMessageDelete } from "./handlers/logMessageDelete.mjs"
 import { LogMessageEdits } from "./handlers/logMessageEdits.mjs"
+import { RoleOnJoin } from "./handlers/roleOnJoin.mjs"
+import { RoleOnMemberUpdate } from "./handlers/roleOnMemberUpdate.mjs"
+import { RolePeriodic } from "./handlers/rolePeriodic.mjs"
 import { StartupHandler } from "./handlers/startupHandler.mjs"
 import type { Handler } from "./models/handler.mjs"
 import type { ClientEvents } from "discord.js"
@@ -20,4 +23,7 @@ export const Handlers: Handler<keyof ClientEvents>[] = [
   LogLeaves,
   LogMessageDelete,
   LogMessageEdits,
+  RoleOnJoin,
+  RoleOnMemberUpdate,
+  RolePeriodic,
 ]
