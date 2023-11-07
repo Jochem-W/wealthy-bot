@@ -16,20 +16,20 @@ export const RoleOnJoin = handler({
     if (
       member.roles.cache.hasAny(
         ...[...Config.tiers.values()].map((tier) => tier.roleId),
-        Config.exempt,
+        ...Object.values(Config.roles),
       )
     ) {
-      if (member.roles.cache.has(Config.unsubscribed)) {
-        await member.roles.remove(Config.unsubscribed)
+      if (member.roles.cache.has(Config.roles.unsubscribed)) {
+        await member.roles.remove(Config.roles.unsubscribed)
       }
 
       return
     }
 
-    if (member.roles.cache.has(Config.unsubscribed)) {
+    if (member.roles.cache.has(Config.roles.unsubscribed)) {
       return
     }
 
-    await member.roles.add(Config.unsubscribed)
+    await member.roles.add(Config.roles.unsubscribed)
   },
 })
