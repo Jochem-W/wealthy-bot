@@ -10,21 +10,21 @@
     "csv-parse": "^5.5.2",
     "discord.js": "^14.13.0",
     "drizzle-orm": "^0.28.6",
-    "jose": "^4.15.4",
+    "jose": "^5.1.0",
     "luxon": "^3.4.3",
-    "postgres": "^3.4.0",
+    "postgres": "^3.4.3",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.2.1",
     "@tsconfig/node20": "^20.1.2",
     "@tsconfig/strictest": "^2.0.2",
-    "@types/luxon": "^3.3.3",
-    "@types/node": "^20.8.7",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
-    "@typescript-eslint/parser": "^6.8.0",
+    "@types/luxon": "^3.3.4",
+    "@types/node": "^20.9.0",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
     "drizzle-kit": "^0.19.13",
-    "eslint": "^8.52.0",
+    "eslint": "^8.53.0",
     "eslint-config-prettier": "^9.0.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
@@ -33,7 +33,7 @@
     "bufferutil": "^4.0.8",
     "erlpack": "^0.1.4",
     "utf-8-validate": "^6.0.3",
-    "zlib-sync": "^0.1.8"
+    "zlib-sync": "^0.1.9"
   },
   "prettier": {
     "semi": false,
