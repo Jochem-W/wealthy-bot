@@ -1,6 +1,6 @@
 import { slashCommand, slashSubcommand } from "../models/slashCommand.mjs"
 import { interactionMember } from "../utilities/interactionUtilities.mjs"
-import { EmbedBuilder, inlineCode } from "discord.js"
+import { EmbedBuilder, Locale, inlineCode } from "discord.js"
 
 function colorToHex(color: number) {
   return `#${color.toString(16).padStart(6, "0")}`
@@ -8,7 +8,13 @@ function colorToHex(color: number) {
 
 export const ColourCommand = slashCommand({
   name: "colour",
+  nameLocalizations: {
+    "en-US": "color",
+  },
   description: "Change your role colour",
+  descriptionLocalizations: {
+    "en-US": "Change your role color",
+  },
   defaultMemberPermissions: null,
   dmPermission: false,
   nsfw: false,
@@ -16,9 +22,15 @@ export const ColourCommand = slashCommand({
     slashSubcommand({
       name: "set",
       description: "Set your role colour",
+      descriptionLocalizations: {
+        "en-US": "Set your role color",
+      },
       options: [
         {
           name: "colour",
+          nameLocalizations: {
+            "en-US": "color",
+          },
           description: "Hex code, with or without the number sign",
           type: "string",
           required: true,
@@ -40,15 +52,18 @@ export const ColourCommand = slashCommand({
           formattedColour = formattedColour.substring(0, 6)
         }
 
+        const noun =
+          interaction.locale === Locale.EnglishUS ? "color" : "colour"
+
         const color = parseInt(formattedColour, 16)
         if (isNaN(color)) {
           const originalCode = interaction.options.getString("colour", true)
           await interaction.reply({
             embeds: [
               new EmbedBuilder()
-                .setTitle("Invalid colour")
+                .setTitle(`Invalid ${noun}`)
                 .setDescription(
-                  `The colour ${inlineCode(
+                  `The ${noun} ${inlineCode(
                     originalCode,
                   )} appears to be invalid.`,
                 )
@@ -63,7 +78,7 @@ export const ColourCommand = slashCommand({
         const reason = "Custom role colour changed"
         const embeds = [
           new EmbedBuilder()
-            .setTitle("Role colour updated")
+            .setTitle(`Role ${noun} updated`)
             .setDescription(inlineCode(formattedColour))
             .setTimestamp(Date.now())
             .setColor(color),
@@ -97,16 +112,22 @@ export const ColourCommand = slashCommand({
     slashSubcommand({
       name: "remove",
       description: "Remove your custom role colour",
+      descriptionLocalizations: {
+        "en-US": "Remove your custom role color",
+      },
       async handle(interaction) {
         const member = await interactionMember(interaction, { force: true })
         const name = `c${interaction.user.id}`
         const role = member.roles.cache.find((r) => r.name === name)
 
+        const noun =
+          interaction.locale === Locale.EnglishUS ? "color" : "colour"
+
         if (!role) {
           await interaction.reply({
             embeds: [
               new EmbedBuilder()
-                .setTitle("No role colour to remove")
+                .setTitle(`No role ${noun} to remove`)
                 .setTimestamp(Date.now()),
             ],
             ephemeral: true,
@@ -118,7 +139,7 @@ export const ColourCommand = slashCommand({
         await interaction.reply({
           embeds: [
             new EmbedBuilder()
-              .setTitle("Role colour removed")
+              .setTitle(`Role ${noun} removed`)
               .setDescription(inlineCode(colorToHex(role.color)))
               .setTimestamp(Date.now())
               .setColor(role.color),
