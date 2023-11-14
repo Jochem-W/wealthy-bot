@@ -5,6 +5,7 @@ import {
   ActionRowBuilder,
   ComponentType,
   EmbedBuilder,
+  spoiler,
   userMention,
   UserSelectMenuBuilder,
 } from "discord.js"
@@ -47,7 +48,7 @@ export function newSubscriptionMessage(user: typeof usersTable.$inferSelect) {
     )
     .setFields(
       { name: "Name", value: user.name },
-      { name: "Email", value: user.email },
+      { name: "Email", value: spoiler(user.email) },
       { name: "Tier", value: user.lastPaymentTier },
     )
     .setTimestamp(user.lastPaymentTimestamp)
