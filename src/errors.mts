@@ -324,8 +324,12 @@ export class InvalidDateTimeError extends CustomError {
   }
 }
 
-export async function logError(client: Client<true>, error: Error) {
+export async function logError(client: Client, error: Error) {
   console.error(error)
+  if (!client.isReady()) {
+    return
+  }
+
   const channel = await fetchChannel(
     client,
     Config.channels.error,
