@@ -6,7 +6,7 @@ export function renewedLateMessage({
   invitee,
 }: {
   user: typeof usersTable.$inferSelect
-  invitee?: typeof inviteesTable.$inferSelect
+  invitee?: typeof inviteesTable.$inferSelect | null
 }) {
   const embed = new EmbedBuilder()
     .setTitle("Late renewal")

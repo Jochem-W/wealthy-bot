@@ -10,12 +10,10 @@ import { Config } from "../models/config.mjs"
 import { inviteesTable, usersTable } from "../schema.mjs"
 import { fetchChannel, tryFetchMember } from "./discordUtilities.mjs"
 import camelcaseKeys from "camelcase-keys"
-import { ChannelType, Client, TextChannel } from "discord.js"
+import { ChannelType, Client } from "discord.js"
 import { and, eq, not } from "drizzle-orm"
 import { DateTime } from "luxon"
 import { z } from "zod"
-
-let channel: TextChannel | undefined
 
 export const DonationModel = z
   .object({
@@ -43,68 +41,58 @@ export async function processDonation(
     return
   }
 
-  // FIXME: race condition
-  const [user] = await Drizzle.select()
+  const [oldUser] = await Drizzle.select()
     .from(usersTable)
     .where(eq(usersTable.email, data.email))
-  if (!user) {
-    await newSubscription(client, { ...data, tierName: data.tierName })
+    .leftJoin(inviteesTable, eq(inviteesTable.userId, usersTable.id))
+  if (!oldUser) {
+    await newSubscription(client, data as typeof data & { tierName: string })
     return
   }
 
-  const [updatedUser] = await Drizzle.update(usersTable)
+  await Drizzle.update(usersTable)
     .set({
       name: data.fromName,
       lastPaymentTier: data.tierName,
       lastPaymentTimestamp: data.timestamp,
     })
     .where(eq(usersTable.email, data.email))
-    .returning()
-  if (!updatedUser) {
-    throw new Error("User not found")
+
+  const [newUser] = await Drizzle.transaction(async (transaction) => {
+    await transaction
+      .update(usersTable)
+      .set({
+        name: data.fromName,
+        lastPaymentTier: data.tierName as string,
+        lastPaymentTimestamp: data.timestamp,
+      })
+      .where(eq(usersTable.email, data.email))
+    return await transaction
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.email, data.email))
+      .leftJoin(inviteesTable, eq(inviteesTable.userId, usersTable.id))
+  })
+
+  if (!newUser) {
+    throw new Error("Couldn't update user")
   }
 
-  const updatedUserData: {
-    user: typeof usersTable.$inferSelect
-    invitee?: typeof inviteesTable.$inferSelect
-  } = { user: updatedUser }
+  replaceTimeout(client, newUser.user)
 
-  const [invitee] = await Drizzle.select()
-    .from(inviteesTable)
-    .where(eq(inviteesTable.userId, updatedUser.id))
-  if (invitee) {
-    updatedUserData.invitee = invitee
-  }
-
-  replaceTimeout(client, updatedUser)
-
-  const oldDate = DateTime.fromJSDate(user.lastPaymentTimestamp)
-  const newDate = DateTime.fromJSDate(updatedUser.lastPaymentTimestamp)
-  const diff = newDate.diff(oldDate)
-
-  console.log(
-    expiredMillis(user) < 0,
-    oldDate.toISO(),
-    newDate.toISO(),
-    diff.shiftTo("day", "hour", "minutes", "seconds").toISO(),
-  )
-
-  const fetched = await fetchChannel(
+  const channel = await fetchChannel(
     client,
     Config.logs.koFi,
     ChannelType.GuildText,
   )
-  channel ??= fetched
 
-  if (expiredMillis(user) < 0) {
-    await channel.send(renewedLateMessage(updatedUserData))
+  if (untilExpiredMillis(oldUser.user) < 0) {
+    await channel.send(renewedLateMessage(newUser))
   }
 
-  if (user.lastPaymentTier !== updatedUser.lastPaymentTier) {
-    await channel.send(tierChangedMessage(user, updatedUserData))
+  if (oldUser.user.lastPaymentTier !== newUser.user.lastPaymentTier) {
+    await channel.send(tierChangedMessage(oldUser.user, newUser))
   }
-
-  await updateRoles(client, updatedUser)
 }
 
 async function newSubscription(
@@ -125,12 +113,11 @@ async function newSubscription(
 
   replaceTimeout(client, user)
 
-  const fetched = await fetchChannel(
+  const channel = await fetchChannel(
     client,
     Config.logs.koFi,
     ChannelType.GuildText,
   )
-  channel ??= fetched
 
   await channel.send(newSubscriptionMessage(user))
 }
@@ -151,7 +138,7 @@ async function updateRoles(
     return
   }
 
-  const expired = expiredMillis(user) < 0
+  const expired = untilExpiredMillis(user) < 0
 
   const currentTier = Config.tiers.get(user.lastPaymentTier)
   for (const [, { roleId, position }] of Config.tiers) {
@@ -195,7 +182,7 @@ export async function linkDiscord(
   return user
 }
 
-export function expiredMillis(user: typeof usersTable.$inferSelect) {
+export function untilExpiredMillis(user: typeof usersTable.$inferSelect) {
   return DateTime.fromJSDate(user.lastPaymentTimestamp)
     .plus({ days: 30 + Config.gracePeriod })
     .diffNow()

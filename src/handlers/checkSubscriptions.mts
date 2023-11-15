@@ -6,7 +6,7 @@ import { handler } from "../models/handler.mjs"
 import { LongTimeout } from "../models/longTimeout.mjs"
 import { inviteesTable, usersTable } from "../schema.mjs"
 import { fetchChannel } from "../utilities/discordUtilities.mjs"
-import { expiredMillis } from "../utilities/subscriptionUtilities.mjs"
+import { untilExpiredMillis } from "../utilities/subscriptionUtilities.mjs"
 import { ChannelType, Client } from "discord.js"
 import { eq } from "drizzle-orm"
 
@@ -19,12 +19,11 @@ export function replaceTimeout(
   removeTimeout(user.id)
   timeouts.set(
     user.id,
-    // eslint-disable-next-line no-loop-func
     new LongTimeout(() => {
       callback(client, user.id).catch((e) =>
         e instanceof Error ? logError(client, e) : console.log(e),
       )
-    }, expiredMillis(user)),
+    }, untilExpiredMillis(user)),
   )
 }
 
@@ -62,7 +61,7 @@ export const CheckSubscriptions = handler({
   once: true,
   async handle(client) {
     for (const user of await Drizzle.select().from(usersTable)) {
-      if (expiredMillis(user) <= 0) {
+      if (untilExpiredMillis(user) <= 0) {
         continue
       }
 

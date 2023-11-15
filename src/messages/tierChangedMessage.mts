@@ -5,7 +5,7 @@ export function tierChangedMessage(
   oldUser: typeof usersTable.$inferSelect,
   newUser: {
     user: typeof usersTable.$inferSelect
-    invitee?: typeof inviteesTable.$inferSelect
+    invitee?: typeof inviteesTable.$inferSelect | null
   },
 ) {
   const embed = new EmbedBuilder()
