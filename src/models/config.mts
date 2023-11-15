@@ -3,7 +3,6 @@ import { z } from "zod"
 
 const model = z.object({
   applicationId: z.string(),
-  assignRoles: z.boolean(),
   channels: z.object({
     error: z.string(),
     restart: z.string(),

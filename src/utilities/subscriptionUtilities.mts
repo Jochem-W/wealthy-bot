@@ -8,7 +8,7 @@ import { renewedLateMessage } from "../messages/renewedLateMessage.mjs"
 import { tierChangedMessage } from "../messages/tierChangedMessage.mjs"
 import { Config } from "../models/config.mjs"
 import { inviteesTable, usersTable } from "../schema.mjs"
-import { fetchChannel, tryFetchMember } from "./discordUtilities.mjs"
+import { fetchChannel } from "./discordUtilities.mjs"
 import camelcaseKeys from "camelcase-keys"
 import { ChannelType, Client } from "discord.js"
 import { and, eq, not } from "drizzle-orm"
@@ -122,40 +122,6 @@ async function newSubscription(
   await channel.send(newSubscriptionMessage(user))
 }
 
-async function updateRoles(
-  client: Client<true>,
-  user: typeof usersTable.$inferSelect,
-) {
-  if (!Config.assignRoles || !user.discordId) {
-    return
-  }
-
-  const discordMember = await tryFetchMember(
-    { client, id: Config.guild },
-    user.discordId,
-  )
-  if (!discordMember) {
-    return
-  }
-
-  const expired = untilExpiredMillis(user) < 0
-
-  const currentTier = Config.tiers.get(user.lastPaymentTier)
-  for (const [, { roleId, position }] of Config.tiers) {
-    if (!currentTier || expired) {
-      await discordMember.roles.remove(roleId)
-      continue
-    }
-
-    if (position > currentTier.position) {
-      await discordMember.roles.remove(roleId)
-      continue
-    }
-
-    await discordMember.roles.add(roleId)
-  }
-}
-
 export async function linkDiscord(
   client: Client<true>,
   id: number,
@@ -177,7 +143,6 @@ export async function linkDiscord(
   }
 
   replaceTimeout(client, user)
-  await updateRoles(client, user)
 
   return user
 }
