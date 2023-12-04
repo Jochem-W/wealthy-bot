@@ -15,3 +15,8 @@ export const inviteesTable = pgTable("invitee", {
     .notNull()
     .references(() => usersTable.id),
 })
+
+export const inviteLinksTable = pgTable("inviteLinks", {
+  discordId: text("discordId").primaryKey(),
+  code: text("code").notNull().unique(),
+})

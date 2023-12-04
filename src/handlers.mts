@@ -2,6 +2,9 @@ import { CheckInvite } from "./handlers/checkInvite.mjs"
 import { CheckSubscriptions } from "./handlers/checkSubscriptions.mjs"
 import { HttpServer } from "./handlers/httpServer.mjs"
 import { InteractionHandler } from "./handlers/interactionHandler.mjs"
+import { InviteCreate } from "./handlers/inviteCreate.mjs"
+import { InviteDelete } from "./handlers/inviteDelete.mjs"
+import { InvitesOnStart } from "./handlers/invitesOnStart.mjs"
 import { LogJoins } from "./handlers/logJoins.mjs"
 import { LogLeaves } from "./handlers/logLeaves.mjs"
 import { LogMessageDelete } from "./handlers/logMessageDelete.mjs"
@@ -26,4 +29,7 @@ export const Handlers: Handler<keyof ClientEvents>[] = [
   RoleOnJoin,
   RoleOnMemberUpdate,
   RolePeriodic,
+  InvitesOnStart,
+  InviteCreate,
+  InviteDelete,
 ]

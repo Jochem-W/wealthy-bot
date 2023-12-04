@@ -6,6 +6,7 @@ const model = z.object({
   channels: z.object({
     error: z.string(),
     restart: z.string(),
+    invite: z.string(),
   }),
   logs: z.object({
     koFi: z.string(),

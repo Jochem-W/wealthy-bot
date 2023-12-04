@@ -1,10 +1,10 @@
 import { Drizzle } from "../clients.mjs"
+import { Config } from "../models/config.mjs"
 import { slashCommand } from "../models/slashCommand.mjs"
-import { inviteesTable, usersTable } from "../schema.mjs"
-import { SecretKey, Variables } from "../variables.mjs"
-import { EmbedBuilder } from "discord.js"
+import { inviteLinksTable, inviteesTable, usersTable } from "../schema.mjs"
+import { DiscordAPIError, EmbedBuilder, RESTJSONErrorCodes } from "discord.js"
 import { eq } from "drizzle-orm"
-import { SignJWT } from "jose"
+import { Duration } from "luxon"
 
 export const InviteCommand = slashCommand({
   name: "invite",
@@ -13,6 +13,10 @@ export const InviteCommand = slashCommand({
   dmPermission: false,
   nsfw: false,
   async handle(interaction) {
+    if (!interaction.inCachedGuild()) {
+      return
+    }
+
     const [userData] = await Drizzle.select()
       .from(usersTable)
       .where(eq(usersTable.discordId, interaction.user.id))
@@ -48,14 +52,39 @@ export const InviteCommand = slashCommand({
       return
     }
 
-    const token = await new SignJWT({ sub: interaction.user.id })
-      .setProtectedHeader({ alg: "HS256" })
-      .setIssuedAt()
-      .setExpirationTime("24h")
-      .sign(SecretKey)
+    const oldInvites = await Drizzle.delete(inviteLinksTable)
+      .where(eq(inviteLinksTable.discordId, interaction.user.id))
+      .returning()
+    for (const oldInvite of oldInvites) {
+      try {
+        await interaction.guild.invites.delete(
+          oldInvite.code,
+          "User created a new invite",
+        )
+      } catch (e) {
+        if (
+          !(e instanceof DiscordAPIError) ||
+          e.code !== RESTJSONErrorCodes.UnknownInvite
+        ) {
+          throw e
+        }
+      }
+    }
 
-    const url = new URL(Variables.inviteUrl)
-    url.searchParams.set("token", token)
+    const invite = await interaction.guild.invites.create(
+      Config.channels.invite,
+      {
+        maxAge: Duration.fromObject({ hours: 12 }).as("seconds"),
+        maxUses: 1,
+        unique: true,
+        reason: "User created a new invite",
+      },
+    ) // TODO: config
+
+    await Drizzle.insert(inviteLinksTable).values({
+      discordId: interaction.user.id,
+      code: invite.code,
+    })
 
     await interaction.reply({
       embeds: [
@@ -64,9 +93,9 @@ export const InviteCommand = slashCommand({
           .setDescription(
             `To invite someone to the server, please send them the following link:`,
           )
-          .setFields({ name: "Invite link", value: url.toString() })
+          .setFields({ name: "Invite link", value: invite.url })
           .setFooter({
-            text: "This link will be valid for 24 hours. You'll be able to create a new link if the link doesn't get used.",
+            text: "This link will be valid for 12 hours. You'll be able to create a new link if the link doesn't get used.",
           }),
       ],
       ephemeral: true,
