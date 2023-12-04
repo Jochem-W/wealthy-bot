@@ -43,10 +43,12 @@ export const CheckInvite = handler({
       return
     }
 
-    const [invitee] = await Drizzle.insert(inviteesTable).values({
-      discordId: member.id,
-      userId: inviter.id,
-    })
+    const [invitee] = await Drizzle.insert(inviteesTable)
+      .values({
+        discordId: member.id,
+        userId: inviter.id,
+      })
+      .returning()
     if (!invitee) {
       return
     }
