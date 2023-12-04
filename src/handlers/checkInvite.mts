@@ -53,6 +53,8 @@ export const CheckInvite = handler({
       return
     }
 
+    await member.roles.add(Config.roles.invited)
+
     const channel = await fetchChannel(
       member.client,
       Config.logs.koFi,
