@@ -1,22 +1,36 @@
+import { Drizzle } from "../clients.mjs"
 import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
-import { Collection } from "discord.js"
+import { LongTimeout } from "../models/longTimeout.mjs"
+import { inviteLinksTable } from "../schema.mjs"
+import { DateTime } from "luxon"
 
-export const Invites = new Collection<string, number>()
+export const Invites = new Set<string>()
 
 export const InvitesOnStart = handler({
   event: "ready",
   once: true,
   async handle(client) {
     const guild = await client.guilds.fetch(Config.guild)
-    const invites = await guild.invites.fetch()
+    const guildInvites = await guild.invites.fetch()
 
-    for (const [code, invite] of invites.entries()) {
-      if (invite.uses === null) {
+    const dbInvites = await Drizzle.select().from(inviteLinksTable)
+    const dbCodes = new Set(dbInvites.map((invite) => invite.code))
+
+    for (const guildInvite of guildInvites.values()) {
+      if (!dbCodes.has(guildInvite.code)) {
         continue
       }
 
-      Invites.set(code, invite.uses)
+      if (!guildInvite.expiresAt) {
+        throw new Error("Invalid guild invites")
+      }
+
+      Invites.add(guildInvite.code)
+      new LongTimeout(
+        () => Invites.delete(guildInvite.code),
+        DateTime.fromJSDate(guildInvite.expiresAt).diffNow().toMillis(),
+      )
     }
   },
 })

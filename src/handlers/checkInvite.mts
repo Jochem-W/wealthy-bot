@@ -13,25 +13,12 @@ export const CheckInvite = handler({
   once: false,
   async handle(member) {
     const currentInvites = await member.guild.invites.fetch()
-    const usedInvites = [...currentInvites.values()].filter((invite) => {
-      if (invite.uses === null) {
-        return false
-      }
+    const usedInvites = [...Invites.values()].filter(
+      (code) => !currentInvites.has(code),
+    )
 
-      const oldUses = Invites.get(invite.code)
-      if (oldUses === undefined) {
-        return false
-      }
-
-      return invite.uses === oldUses + 1
-    })
-
-    for (const invite of currentInvites.values()) {
-      if (invite.uses === null) {
-        continue
-      }
-
-      Invites.set(invite.code, invite.uses)
+    for (const invite of usedInvites) {
+      Invites.delete(invite)
     }
 
     if (usedInvites.length === 0 || !usedInvites[0]) {
@@ -44,7 +31,7 @@ export const CheckInvite = handler({
 
     const [dbInvite] = await Drizzle.select()
       .from(inviteLinksTable)
-      .where(eq(inviteLinksTable.code, usedInvites[0].code))
+      .where(eq(inviteLinksTable.code, usedInvites[0]))
     if (!dbInvite) {
       return
     }

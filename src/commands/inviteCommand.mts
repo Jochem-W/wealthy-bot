@@ -1,4 +1,5 @@
 import { Drizzle } from "../clients.mjs"
+import { Invites } from "../handlers/invitesOnStart.mjs"
 import { Config } from "../models/config.mjs"
 import { slashCommand } from "../models/slashCommand.mjs"
 import { inviteLinksTable, inviteesTable, usersTable } from "../schema.mjs"
@@ -56,6 +57,8 @@ export const InviteCommand = slashCommand({
       .where(eq(inviteLinksTable.discordId, interaction.user.id))
       .returning()
     for (const oldInvite of oldInvites) {
+      Invites.delete(oldInvite.code)
+
       try {
         await interaction.guild.invites.delete(
           oldInvite.code,
@@ -79,7 +82,8 @@ export const InviteCommand = slashCommand({
         unique: true,
         reason: "User created a new invite",
       },
-    ) // TODO: config
+    )
+    Invites.add(invite.code)
 
     await Drizzle.insert(inviteLinksTable).values({
       discordId: interaction.user.id,
