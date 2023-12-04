@@ -1,5 +1,5 @@
 # Set-up build image
-FROM node:20-alpine AS builder
+FROM node:21-alpine AS builder
 ENV NODE_ENV=development
 
 WORKDIR /app
@@ -20,7 +20,7 @@ RUN pnpm tsc && \
     pnpm prune --prod
 
 # Set-up running image
-FROM node:20-alpine
+FROM node:21-alpine
 ARG commit_hash
 ENV NODE_ENV=production \
     COMMIT_HASH=$commit_hash
