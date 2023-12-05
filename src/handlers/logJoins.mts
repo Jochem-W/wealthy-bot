@@ -13,6 +13,10 @@ export const LogJoins = handler({
   event: "guildMemberAdd",
   once: false,
   async handle(member) {
+    if (member.guild.id !== Config.guild) {
+      return
+    }
+
     const channel = await fetchChannel(
       member.client,
       Config.logs.members,

@@ -19,6 +19,10 @@ export const LogMessageEdits = handler({
   event: "messageUpdate",
   once: false,
   async handle(oldMessage, newMessage) {
+    if (newMessage.guild?.id !== Config.guild) {
+      return
+    }
+
     if (newMessage.partial) {
       // eslint-disable-next-line require-atomic-updates, no-param-reassign
       newMessage = await newMessage.fetch()

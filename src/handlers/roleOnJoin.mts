@@ -6,6 +6,10 @@ export const RoleOnJoin = handler({
   event: "guildMemberAdd",
   once: false,
   async handle(member) {
+    if (member.guild.id !== Config.guild) {
+      return
+    }
+
     if (
       !member.flags.has(GuildMemberFlags.CompletedOnboarding) ||
       member.pending === true ||

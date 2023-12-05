@@ -12,6 +12,10 @@ export const CheckInvite = handler({
   event: "guildMemberAdd",
   once: false,
   async handle(member) {
+    if (member.guild.id !== Config.guild) {
+      return
+    }
+
     const currentInvites = await member.guild.invites.fetch()
     const usedInvites = [...Invites.values()].filter(
       (code) => !currentInvites.has(code),

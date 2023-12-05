@@ -19,6 +19,10 @@ export const LogMessageDelete = handler({
   event: "messageDelete",
   once: false,
   async handle(message) {
+    if (message.guild?.id !== Config.guild) {
+      return
+    }
+
     if (message.author?.bot) {
       return
     }
