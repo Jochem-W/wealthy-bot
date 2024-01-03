@@ -1,3 +1,4 @@
+import { AssignCommand } from "./commands/assignCommand.mjs"
 import { ColourCommand } from "./commands/colourCommand.mjs"
 import { InviteCommand } from "./commands/inviteCommand.mjs"
 import { MembersCommand } from "./commands/membersCommand.mjs"
@@ -9,6 +10,7 @@ export const SlashCommands: Command<ApplicationCommandType.ChatInput>[] = [
   ColourCommand,
   InviteCommand,
   MembersCommand,
+  AssignCommand,
 ]
 
 export const MessageContextMenuCommands: Command<ApplicationCommandType.Message>[] =
