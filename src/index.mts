@@ -25,7 +25,8 @@ const discord = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildBans,
+    GatewayIntentBits.GuildModeration,
+    GatewayIntentBits.GuildVoiceStates,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.MessageContent,
