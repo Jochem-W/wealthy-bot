@@ -12,6 +12,7 @@ const model = z.object({
     koFi: z.string(),
     members: z.string(),
     messages: z.string(),
+    voice: z.string(),
   }),
   gracePeriod: z.number(),
   guild: z.string(),
