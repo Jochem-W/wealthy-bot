@@ -11,6 +11,7 @@ import { RoleOnJoin } from "./handlers/roleOnJoin.mjs"
 import { RoleOnMemberUpdate } from "./handlers/roleOnMemberUpdate.mjs"
 import { RolePeriodic } from "./handlers/rolePeriodic.mjs"
 import { StartupHandler } from "./handlers/startupHandler.mjs"
+import { voiceInactive } from "./handlers/voiceInactive.mjs"
 import { VoiceLogsHandler } from "./handlers/voiceLogsHandler.mjs"
 import type { Handler } from "./models/handler.mjs"
 import type { ClientEvents } from "discord.js"
@@ -30,4 +31,5 @@ export const Handlers: Handler<keyof ClientEvents>[] = [
   RolePeriodic,
   InvitesOnStart,
   VoiceLogsHandler,
+  voiceInactive,
 ]
