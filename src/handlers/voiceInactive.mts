@@ -18,6 +18,7 @@ export const voiceInactive = handler({
       return
     }
 
+    console.log(member.user.username, "is seemingly AFK")
     timeouts.set(
       member.id,
       setTimeout(() => {
@@ -40,5 +41,6 @@ async function callback(member: GuildMember) {
     return
   }
 
+  console.log("Moving", member.user.username, "to AFK")
   member.voice.setChannel(member.guild.afkChannel, "Member was AFK")
 }
