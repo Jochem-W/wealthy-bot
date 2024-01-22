@@ -10,26 +10,32 @@ export function tierChangedMessage(
 ) {
   const embed = new EmbedBuilder()
     .setTitle("Tier changed")
-    .setFields(
-      {
-        name: "Member",
-        value: newUser.user.discordId
-          ? userMention(newUser.user.discordId)
-          : newUser.user.name,
-      },
-      { name: "Old tier", value: oldUser.lastPaymentTier },
-      { name: "New tier", value: newUser.user.lastPaymentTier },
-    )
     .setTimestamp(newUser.user.lastPaymentTimestamp)
+
+  if (newUser.user.discordId) {
+    embed.addFields({
+      name: "Discord user",
+      value: userMention(newUser.user.discordId),
+      inline: true,
+    })
+  }
+
+  embed.addFields(
+    {
+      name: "Ko-fi user",
+      value: newUser.user.name,
+      inline: true,
+    },
+    { name: "Old tier", value: oldUser.lastPaymentTier },
+    { name: "New tier", value: newUser.user.lastPaymentTier },
+  )
 
   if (newUser.invitee) {
     embed.addFields({
       name: "Invited",
       value: userMention(newUser.invitee.discordId),
     })
-    embed.setDescription(
-      "Make sure to check if the invited member should be removed.",
-    )
+    embed.setDescription("Don't forget to check if the invite is still valid.")
   }
 
   return { embeds: [embed] }

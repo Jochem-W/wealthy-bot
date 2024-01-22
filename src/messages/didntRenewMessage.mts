@@ -1,16 +1,25 @@
 import { inviteesTable, usersTable } from "../schema.mjs"
-import { EmbedBuilder, Guild, time, TimestampStyles, userMention } from "discord.js"
 import { tryFetchMember } from "../utilities/discordUtilities.mjs"
+import {
+  EmbedBuilder,
+  Guild,
+  time,
+  TimestampStyles,
+  userMention,
+} from "discord.js"
 
-export async function didntRenewMessage(guild: Guild, {
-  user,
-  invitee,
-}: {
-  user: typeof usersTable.$inferSelect
-  invitee?: typeof inviteesTable.$inferSelect | null
-}) {
+export async function didntRenewMessage(
+  guild: Guild,
+  {
+    user,
+    invitee,
+  }: {
+    user: typeof usersTable.$inferSelect
+    invitee?: typeof inviteesTable.$inferSelect | null
+  },
+) {
   let description =
-    "This could mean that the subscription was cancelled, or that the payment is still pending."
+    "Either the subscription was cancelled, or the payment failed."
 
   let member
   if (user.discordId) {
@@ -19,29 +28,39 @@ export async function didntRenewMessage(guild: Guild, {
 
   const embed = new EmbedBuilder()
     .setTitle("Overdue payment")
-    .setFields(
-      {
-        name: "Member",
-        value: member ? userMention(member.id) : user.name
-      },
-      { name: "Tier", value: user.lastPaymentTier },
-      {
-        name: "Last paid",
-        value: `${time(
-          user.lastPaymentTimestamp,
-          TimestampStyles.ShortDate,
-        )} (${time(user.lastPaymentTimestamp, TimestampStyles.RelativeTime)})`,
-      },
-    )
     .setColor(0xff0000)
+
+  if (member) {
+    embed.addFields({
+      name: "Discord user",
+      value: userMention(member.id),
+      inline: true,
+    })
+  }
+
+  embed.addFields(
+    {
+      name: "Ko-fi user",
+      value: user.name,
+      inline: true,
+    },
+    { name: "Tier", value: user.lastPaymentTier },
+    {
+      name: "Last paid",
+      value: `${time(
+        user.lastPaymentTimestamp,
+        TimestampStyles.ShortDate,
+      )} (${time(user.lastPaymentTimestamp, TimestampStyles.RelativeTime)})`,
+    },
+  )
 
   if (invitee) {
     embed.addFields({
-      name: "Invited",
+      name: "Invited user",
       value: userMention(invitee.discordId),
+      inline: true,
     })
-    description +=
-      " Make sure to check if the invited member should be removed."
+    description += " Don't forget to check if the invite is still valid."
   }
 
   embed.setDescription(description)

@@ -10,14 +10,24 @@ export function renewedLateMessage({
 }) {
   const embed = new EmbedBuilder()
     .setTitle("Late renewal")
-    .setFields(
-      {
-        name: "Member",
-        value: user.discordId ? userMention(user.discordId) : user.name,
-      },
-      { name: "Tier", value: user.lastPaymentTier },
-    )
     .setTimestamp(user.lastPaymentTimestamp)
+
+  if (user.discordId) {
+    embed.addFields({
+      name: "Discord user",
+      value: userMention(user.discordId),
+      inline: true,
+    })
+  }
+
+  embed.addFields(
+    {
+      name: "Ko-fi user",
+      value: user.name,
+      inline: true,
+    },
+    { name: "Tier", value: user.lastPaymentTier },
+  )
 
   if (invitee) {
     embed.addFields({

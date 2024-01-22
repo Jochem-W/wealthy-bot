@@ -12,19 +12,27 @@ export function inviteMessage(
     invitee: typeof inviteesTable.$inferSelect
   },
 ) {
-  return {
-    embeds: [
-      new EmbedBuilder()
-        .setTitle("New user invited")
-        .setFields(
-          { name: "User", value: userMention(invitee.discordId) },
-          {
-            name: "Invited by",
-            value: user.discordId ? userMention(user.discordId) : user.name,
-          },
-        )
-        .setThumbnail(member.displayAvatarURL())
-        .setTimestamp(Date.now()),
-    ],
+  const embed = new EmbedBuilder()
+    .setTitle("New user invited")
+    .setFields({ name: "Invitee", value: userMention(invitee.discordId) })
+    .setThumbnail(member.displayAvatarURL())
+    .setTimestamp(Date.now())
+
+  let name = "Invited by"
+  if (user.discordId) {
+    embed.addFields({
+      name,
+      value: userMention(user.discordId),
+      inline: true,
+    })
+
+    name = "\u200b"
   }
+
+  embed.addFields({
+    name,
+    value: user.name,
+  })
+
+  return { embeds: [embed] }
 }
