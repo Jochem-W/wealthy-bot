@@ -2,6 +2,7 @@ import { Drizzle } from "../clients.mjs"
 import { slashCommand, slashSubcommand } from "../models/slashCommand.mjs"
 import { birthdaysTable } from "../schema.mjs"
 import { PermissionFlagsBits } from "discord.js"
+import { eq } from "drizzle-orm"
 
 const months = [
   "January",
@@ -38,8 +39,8 @@ function formatDate(month: number, day: number) {
   return `${months[month]} ${day}${getSuffix(day)}`
 }
 
-const birthdayCommand = slashSubcommand({
-  name: "birthday",
+const set = slashSubcommand({
+  name: "set",
   description: "Set a member's birthdate",
   options: [
     {
@@ -70,9 +71,9 @@ const birthdayCommand = slashSubcommand({
     }
 
     if (
-      (month <= 7 && month % 2 == 0 && day > 30) ||
+      (month <= 6 && month % 2 == 1 && day > 30) ||
       (month == 2 && day > 29) ||
-      (month > 7 && month % 2 == 1 && day > 30)
+      (month > 6 && month % 2 == 0 && day > 30)
     ) {
       await interaction.reply({
         ephemeral: true,
@@ -108,10 +109,62 @@ const birthdayCommand = slashSubcommand({
   },
 })
 
-export const SetCommand = slashCommand({
-  name: "set",
-  description: "Set various things",
+const get = slashSubcommand({
+  name: "get",
+  description: "Get a member's birthdate",
+  options: [
+    {
+      name: "user",
+      description: "Target user",
+      type: "user",
+      required: true,
+    },
+  ],
+  async handle(interaction, user) {
+    if (!interaction.inCachedGuild()) {
+      return
+    }
+
+    const [value] = await Drizzle.select()
+      .from(birthdaysTable)
+      .where(eq(birthdaysTable.id, user.id))
+
+    await interaction.reply({
+      ephemeral: true,
+      content: `${user.displayName}'s birthdate is ${!value ? "not set" : formatDate(value.month - 1, value.day)}`,
+    })
+  },
+})
+
+const clear = slashSubcommand({
+  name: "clear",
+  description: "Clear a member's birthdate",
+  options: [
+    {
+      name: "user",
+      description: "Target user",
+      type: "user",
+      required: true,
+    },
+  ],
+  async handle(interaction, user) {
+    if (!interaction.inCachedGuild()) {
+      return
+    }
+
+    await Drizzle.delete(birthdaysTable).where(eq(birthdaysTable.id, user.id))
+
+    await interaction.reply({
+      ephemeral: true,
+      content: `Cleared ${user.displayName}'s birthdate`,
+    })
+  },
+})
+
+export const BirthdayCommand = slashCommand({
+  name: "birthday",
+  description: "Modify a member's stored birthdate",
   defaultMemberPermissions: PermissionFlagsBits.Administrator,
   dmPermission: false,
-  subcommands: [birthdayCommand],
+  subcommands: [get, set, clear],
 })

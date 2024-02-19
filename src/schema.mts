@@ -11,8 +11,8 @@ export const usersTable = pgTable("user", {
 
 export const birthdaysTable = pgTable("birthday", {
   id: text("id").primaryKey(),
-  month: integer("month"),
-  day: integer("day"),
+  month: integer("month").notNull(),
+  day: integer("day").notNull(),
 })
 
 export const inviteesTable = pgTable("invitee", {
