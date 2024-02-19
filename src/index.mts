@@ -6,8 +6,8 @@ import {
 } from "./commands.mjs"
 import { CommandNotFoundByNameError, logError } from "./errors.mjs"
 import { Handlers } from "./handlers.mjs"
+import type { Command } from "./models/command.mjs"
 import { Config } from "./models/config.mjs"
-import type { Command } from "./types/command.mjs"
 import { Variables } from "./variables.mjs"
 import {
   ApplicationCommandType,

@@ -1,4 +1,3 @@
-import { NotImplementedError } from "../errors.mjs"
 import {
   ContextMenuCommandBuilder,
   ApplicationCommandType,
@@ -13,15 +12,15 @@ type Interaction<T extends ContextMenuCommandType> =
   T extends ApplicationCommandType.Message
     ? MessageContextMenuCommandInteraction
     : T extends ApplicationCommandType.User
-    ? UserContextMenuCommandInteraction
-    : never
+      ? UserContextMenuCommandInteraction
+      : never
 
 type Value<T extends ContextMenuCommandType> =
   T extends ApplicationCommandType.Message
     ? Message
     : T extends ApplicationCommandType.User
-    ? User
-    : never
+      ? User
+      : never
 
 export function contextMenuCommand<T extends ContextMenuCommandType>({
   name,
@@ -56,10 +55,6 @@ export function contextMenuCommand<T extends ContextMenuCommandType>({
       case ApplicationCommandType.User:
         await handle(interaction, interaction.targetUser as Value<T>)
         break
-      default:
-        throw new NotImplementedError(
-          `Context menu commands of this type haven't been implemented yet.`,
-        )
     }
   }
 

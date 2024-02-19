@@ -1,5 +1,5 @@
+import type { Command } from "./models/command.mjs"
 import { Config } from "./models/config.mjs"
-import type { Command } from "./types/command.mjs"
 import { fetchChannel } from "./utilities/discordUtilities.mjs"
 import { makeErrorMessage } from "./utilities/embedUtilities.mjs"
 import { Attachment, ChannelType, CommandInteraction } from "discord.js"

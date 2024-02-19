@@ -30,23 +30,12 @@ import {
 
 type LocalizationMap<Type extends string> = Partial<Record<LocaleString, Type>>
 
-type SlashOptionSharedData<
-  Type extends SlashOptionTypeSimple,
-  Required extends boolean,
-> = {
+type SlashOptionSharedData<Required extends boolean> = {
   name: Lowercase<string>
   nameLocalizations?: LocalizationMap<Lowercase<string>>
   description: string
   descriptionLocalizations?: LocalizationMap<string>
-  type: Type
-  required: Required
-  minLength?: never
-  maxLength?: never
-  minValue?: never
-  maxValue?: never
-  choices?: never
-  autocomplete?: never
-  channelTypes?: never
+  required?: Required
 }
 
 type SlashOptionAutocompleteHandler<
@@ -58,49 +47,38 @@ type SlashOptionAutocompleteHandler<
   | ApplicationCommandOptionChoiceData<SlashOptionValueType<Type>>[]
   | Promise<ApplicationCommandOptionChoiceData<SlashOptionValueType<Type>>[]>
 
-type SlashOptionData<
-  Type extends SlashOptionTypeSimple,
-  Required extends boolean,
-> =
-  | (Omit<
-      SlashOptionSharedData<"string", Required>,
-      "minLength" | "maxLength" | "autocomplete"
-    > & {
+type SlashOptionData<Required extends boolean> =
+  | (SlashOptionSharedData<Required> & {
+      type: "string"
       minLength?: number
       maxLength?: number
       autocomplete?: SlashOptionAutocompleteHandler<"string">
     })
-  | (Omit<
-      SlashOptionSharedData<"string", Required>,
-      "minLength" | "maxLength" | "choices"
-    > & {
+  | (SlashOptionSharedData<Required> & {
+      type: "string"
       minLength?: number
       maxLength?: number
       choices: APIApplicationCommandOptionChoice<string>[]
     })
-  | (Omit<
-      SlashOptionSharedData<"number" | "integer", Required>,
-      "minValue" | "maxValue" | "autocomplete"
-    > & {
+  | (SlashOptionSharedData<Required> & {
+      type: "number" | "integer"
       minValue?: number
       maxValue?: number
       autocomplete?: SlashOptionAutocompleteHandler<"number" | "integer">
     })
-  | (Omit<
-      SlashOptionSharedData<"number" | "integer", Required>,
-      "minValue" | "maxValue" | "choices"
-    > & {
+  | (SlashOptionSharedData<Required> & {
+      type: "number" | "integer"
       minValue?: number
       maxValue?: number
       choices: APIApplicationCommandOptionChoice<number>[]
     })
-  | (Omit<SlashOptionSharedData<"channel", Required>, "channelTypes"> & {
+  | (SlashOptionSharedData<Required> & {
+      type: "channel"
       channelTypes?: ApplicationCommandOptionAllowedChannelTypes[]
     })
-  | SlashOptionSharedData<
-      Exclude<Type, "string" | "number" | "integer" | "channel">,
-      Required
-    >
+  | (SlashOptionSharedData<Required> & {
+      type: "boolean" | "user" | "role" | "mentionable" | "attachment"
+    })
 
 type SlashOptionTypeSimple =
   | "string"
@@ -116,50 +94,52 @@ type SlashOptionTypeSimple =
 type SlashOptionType<Type extends SlashOptionTypeSimple> = Type extends "string"
   ? ApplicationCommandOptionType.String
   : Type extends SlashCommandIntegerOption
-  ? ApplicationCommandOptionType.Integer
-  : Type extends SlashCommandBooleanOption
-  ? ApplicationCommandOptionType.Boolean
-  : Type extends SlashCommandUserOption
-  ? ApplicationCommandOptionType.User
-  : Type extends SlashCommandChannelOption
-  ? ApplicationCommandOptionType.Channel
-  : Type extends SlashCommandRoleOption
-  ? ApplicationCommandOptionType.Role
-  : Type extends SlashCommandMentionableOption
-  ? ApplicationCommandOptionType.Mentionable
-  : Type extends SlashCommandNumberOption
-  ? ApplicationCommandOptionType.Number
-  : Type extends SlashCommandAttachmentOption
-  ? ApplicationCommandOptionType.Attachment
-  : never
+    ? ApplicationCommandOptionType.Integer
+    : Type extends SlashCommandBooleanOption
+      ? ApplicationCommandOptionType.Boolean
+      : Type extends SlashCommandUserOption
+        ? ApplicationCommandOptionType.User
+        : Type extends SlashCommandChannelOption
+          ? ApplicationCommandOptionType.Channel
+          : Type extends SlashCommandRoleOption
+            ? ApplicationCommandOptionType.Role
+            : Type extends SlashCommandMentionableOption
+              ? ApplicationCommandOptionType.Mentionable
+              : Type extends SlashCommandNumberOption
+                ? ApplicationCommandOptionType.Number
+                : Type extends SlashCommandAttachmentOption
+                  ? ApplicationCommandOptionType.Attachment
+                  : never
 
 type SlashOptionValueType<Type extends SlashOptionTypeSimple> =
   Type extends "string"
     ? string
     : Type extends "integer"
-    ? number
-    : Type extends "boolean"
-    ? boolean
-    : Type extends "user"
-    ? User
-    : Type extends "channel"
-    ? Channel
-    : Type extends "role"
-    ? Role
-    : Type extends "mentionable"
-    ? Exclude<
-        ReturnType<CommandInteractionOptionResolver["getMentionable"]>,
-        null
-      >
-    : Type extends "number"
-    ? number
-    : Type extends "attachment"
-    ? Attachment
-    : never
+      ? number
+      : Type extends "boolean"
+        ? boolean
+        : Type extends "user"
+          ? User
+          : Type extends "channel"
+            ? Channel
+            : Type extends "role"
+              ? Role
+              : Type extends "mentionable"
+                ? Exclude<
+                    ReturnType<
+                      CommandInteractionOptionResolver["getMentionable"]
+                    >,
+                    null
+                  >
+                : Type extends "number"
+                  ? number
+                  : Type extends "attachment"
+                    ? Attachment
+                    : never
 
 type SlashOptionValueTypeWithRequired<
   Type extends SlashOptionTypeSimple,
-  Required extends boolean,
+  Required extends boolean | undefined,
 > = Required extends true
   ? SlashOptionValueType<Type>
   : SlashOptionValueType<Type> | null
@@ -170,7 +150,7 @@ type InferSlashOptionValueTypes<
 > = T extends readonly [infer TH, ...infer TT]
   ? InferSlashOptionValueTypes<
       TT,
-      TH extends SlashOptionData<SlashOptionTypeSimple, boolean>
+      TH extends SlashOptionData<boolean>
         ? readonly [
             ...R,
             SlashOptionValueTypeWithRequired<TH["type"], TH["required"]>,
@@ -186,60 +166,59 @@ type SlashCommandSharedData = {
   descriptionLocalizations?: LocalizationMap<string>
 }
 
-type SlashSubcommandData<
-  Options extends SlashOptionData<SlashOptionTypeSimple, boolean>[],
-> = SlashCommandSharedData & {
-  options?: [...Options]
-  subcommandGroups?: never
-  subcommands?: never
-  handle: (
-    interaction: ChatInputCommandInteraction,
-    ...options: [...InferSlashOptionValueTypes<Options>]
-  ) => Promise<void>
-}
+type SlashSubcommandData<Options extends SlashOptionData<boolean>[]> =
+  SlashCommandSharedData & {
+    options?: [...Options]
+    subcommandGroups?: never
+    subcommands?: never
+    handle: (
+      interaction: ChatInputCommandInteraction,
+      ...options: [...InferSlashOptionValueTypes<Options>]
+    ) => Promise<void>
+  }
 
-type SlashCommandData<
-  Options extends SlashOptionData<SlashOptionTypeSimple, boolean>[],
-> = SlashCommandSharedData & {
-  dmPermission: boolean
-  defaultMemberPermissions: Permissions | bigint | number | null
-  nsfw: boolean
-} & (
-    | {
-        options?: [...Options]
-        subcommandGroups?: never
-        subcommands?: never
-        handle: (
-          interaction: ChatInputCommandInteraction,
-          ...options: [...InferSlashOptionValueTypes<Options>]
-        ) => Promise<void>
-      }
-    | {
-        options?: never
-        subcommandGroups?: (SlashCommandSharedData & {
+type SlashCommandData<Options extends SlashOptionData<boolean>[]> =
+  SlashCommandSharedData & {
+    dmPermission: boolean
+    defaultMemberPermissions: Permissions | bigint | number | null
+    nsfw?: boolean
+  } & (
+      | {
+          options?: [...Options]
           subcommandGroups?: never
+          subcommands?: never
+          handle: (
+            interaction: ChatInputCommandInteraction,
+            ...options: [...InferSlashOptionValueTypes<Options>]
+          ) => Promise<void>
+        }
+      | {
+          options?: never
+          subcommandGroups?: (SlashCommandSharedData & {
+            subcommandGroups?: never
+            subcommands: ReturnType<typeof slashSubcommand>[]
+          })[]
           subcommands: ReturnType<typeof slashSubcommand>[]
-        })[]
-        subcommands: ReturnType<typeof slashSubcommand>[]
-      }
-    | {
-        options?: never
-        subcommandGroups: (SlashCommandSharedData & {
-          subcommandGroups?: never
-          subcommands: ReturnType<typeof slashSubcommand>[]
-        })[]
-        subcommands?: ReturnType<typeof slashSubcommand>[]
-      }
-  )
+        }
+      | {
+          options?: never
+          subcommandGroups: (SlashCommandSharedData & {
+            subcommandGroups?: never
+            subcommands: ReturnType<typeof slashSubcommand>[]
+          })[]
+          subcommands?: ReturnType<typeof slashSubcommand>[]
+        }
+    )
 
 function applyShared<Builder extends ApplicationCommandOptionBase>(
-  option: SlashOptionData<SlashOptionTypeSimple, boolean>,
+  option: SlashOptionData<boolean>,
   builder: Builder,
 ) {
-  builder
-    .setName(option.name)
-    .setDescription(option.description)
-    .setRequired(option.required)
+  builder.setName(option.name).setDescription(option.description)
+
+  if (option.required !== undefined) {
+    builder.setRequired(option.required)
+  }
 
   if (option.nameLocalizations) {
     builder.setNameLocalizations(option.nameLocalizations)
@@ -253,7 +232,7 @@ function applyShared<Builder extends ApplicationCommandOptionBase>(
 }
 
 function addOption(
-  option: SlashOptionData<SlashOptionTypeSimple, boolean>,
+  option: SlashOptionData<boolean>,
   commandBuilder:
     | SlashCommandOptionsOnlyBuilder
     | SlashCommandSubcommandBuilder,
@@ -261,9 +240,7 @@ function addOption(
   switch (option.type) {
     case "string":
       commandBuilder.addStringOption((builder) => {
-        applyShared(option, builder).setAutocomplete(
-          option.autocomplete !== undefined,
-        )
+        applyShared(option, builder).setAutocomplete("autocomplete" in option)
 
         if (typeof option.minLength === "number") {
           builder.setMinLength(option.minLength)
@@ -273,7 +250,7 @@ function addOption(
           builder.setMaxLength(option.maxLength)
         }
 
-        if (option.choices) {
+        if ("choices" in option) {
           builder.setChoices(...option.choices)
         }
 
@@ -282,9 +259,7 @@ function addOption(
       break
     case "number":
       commandBuilder.addNumberOption((builder) => {
-        applyShared(option, builder).setAutocomplete(
-          option.autocomplete !== undefined,
-        )
+        applyShared(option, builder).setAutocomplete("autocomplete" in option)
 
         if (typeof option.minValue === "number") {
           builder.setMinValue(option.minValue)
@@ -294,7 +269,7 @@ function addOption(
           builder.setMaxValue(option.maxValue)
         }
 
-        if (option.choices) {
+        if ("choices" in option) {
           builder.setChoices(...option.choices)
         }
 
@@ -306,9 +281,7 @@ function addOption(
       break
     case "integer":
       commandBuilder.addIntegerOption((builder) => {
-        applyShared(option, builder).setAutocomplete(
-          option.autocomplete !== undefined,
-        )
+        applyShared(option, builder).setAutocomplete("autocomplete" in option)
 
         if (typeof option.minValue === "number") {
           builder.setMinValue(option.minValue)
@@ -318,7 +291,7 @@ function addOption(
           builder.setMaxValue(option.maxValue)
         }
 
-        if (option.choices) {
+        if ("choices" in option) {
           builder.setChoices(...option.choices)
         }
 
@@ -363,7 +336,7 @@ function getOption<
   Required extends boolean,
 >(
   interaction: ChatInputCommandInteraction,
-  option: SlashOptionData<Type, Required>,
+  option: SlashOptionData<Required>,
 ): SlashOptionValueTypeWithRequired<Type, Required> {
   switch (option.type) {
     case "string":
@@ -412,13 +385,13 @@ function getOption<
         option.required,
       ) as SlashOptionValueTypeWithRequired<Type, Required>
     default:
-      throw new Error(`Invalid option type ${option.type}`)
+      throw new Error(`Invalid option ${JSON.stringify(option, undefined, 4)}`)
   }
 }
 
-export function slashCommand<
-  Data extends SlashOptionData<SlashOptionTypeSimple, boolean>[],
->(data: SlashCommandData<Data>) {
+export function slashCommand<Data extends SlashOptionData<boolean>[]>(
+  data: SlashCommandData<Data>,
+) {
   const { name, nameLocalizations, description, descriptionLocalizations } =
     data
 
@@ -427,7 +400,7 @@ export function slashCommand<
     .setDescription(description)
     .setDMPermission(data.dmPermission)
     .setDefaultMemberPermissions(data.defaultMemberPermissions)
-    .setNSFW(data.nsfw)
+    .setNSFW(data.nsfw === true)
 
   if (nameLocalizations) {
     commandBuilder.setNameLocalizations(nameLocalizations)
@@ -495,7 +468,7 @@ export function slashCommand<
       async autocomplete(interaction: AutocompleteInteraction) {
         const focused = interaction.options.getFocused(true)
         const option = data.options?.find((o) => o.name === focused.name)
-        if (!option || !option.autocomplete) {
+        if (!option || !("autocomplete" in option)) {
           throw new Error(`Option ${option?.name} doesn't have autocomplete`)
         }
 
@@ -548,9 +521,7 @@ export function slashCommand<
   }
 }
 
-export function slashSubcommand<
-  Data extends SlashOptionData<SlashOptionTypeSimple, boolean>[],
->({
+export function slashSubcommand<Data extends SlashOptionData<boolean>[]>({
   name,
   nameLocalizations,
   description,
@@ -595,7 +566,7 @@ export function slashSubcommand<
     async autocomplete(interaction: AutocompleteInteraction) {
       const focused = interaction.options.getFocused(true)
       const option = options?.find((o) => o.name === focused.name)
-      if (!option || !option.autocomplete) {
+      if (!option || !("autocomplete" in option)) {
         throw new Error(`Option ${option?.name} doesn't have autocomplete`)
       }
 

@@ -1,4 +1,3 @@
-import { DuplicateNameError } from "../errors.mjs"
 import { Modals } from "../modals.mjs"
 import {
   ActionRowBuilder,
@@ -31,56 +30,6 @@ export function modalInput<T extends boolean, TT extends string>(
   return { id, required, builder }
 }
 
-// export function staticModal<
-//   T extends string,
-//   TT extends readonly ReturnType<typeof modalInput>[]
-// >({
-//   id,
-//   title,
-//   components,
-//   handle,
-// }: {
-//   id: T
-//   title: string
-//   components: [...TT]
-//   handle: (
-//     interaction: ModalSubmitInteraction,
-//     values: InferModalValues<TT>
-//   ) => Promise<void>
-// }) {
-//   if (Modals.has(id)) {
-//     throw new DuplicateNameError(id)
-//   }
-
-//   const modal = new ModalBuilder()
-//     .setTitle(title)
-//     .setCustomId(id)
-//     .setComponents(
-//       components.map((c) =>
-//         new ActionRowBuilder<ModalActionRowComponentBuilder>().setComponents(
-//           c.builder
-//         )
-//       )
-//     )
-
-//   Modals.set(id, async (interaction) => {
-//     const values: Record<string, string> = {}
-//     for (const row of interaction.components) {
-//       for (const input of row.components) {
-//         if (input.value === "") {
-//           continue
-//         }
-
-//         values[input.customId] = input.value
-//       }
-//     }
-
-//     await handle(interaction, values as InferModalValues<TT>)
-//   })
-
-//   return modal
-// }
-
 export function modal<
   T extends string,
   TT extends readonly ReturnType<typeof modalInput>[],
@@ -101,7 +50,7 @@ export function modal<
   ) => Promise<void>
 }) {
   if (Modals.has(id)) {
-    throw new DuplicateNameError(id)
+    throw new Error(`A model with the name ${id} already exists`)
   }
 
   Modals.set(id, async (interaction) => {
