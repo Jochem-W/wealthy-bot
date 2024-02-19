@@ -1,8 +1,5 @@
 import { Drizzle } from "../clients.mjs"
-import {
-  replaceTimeout,
-  removeTimeout,
-} from "../handlers/checkSubscriptions.mjs"
+import { replaceTimeout } from "../handlers/checkSubscriptions.mjs"
 import { newSubscriptionMessage } from "../messages/newSubscriptionMessage.mjs"
 import { renewedLateMessage } from "../messages/renewedLateMessage.mjs"
 import { tierChangedMessage } from "../messages/tierChangedMessage.mjs"
@@ -122,17 +119,10 @@ async function newSubscription(
   await channel.send(newSubscriptionMessage(user))
 }
 
-export async function linkDiscord(
-  client: Client<true>,
-  id: number,
-  discordId: string,
-) {
-  const deletedUsers = await Drizzle.delete(usersTable)
+export async function linkDiscord(id: number, discordId: string) {
+  await Drizzle.update(usersTable)
+    .set({ discordId: null })
     .where(and(not(eq(usersTable.id, id)), eq(usersTable.discordId, discordId)))
-    .returning()
-  for (const deletedUser of deletedUsers) {
-    removeTimeout(deletedUser.id)
-  }
 
   const [user] = await Drizzle.update(usersTable)
     .set({ discordId })
@@ -141,8 +131,6 @@ export async function linkDiscord(
   if (!user) {
     throw new Error("User not found")
   }
-
-  replaceTimeout(client, user)
 
   return user
 }

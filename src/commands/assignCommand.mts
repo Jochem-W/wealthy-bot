@@ -36,7 +36,7 @@ export const AssignCommand = slashCommand({
     },
   ],
   async handle(interaction, user, koFi) {
-    await linkDiscord(interaction.client, parseInt(koFi, 10), user.id)
+    await linkDiscord(parseInt(koFi, 10), user.id)
 
     await interaction.reply({
       ephemeral: true,
