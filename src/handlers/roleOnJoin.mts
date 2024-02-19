@@ -27,7 +27,7 @@ export const RoleOnJoin = handler({
     let isInvited = member.roles.cache.has(Config.roles.invited)
     let isExemptNormal = member.roles.cache.has(Config.roles.exemptNormal)
     let isExemptExtra = member.roles.cache.has(Config.roles.exemptExtra)
-    let isExempt = isExemptNormal && isExemptExtra
+    let isExempt = isExemptNormal || isExemptExtra
     let isUnsubscribed = member.roles.cache.has(Config.roles.unsubscribed)
 
     if (isExemptNormal && isExemptExtra) {
@@ -51,14 +51,14 @@ export const RoleOnJoin = handler({
       // await member.roles.remove(Config.roles.exemptNormal)
       console.log("Removing normal exempt role from", member.user.displayName)
       isExemptNormal = false
-      isExempt = isExemptNormal && isExemptExtra
+      isExempt = isExemptNormal || isExemptExtra
     }
 
     if (isExemptExtra && (isSubscribed || isInvited)) {
       // await member.roles.remove(Config.roles.exemptExtra)
       console.log("Removing extra exempt role from", member.user.displayName)
       isExemptExtra = false
-      isExempt = isExemptNormal && isExemptExtra
+      isExempt = isExemptNormal || isExemptExtra
     }
 
     if (isUnsubscribed && (isExempt || isSubscribed || isInvited)) {
