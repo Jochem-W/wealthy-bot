@@ -1,8 +1,7 @@
 import { Drizzle } from "../clients.mjs"
 import { slashCommand, slashSubcommand } from "../models/slashCommand.mjs"
-import { usersTable } from "../schema.mjs"
+import { birthdaysTable } from "../schema.mjs"
 import { PermissionFlagsBits } from "discord.js"
-import { eq } from "drizzle-orm"
 
 const months = [
   "January",
@@ -82,12 +81,16 @@ const birthdayCommand = slashSubcommand({
       return
     }
 
-    const [updated] = await Drizzle.update(usersTable)
-      .set({
-        birthDay: day,
-        birthMonth: month + 1,
+    const [updated] = await Drizzle.insert(birthdaysTable)
+      .values({
+        id: user.id,
+        day,
+        month: month + 1,
       })
-      .where(eq(usersTable.discordId, user.id))
+      .onConflictDoUpdate({
+        target: birthdaysTable.id,
+        set: { day, month: month + 1 },
+      })
       .returning()
 
     if (!updated) {

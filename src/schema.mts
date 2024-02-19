@@ -7,8 +7,12 @@ export const usersTable = pgTable("user", {
   lastPaymentTier: text("lastPaymentTier").notNull(),
   lastPaymentTimestamp: timestamp("lastPaymentTimestamp").notNull(),
   discordId: text("discordId").unique(),
-  birthMonth: integer("birthMonth"),
-  birthDay: integer("birthDay"),
+})
+
+export const birthdaysTable = pgTable("birthday", {
+  id: text("id").primaryKey(),
+  month: integer("month"),
+  day: integer("day"),
 })
 
 export const inviteesTable = pgTable("invitee", {
