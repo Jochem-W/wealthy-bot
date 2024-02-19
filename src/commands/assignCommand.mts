@@ -40,7 +40,7 @@ export const AssignCommand = slashCommand({
 
     await interaction.reply({
       ephemeral: true,
-      content: "I'm lazy so there's no fancy embed, but it should've worked",
+      content: "I'm lazy, so there's no fancy embed, but it should've worked",
     })
   },
 })
