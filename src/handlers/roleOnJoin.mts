@@ -25,19 +25,15 @@ export const RoleOnJoin = handler({
       ...[...Config.tiers.values()].map((tier) => tier.roleId),
     )
     let isInvited = member.roles.cache.has(Config.roles.invited)
-    let isExempt = member.roles.cache.has(Config.roles.exempt)
+    let isExemptNormal = member.roles.cache.has(Config.roles.exemptNormal)
+    let isExemptExtra = member.roles.cache.has(Config.roles.exemptExtra)
+    let isExempt = isExemptNormal && isExemptExtra
     let isUnsubscribed = member.roles.cache.has(Config.roles.unsubscribed)
 
-    if (isUnsubscribed && (isExempt || isSubscribed || isInvited)) {
-      // await member.roles.remove(Config.roles.unsubscribed)
-      console.log("Removing unsubscribed role from", member.user.displayName)
-      isUnsubscribed = false
-    }
-
-    if (isExempt && (isSubscribed || isInvited)) {
-      // await member.roles.remove(Config.roles.exempt)
-      console.log("Removing exempt role from", member.user.displayName)
-      isExempt = false
+    if (isExemptNormal && isExemptExtra) {
+      // await member.roles.remove(Config.roles.exemptNormal)
+      console.log("Removing normal exempt role from", member.user.displayName)
+      isExemptNormal = false
     }
 
     if (isInvited) {
@@ -51,9 +47,30 @@ export const RoleOnJoin = handler({
       }
     }
 
+    if (isExemptNormal && (isSubscribed || isInvited)) {
+      // await member.roles.remove(Config.roles.exemptNormal)
+      console.log("Removing normal exempt role from", member.user.displayName)
+      isExemptNormal = false
+      isExempt = isExemptNormal && isExemptExtra
+    }
+
+    if (isExemptExtra && (isSubscribed || isInvited)) {
+      // await member.roles.remove(Config.roles.exemptExtra)
+      console.log("Removing extra exempt role from", member.user.displayName)
+      isExemptExtra = false
+      isExempt = isExemptNormal && isExemptExtra
+    }
+
+    if (isUnsubscribed && (isExempt || isSubscribed || isInvited)) {
+      // await member.roles.remove(Config.roles.unsubscribed)
+      console.log("Removing unsubscribed role from", member.user.displayName)
+      isUnsubscribed = false
+    }
+
     if (!isUnsubscribed && !isInvited && !isExempt && !isSubscribed) {
       // await member.roles.add(Config.roles.unsubscribed)
       console.log("Adding unsubscribed role from", member.user.displayName)
+      isUnsubscribed = true
     }
   },
 })

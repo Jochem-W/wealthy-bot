@@ -24,7 +24,8 @@ const model = z.object({
     .optional(),
   roles: z.object({
     unsubscribed: z.string(),
-    exempt: z.string(),
+    exemptNormal: z.string(),
+    exemptExtra: z.string(),
     invited: z.string(),
   }),
   tiers: z
