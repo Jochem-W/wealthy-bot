@@ -89,10 +89,7 @@ export async function fetchChannel<T extends ChannelType>(
   type: T | T[],
   options?: FetchChannelOptions,
 ) {
-  const channel = await client.channels.fetch(id, {
-    allowUnknownGuild: true,
-    ...options,
-  })
+  const channel = await client.channels.fetch(id, options)
   if (!channel) {
     throw new ChannelNotFoundError(id)
   }
