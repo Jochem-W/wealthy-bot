@@ -37,7 +37,7 @@ export const StarboardHandler = handler({
 
     if (
       reaction.message.guildId !== Config.guild ||
-      reaction.emoji.name !== "⭐" ||
+      reaction.emoji.toString() !== configuration.emoji ||
       !configuration.channel
     ) {
       return
@@ -104,6 +104,9 @@ export const StarboardHandler = handler({
       .setDescription(message.content || null)
       .setTimestamp(message.createdTimestamp)
 
+    const emojiName =
+      reaction.emoji.name?.replace(":", "").replace("_", " ") ?? "star"
+
     const messageData = {
       embeds,
       components: [
@@ -111,9 +114,9 @@ export const StarboardHandler = handler({
           new ButtonBuilder()
             .setCustomId("stars")
             .setDisabled(true)
-            .setEmoji("⭐")
+            .setEmoji(configuration.emoji)
             .setLabel(
-              `${reaction.count} ${reaction.count === 1 ? "star" : "stars"}`,
+              `${reaction.count} ${reaction.count === 1 ? emojiName : emojiName + "s"}`,
             )
             .setStyle(ButtonStyle.Secondary),
           new ButtonBuilder()

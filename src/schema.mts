@@ -49,4 +49,5 @@ export const starboardConfiguration = pgTable("starboard_config", {
   channel: text("channel").notNull(),
   enabled: boolean("enabled").notNull(),
   threshold: integer("threshold").notNull(),
+  emoji: text("emoji").notNull(),
 })

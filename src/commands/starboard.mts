@@ -8,12 +8,34 @@ import { starboardConfiguration } from "../schema.mjs"
 import {
   ChannelType,
   EmbedBuilder,
+  Guild,
   PermissionFlagsBits,
   TextChannel,
   channelMention,
   inlineCode,
 } from "discord.js"
 import { desc } from "drizzle-orm"
+import emojiRegex from "emoji-regex"
+
+const regex = emojiRegex()
+
+function parseEmoji(guild: Guild, emoji: string | null) {
+  if (!emoji) {
+    return null
+  }
+
+  const unicodeEmoji = emoji.match(regex)
+  if (unicodeEmoji && unicodeEmoji[0]) {
+    return unicodeEmoji[0]
+  }
+
+  const guildEmoji = emoji.match(/<a?:[\w-]+:(\d+)>/)
+  if (!guildEmoji || !guildEmoji[1] || !guild.emojis.cache.has(guildEmoji[1])) {
+    return null
+  }
+
+  return emoji
+}
 
 export const StarboardCommand = slashCommand({
   name: "starboard",
@@ -42,8 +64,34 @@ export const StarboardCommand = slashCommand({
           type: "channel",
           channelTypes: [ChannelType.GuildText, ChannelType.GuildAnnouncement],
         },
+        {
+          name: "emoji",
+          description: "Sets the emoji used for starring messages",
+          type: "string",
+        },
       ],
-      async handle(interaction, enabled, threshold, channel) {
+      async handle(interaction, enabled, threshold, channel, emoji) {
+        if (!interaction.inCachedGuild()) {
+          return
+        }
+
+        if (emoji) {
+          const originalEmoji = emoji
+          emoji = parseEmoji(interaction.guild, emoji)
+          if (!emoji) {
+            await interaction.reply({
+              embeds: [
+                new EmbedBuilder()
+                  .setTitle("Invalid emoji")
+                  .setDescription(
+                    `The emoji ${inlineCode(originalEmoji)} is invalid. Make sure it's an emoji that's built in to Discord or an emoji that's from the current server.`,
+                  ),
+              ],
+            })
+            return
+          }
+        }
+
         const [configuration] = await Drizzle.select()
           .from(starboardConfiguration)
           .orderBy(desc(starboardConfiguration.timestamp))
@@ -55,6 +103,7 @@ export const StarboardCommand = slashCommand({
 
         const oldEnabled = configuration?.enabled ?? false
         const oldThreshold = configuration?.threshold ?? 0
+        const oldEmoji = configuration?.emoji ?? "⭐"
 
         if (!channelId) {
           await interaction.reply({
@@ -76,6 +125,7 @@ export const StarboardCommand = slashCommand({
             enabled: enabled ?? oldEnabled,
             channel: channelId,
             threshold: threshold ?? oldThreshold,
+            emoji: emoji ?? oldEmoji,
           })
           .returning()
 
@@ -118,6 +168,11 @@ export const StarboardCommand = slashCommand({
                     threshold !== null
                       ? `${inlineCode(oldThreshold.toString(10))} -> ${inlineCode(threshold.toString(10))}`
                       : `${inlineCode(oldThreshold.toString(10))}`,
+                },
+                {
+                  name: "Emoji",
+                  value:
+                    emoji !== null ? `${oldEmoji} -> ${emoji}` : `${oldEmoji}`,
                 },
               ),
           ],

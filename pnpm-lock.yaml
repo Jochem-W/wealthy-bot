@@ -23,6 +23,9 @@ importers:
       drizzle-orm:
         specifier: ^0.30.10
         version: 0.30.10(postgres@3.4.4)
+      emoji-regex:
+        specifier: ^10.3.0
+        version: 10.3.0
       jose:
         specifier: ^5.2.4
         version: 5.2.4
@@ -926,6 +929,9 @@ packages:
         optional: true
       sqlite3:
         optional: true
+
+  emoji-regex@10.3.0:
+    resolution: {integrity: sha512-QpLs9D9v9kArv4lfDEgg1X/gN5XLnf/A6l9cs8SPZLRZR3ZkY9+kwIQTxm+fsSej5UMYGE8fdoaZVIBlqG0XTw==}
 
   env-paths@3.0.0:
     resolution: {integrity: sha512-dtJUTepzMW3Lm/NPxRf3wP4642UWhjL2sQxc+ym2YMj1m/H2zDNQOlezafzkHwn6sMstjHTwG6iQQsctDW/b1A==}
@@ -2237,6 +2243,8 @@ snapshots:
   drizzle-orm@0.30.10(postgres@3.4.4):
     optionalDependencies:
       postgres: 3.4.4
+
+  emoji-regex@10.3.0: {}
 
   env-paths@3.0.0: {}
 
