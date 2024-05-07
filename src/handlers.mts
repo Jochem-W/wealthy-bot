@@ -13,6 +13,7 @@ import { LogMessageEdits } from "./handlers/logMessageEdits.mjs"
 import { RoleOnJoin } from "./handlers/roleOnJoin.mjs"
 import { RoleOnMemberUpdate } from "./handlers/roleOnMemberUpdate.mjs"
 import { RolePeriodic } from "./handlers/rolePeriodic.mjs"
+import { StarboardHandler } from "./handlers/starboard.mjs"
 import { StartupHandler } from "./handlers/startupHandler.mjs"
 import { VoiceLogsHandler } from "./handlers/voiceLogsHandler.mjs"
 import type { Handler } from "./models/handler.mjs"
@@ -33,4 +34,5 @@ export const Handlers: Handler<keyof ClientEvents>[] = [
   RolePeriodic,
   InvitesOnStart,
   VoiceLogsHandler,
+  StarboardHandler,
 ]

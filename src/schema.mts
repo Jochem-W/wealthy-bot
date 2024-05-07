@@ -1,7 +1,14 @@
 /**
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
-import { integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core"
+import {
+  boolean,
+  integer,
+  pgTable,
+  serial,
+  text,
+  timestamp,
+} from "drizzle-orm/pg-core"
 
 export const usersTable = pgTable("user", {
   id: serial("id").primaryKey(),
@@ -28,4 +35,18 @@ export const inviteesTable = pgTable("invitee", {
 export const inviteLinksTable = pgTable("inviteLinks", {
   discordId: text("discordId").primaryKey(),
   code: text("code").notNull().unique(),
+})
+
+export const starboardTable = pgTable("starboard", {
+  id: text("id").primaryKey(),
+  message: text("message").notNull(),
+  channel: text("channel").notNull(),
+})
+
+export const starboardConfiguration = pgTable("starboard_config", {
+  id: serial("id").primaryKey(),
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  channel: text("channel").notNull(),
+  enabled: boolean("enabled").notNull(),
+  threshold: integer("threshold").notNull(),
 })
