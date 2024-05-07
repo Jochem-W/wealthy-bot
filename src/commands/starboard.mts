@@ -59,7 +59,7 @@ export const StarboardCommand = slashCommand({
             {
               name: "threshold",
               description:
-                "Sets the minimum amount of reaction for a message to be added to the starboard",
+                "Sets the minimum amount of reactions for a message to be added to the starboard",
               type: "integer",
             },
             {
