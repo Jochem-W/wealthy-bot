@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "author": "Jochem-W",
-  "license": "AGPL-3.0-only",
+  "license": "AGPL-3.0-or-later",
   "dependencies": {
     "@octokit/rest": "^20.1.1",
     "camelcase-keys": "^9.1.3",

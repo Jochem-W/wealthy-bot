@@ -1,3 +1,6 @@
+/**
+ * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
+ */
 import { Colours } from "../colours.mjs"
 import { NoDataError } from "../errors.mjs"
 import { Config } from "../models/config.mjs"

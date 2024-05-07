@@ -1,3 +1,7 @@
+/**
+ * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
+ */
+
 export function* chunks<T>(arr: T[], n: number) {
   for (let i = 0; i < arr.length; i += n) {
     yield arr.slice(i, i + n)

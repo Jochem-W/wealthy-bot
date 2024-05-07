@@ -1,3 +1,6 @@
+/**
+ * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
+ */
 import { component } from "../models/component.mjs"
 import { usersTable } from "../schema.mjs"
 import { linkDiscord } from "../utilities/subscriptionUtilities.mjs"

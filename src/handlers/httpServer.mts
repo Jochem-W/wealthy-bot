@@ -1,3 +1,6 @@
+/**
+ * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
+ */
 import { logError } from "../errors.mjs"
 import { handler } from "../models/handler.mjs"
 import {

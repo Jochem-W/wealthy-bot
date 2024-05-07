@@ -1,3 +1,7 @@
+/**
+ * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
+ */
+
 const maximumTimeout = 2 ** 31 - 1
 
 export class LongTimeout {

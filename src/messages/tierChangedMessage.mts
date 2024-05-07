@@ -1,3 +1,6 @@
+/**
+ * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
+ */
 import { inviteesTable, usersTable } from "../schema.mjs"
 import { EmbedBuilder, userMention } from "discord.js"
 
