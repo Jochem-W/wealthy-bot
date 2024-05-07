@@ -103,14 +103,14 @@ export const StarboardCommand = slashCommand({
                   name: "Enabled",
                   value:
                     enabled !== null
-                      ? `${inlineCode(oldEnabled.toString())} -> ${inlineCode(enabled.toString())}`
-                      : `${inlineCode(oldEnabled.toString())}`,
+                      ? `${oldEnabled ? "✅" : "❌"} -> ${enabled ? "✅" : "❌"}`
+                      : `${oldEnabled ? "✅" : "❌"}`,
                 },
                 {
                   name: "Channel",
                   value: channel
                     ? `${configuration?.channel ? channelMention(configuration.channel) : inlineCode("None")} -> ${channelMention(channel.id)}`
-                    : `${configuration?.channel ? channelMention(configuration.channel) : inlineCode("None")}}`,
+                    : `${configuration?.channel ? channelMention(configuration.channel) : inlineCode("None")}`,
                 },
                 {
                   name: "Threshold",
