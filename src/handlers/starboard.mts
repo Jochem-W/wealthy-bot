@@ -13,9 +13,24 @@ import {
   ButtonStyle,
   ChannelType,
   EmbedBuilder,
+  GuildEmoji,
   MessageActionRowComponentBuilder,
+  ReactionEmoji,
 } from "discord.js"
 import { desc, eq } from "drizzle-orm"
+import { which } from "node-emoji"
+
+function emojiName(emoji: GuildEmoji | ReactionEmoji) {
+  if (!emoji.name) {
+    return "star"
+  }
+
+  if (emoji.id) {
+    return emoji.name
+  }
+
+  return which(emoji.name) ?? "star"
+}
 
 export const StarboardHandler = handler({
   event: "messageReactionAdd",
@@ -104,8 +119,7 @@ export const StarboardHandler = handler({
       .setDescription(message.content || null)
       .setTimestamp(message.createdTimestamp)
 
-    const emojiName =
-      reaction.emoji.name?.replace(":", "").replace("_", " ") ?? "star"
+    const name = emojiName(reaction.emoji)
 
     const messageData = {
       embeds,
@@ -116,7 +130,7 @@ export const StarboardHandler = handler({
             .setDisabled(true)
             .setEmoji(configuration.emoji)
             .setLabel(
-              `${reaction.count} ${reaction.count === 1 ? emojiName : emojiName + "s"}`,
+              `${reaction.count} ${reaction.count === 1 ? name : name + "s"}`,
             )
             .setStyle(ButtonStyle.Secondary),
           new ButtonBuilder()
