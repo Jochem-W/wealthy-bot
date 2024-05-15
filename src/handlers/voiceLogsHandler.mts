@@ -23,6 +23,10 @@ export const VoiceLogsHandler = handler({
   event: "voiceStateUpdate",
   once: false,
   async handle(oldState, newState) {
+    if (newState.guild.id !== Config.guild) {
+      return
+    }
+
     logChannel ??= await fetchChannel(
       newState.client,
       Config.logs.voice,
