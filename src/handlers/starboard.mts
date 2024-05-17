@@ -40,21 +40,11 @@ export const StarboardHandler = handler({
       .from(starboardConfiguration)
       .orderBy(desc(starboardConfiguration.timestamp))
       .limit(1)
-    if (!configuration) {
+    if (!configuration || !configuration.channel) {
       return
     }
 
-    const channel = await fetchChannel(
-      reaction.client,
-      configuration.channel,
-      ChannelType.GuildText,
-    )
-
-    if (
-      reaction.message.guildId !== Config.guild ||
-      reaction.emoji.toString() !== configuration.emoji ||
-      !configuration.channel
-    ) {
+    if (reaction.emoji.toString() !== configuration.emoji) {
       return
     }
 
@@ -69,6 +59,10 @@ export const StarboardHandler = handler({
     let message = reaction.message
     if (message.partial) {
       message = await message.fetch()
+    }
+
+    if (reaction.message.guildId !== Config.guild) {
+      return
     }
 
     const images = []
@@ -154,23 +148,31 @@ export const StarboardHandler = handler({
     const [db] = await Drizzle.select()
       .from(starboardTable)
       .where(eq(starboardTable.id, reaction.message.id))
-    if (!db) {
-      const starboardMessage = await channel.send(messageDataWithAttachments)
-      await Drizzle.insert(starboardTable).values({
-        id: reaction.message.id,
-        message: starboardMessage.id,
-        channel: starboardMessage.channelId,
-      })
+    if (db) {
+      const starboardChannel = await fetchChannel(
+        reaction.client,
+        db.channel,
+        ChannelType.GuildText,
+      )
+      const starboardMessage = await starboardChannel.messages.fetch(db.message)
+      await starboardMessage.edit(messageData)
 
       return
     }
 
     const starboardChannel = await fetchChannel(
       reaction.client,
-      db.channel,
+      configuration.channel,
       ChannelType.GuildText,
     )
-    const starboardMessage = await starboardChannel.messages.fetch(db.message)
-    await starboardMessage.edit(messageData)
+
+    const starboardMessage = await starboardChannel.send(
+      messageDataWithAttachments,
+    )
+    await Drizzle.insert(starboardTable).values({
+      id: reaction.message.id,
+      message: starboardMessage.id,
+      channel: starboardMessage.channelId,
+    })
   },
 })
