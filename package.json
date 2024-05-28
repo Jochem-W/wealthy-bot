@@ -23,7 +23,7 @@
     "@tsconfig/strictest": "^2.0.5",
     "@types/luxon": "^3.4.2",
     "@types/node": "^20.12.12",
-    "@typescript-eslint/eslint-plugin": "^7.9.0",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.9.0",
     "drizzle-kit": "^0.21.2",
     "eslint": "^8.57.0",
