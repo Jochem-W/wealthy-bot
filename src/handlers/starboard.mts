@@ -42,7 +42,7 @@ function emojiName(emoji: GuildEmoji | ReactionEmoji) {
 export const StarboardHandler = handler({
   event: "messageReactionAdd",
   once: false,
-  async handle(reaction) {
+  async handle(reaction, user) {
     const [configuration] = await Drizzle.select()
       .from(starboardConfiguration)
       .orderBy(desc(starboardConfiguration.timestamp))
@@ -68,13 +68,18 @@ export const StarboardHandler = handler({
       return
     }
 
+    if (reaction.users.cache.size === 0) {
+      await reaction.users.fetch({ limit: 100 })
+    }
+
     await Drizzle.insert(starredTable)
-      .values(
-        reaction.users.cache.map((user) => ({
+      .values([
+        ...reaction.users.cache.map((user) => ({
           userId: user.id,
           messageId: message.id,
         })),
-      )
+        { userId: user.id, messageId: message.id },
+      ])
       .onConflictDoNothing()
 
     const [count] = await Drizzle.select({
