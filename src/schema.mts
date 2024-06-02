@@ -5,6 +5,7 @@ import {
   boolean,
   integer,
   pgTable,
+  primaryKey,
   serial,
   text,
   timestamp,
@@ -42,6 +43,17 @@ export const starboardTable = pgTable("starboard", {
   message: text("message").notNull(),
   channel: text("channel").notNull(),
 })
+
+export const starredTable = pgTable(
+  "starred",
+  {
+    userId: text("user_id").notNull(),
+    messageId: text("message_id").notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.userId, table.messageId] }),
+  }),
+)
 
 export const starboardConfiguration = pgTable("starboard_config", {
   id: serial("id").primaryKey(),

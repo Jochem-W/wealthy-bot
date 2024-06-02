@@ -3,22 +3,29 @@
  */
 import { Drizzle } from "../clients.mjs"
 import { Colours } from "../colours.mjs"
+import { component } from "../models/component.mjs"
 import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
-import { starboardConfiguration, starboardTable } from "../schema.mjs"
+import {
+  starboardConfiguration,
+  starboardTable,
+  starredTable,
+} from "../schema.mjs"
 import { fetchChannel } from "../utilities/discordUtilities.mjs"
 import {
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
+  ComponentType,
   EmbedBuilder,
   GuildEmoji,
   MessageActionRowComponentBuilder,
   ReactionEmoji,
 } from "discord.js"
-import { desc, eq } from "drizzle-orm"
+import { desc, eq, countDistinct } from "drizzle-orm"
 import { which } from "node-emoji"
+import postgres from "postgres"
 
 function emojiName(emoji: GuildEmoji | ReactionEmoji) {
   if (!emoji.name) {
@@ -44,15 +51,11 @@ export const StarboardHandler = handler({
       return
     }
 
-    if (reaction.emoji.toString() !== configuration.emoji) {
-      return
-    }
-
     if (reaction.partial) {
       reaction = await reaction.fetch()
     }
 
-    if (reaction.count < configuration.threshold) {
+    if (reaction.emoji.toString() !== configuration.emoji) {
       return
     }
 
@@ -61,9 +64,30 @@ export const StarboardHandler = handler({
       message = await message.fetch()
     }
 
-    if (reaction.message.guildId !== Config.guild) {
+    if (message.guildId !== Config.guild) {
       return
     }
+
+    await Drizzle.insert(starredTable)
+      .values(
+        reaction.users.cache.map((user) => ({
+          userId: user.id,
+          messageId: message.id,
+        })),
+      )
+      .onConflictDoNothing()
+
+    const [count] = await Drizzle.select({
+      value: countDistinct(starredTable.userId),
+    })
+      .from(starredTable)
+      .where(eq(starredTable.messageId, message.id))
+
+    if (reaction.count < configuration.threshold) {
+      return
+    }
+
+    const countNum = count?.value ?? reaction.count
 
     const images = []
     for (const attachment of message.attachments.values()) {
@@ -120,12 +144,9 @@ export const StarboardHandler = handler({
       components: [
         new ActionRowBuilder<MessageActionRowComponentBuilder>().setComponents(
           new ButtonBuilder()
-            .setCustomId("stars")
-            .setDisabled(true)
+            .setCustomId(button())
             .setEmoji(configuration.emoji)
-            .setLabel(
-              `${reaction.count} ${reaction.count === 1 ? name : name + "s"}`,
-            )
+            .setLabel(`${countNum} ${countNum === 1 ? name : name + "s"}`)
             .setStyle(ButtonStyle.Secondary),
           new ButtonBuilder()
             .setEmoji("🔗")
@@ -147,7 +168,7 @@ export const StarboardHandler = handler({
 
     const [db] = await Drizzle.select()
       .from(starboardTable)
-      .where(eq(starboardTable.id, reaction.message.id))
+      .where(eq(starboardTable.id, message.id))
     if (db) {
       const starboardChannel = await fetchChannel(
         reaction.client,
@@ -170,9 +191,59 @@ export const StarboardHandler = handler({
       messageDataWithAttachments,
     )
     await Drizzle.insert(starboardTable).values({
-      id: reaction.message.id,
+      id: message.id,
       message: starboardMessage.id,
       channel: starboardMessage.channelId,
     })
+  },
+})
+
+const button = component({
+  type: ComponentType.Button,
+  name: "starboard",
+  async handle(interaction) {
+    const [data] = await Drizzle.select()
+      .from(starboardTable)
+      .where(eq(starboardTable.message, interaction.message.id))
+
+    if (!data) {
+      return
+    }
+
+    const [count] = await Drizzle.select({
+      value: countDistinct(starredTable.userId),
+    })
+      .from(starredTable)
+      .where(eq(starredTable.messageId, data.id))
+
+    if (!count) {
+      return
+    }
+
+    try {
+      await Drizzle.insert(starredTable).values({
+        userId: interaction.user.id,
+        messageId: data.id,
+      })
+    } catch (e) {
+      if (!(e instanceof postgres.PostgresError) || e.code !== "23505") {
+        throw e
+      }
+
+      await interaction.reply({
+        content: "You've already starred this message!",
+        ephemeral: true,
+      })
+    }
+
+    const row = new ActionRowBuilder<MessageActionRowComponentBuilder>(
+      interaction.message.components[0],
+    )
+    const component = row.components[0] as ButtonBuilder
+    component.setLabel(
+      `${count.value + 1} ${component.data.label?.split(" ")[1]}`,
+    )
+
+    await interaction.update({ components: [row] })
   },
 })
