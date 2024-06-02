@@ -243,7 +243,7 @@ const button = component({
     }
 
     const row = new ActionRowBuilder<MessageActionRowComponentBuilder>(
-      interaction.message.components[0],
+      interaction.message.components[0]?.data,
     )
     const component = row.components[0] as ButtonBuilder
     component.setLabel(
