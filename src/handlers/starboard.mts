@@ -207,6 +207,10 @@ const button = component({
   type: ComponentType.Button,
   name: "starboard",
   async handle(interaction) {
+    if (!interaction.message.components[0]) {
+      return
+    }
+
     const [data] = await Drizzle.select()
       .from(starboardTable)
       .where(eq(starboardTable.message, interaction.message.id))
@@ -242,9 +246,8 @@ const button = component({
       return
     }
 
-    const row = new ActionRowBuilder<MessageActionRowComponentBuilder>(
-      interaction.message.components[0]?.data,
-    )
+    const row: ActionRowBuilder<MessageActionRowComponentBuilder> =
+      ActionRowBuilder.from(interaction.message.components[0])
     const component = row.components[0] as ButtonBuilder
     component.setLabel(
       `${count.value + 1} ${component.data.label?.split(" ")[1]}`,
