@@ -239,6 +239,7 @@ const button = component({
         content: "You've already starred this message!",
         ephemeral: true,
       })
+      return
     }
 
     const row = new ActionRowBuilder<MessageActionRowComponentBuilder>(
