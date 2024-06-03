@@ -152,7 +152,7 @@ export const StarboardHandler = handler({
             .setCustomId(button())
             .setEmoji(configuration.emoji)
             .setLabel(`${countNum} ${countNum === 1 ? name : name + "s"}`)
-            .setStyle(ButtonStyle.Secondary),
+            .setStyle(ButtonStyle.Primary),
           new ButtonBuilder()
             .setEmoji("🔗")
             .setLabel("Jump to message")
@@ -249,9 +249,9 @@ const button = component({
     const row: ActionRowBuilder<MessageActionRowComponentBuilder> =
       ActionRowBuilder.from(interaction.message.components[0])
     const component = row.components[0] as ButtonBuilder
-    component.setLabel(
-      `${count.value + 1} ${component.data.label?.split(" ")[1]}`,
-    )
+    component
+      .setLabel(`${count.value + 1} ${component.data.label?.split(" ")[1]}`)
+      .setStyle(ButtonStyle.Primary)
 
     await interaction.update({ components: [row] })
   },
