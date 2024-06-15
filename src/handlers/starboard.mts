@@ -88,11 +88,10 @@ export const StarboardHandler = handler({
       .from(starredTable)
       .where(eq(starredTable.messageId, message.id))
 
-    if (reaction.count < configuration.threshold) {
+    const countNum = count?.value ?? reaction.count
+    if (countNum < configuration.threshold) {
       return
     }
-
-    const countNum = count?.value ?? reaction.count
 
     const images = []
     for (const attachment of message.attachments.values()) {
