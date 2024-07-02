@@ -19,12 +19,6 @@ const model = z.object({
   }),
   gracePeriod: z.number(),
   guild: z.string(),
-  repository: z
-    .object({
-      name: z.string(),
-      owner: z.string(),
-    })
-    .optional(),
   roles: z.object({
     unsubscribed: z.string(),
     exemptNormal: z.string(),

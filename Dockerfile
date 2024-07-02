@@ -22,8 +22,7 @@ RUN pnpm tsc && \
 # Set-up running image
 FROM node:22-alpine
 ARG commit_hash
-ENV NODE_ENV=production \
-    COMMIT_HASH=$commit_hash
+ENV NODE_ENV=production
 WORKDIR /app
 
 # Copy all files (including source :/)
