@@ -3,14 +3,10 @@
  */
 import { logError } from "../errors.mjs"
 import { handler } from "../models/handler.mjs"
-import {
-  DonationModel,
-  processDonation,
-} from "../utilities/subscriptionUtilities.mjs"
+import { webhook } from "../models/patreon.mjs"
 import { Variables } from "../variables.mjs"
 import type { Client } from "discord.js"
 import { createServer, IncomingMessage, ServerResponse } from "http"
-import { parse } from "querystring"
 
 export const Server = createServer()
 
@@ -29,25 +25,19 @@ function badRequest(response: ServerResponse, log?: object | string) {
 }
 
 async function endHandler(
-  client: Client<true>,
+  _client: Client<true>,
+  _request: IncomingMessage,
   response: ServerResponse,
   body: string,
 ) {
   try {
-    const formData = parse(body)
-    const { data } = formData
-    if (typeof data !== "string") {
-      badRequest(response, body)
+    const data = await webhook.safeParseAsync(JSON.parse(body))
+    if (!data.success || data.error) {
+      console.log(data)
+      badRequest(response, `Invalid data ${data.error.toString()}`)
       return
     }
 
-    const info = DonationModel.parse(JSON.parse(data))
-    if (info.verificationToken !== Variables.verificationToken) {
-      badRequest(response, "Invalid verification token")
-      return
-    }
-
-    await processDonation(client, info)
     ok(response)
   } catch (e) {
     badRequest(response)
@@ -61,25 +51,45 @@ async function requestHandler(
   response: ServerResponse,
 ) {
   try {
-    if (!request.url || !request.headers.host) {
-      badRequest(response)
+    if (!request.url) {
+      badRequest(response, "No URL")
       return
     }
 
-    const url = new URL(request.url, `https://${request.headers.host}`)
-    const contentType = request.headers["content-type"]
-    if (
-      url.pathname !== "/webhook" ||
-      contentType !== "application/x-www-form-urlencoded"
-    ) {
-      badRequest(response, { url, contentType })
+    if (!request.headers.host) {
+      badRequest(response, "No Host")
+      return
+    }
+
+    if (request.headers["user-agent"] !== "Patreon HTTP Robot") {
+      badRequest(
+        response,
+        `Invalid User-Agent ${request.headers["user-agent"]}`,
+      )
+      return
+    }
+
+    if (request.headers["content-type"] !== "application/json") {
+      badRequest(
+        response,
+        `Invalid Content-Type ${request.headers["content-type"]}`,
+      )
+      return
+    }
+
+    const url = new URL(
+      request.url,
+      `https://${request.headers.host}`,
+    ).toString()
+    if (url !== Variables.webhookUrl) {
+      badRequest(response, `Invalid URL ${url} !== ${Variables.webhookUrl}`)
       return
     }
 
     let body = ""
     request.on("data", (chunk) => (body += chunk))
     request.on("end", () => {
-      void endHandler(client, response, body)
+      void endHandler(client, request, response, body)
     })
   } catch (e) {
     badRequest(response)

@@ -7,12 +7,16 @@ import { z } from "zod"
 
 const model = z
   .object({
-        DISCORD_BOT_TOKEN: z.string(),
-        NODE_ENV: z.string().optional().default("development"),
+    DISCORD_BOT_TOKEN: z.string(),
+    NODE_ENV: z.string().optional().default("development"),
     HTTP_PORT: z.coerce.number().optional().default(80),
-        SECRET_KEY: z.string(),
+    SECRET_KEY: z.string(),
     INVITE_URL: z.string().url(),
     DATABASE_URL: z.string(),
+    WEBHOOK_URL: z
+      .string()
+      .url()
+      .transform((arg) => new URL(arg).toString()),
   })
   .transform((arg) => camelcaseKeys(arg))
 
