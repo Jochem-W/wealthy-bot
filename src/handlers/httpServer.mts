@@ -8,6 +8,12 @@ import { Variables } from "../variables.mjs"
 import type { Client } from "discord.js"
 import { createServer, IncomingMessage, ServerResponse } from "http"
 
+const triggers = new Set([
+  "members:pledge:create",
+  "members:pledge:update",
+  "members:pledge:delete",
+])
+
 export const Server = createServer()
 
 function ok(response: ServerResponse) {
@@ -26,11 +32,26 @@ function badRequest(response: ServerResponse, log?: object | string) {
 
 async function endHandler(
   _client: Client<true>,
-  _request: IncomingMessage,
+  request: IncomingMessage,
   response: ServerResponse,
   body: string,
 ) {
+  if (!(typeof request.headers["x-patreon-event"] === "string")) {
+    badRequest(
+      response,
+      `Invalid trigger ${request.headers["x-patreon-event"]?.toString()}`,
+    )
+    return
+  }
+
+  if (!triggers.has(request.headers["x-patreon-event"])) {
+    console.log(`Ignored trigger ${request.headers["x-patreon-event"]}`)
+    ok(response)
+    return
+  }
+
   try {
+    console.log(request.headers["x-patreon-event"], body)
     const data = await webhook.safeParseAsync(JSON.parse(body))
     if (!data.success || data.error) {
       console.log(data)
