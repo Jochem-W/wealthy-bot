@@ -2,11 +2,21 @@
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
 import { logError } from "../errors.mjs"
+import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
 import { webhook } from "../models/patreon.mjs"
+import { fetchChannel } from "../utilities/discordUtilities.mjs"
 import { Variables } from "../variables.mjs"
-import type { Client } from "discord.js"
+import {
+  ChannelType,
+  EmbedBuilder,
+  hyperlink,
+  spoiler,
+  userMention,
+  type Client,
+} from "discord.js"
 import { createServer, IncomingMessage, ServerResponse } from "http"
+import { z } from "zod"
 
 const triggers = new Set([
   "members:pledge:create",
@@ -30,36 +40,91 @@ function badRequest(response: ServerResponse, log?: object | string) {
   response.end()
 }
 
+async function log(
+  client: Client<true>,
+  trigger: string,
+  payload: z.infer<typeof webhook>,
+) {
+  const channel = await fetchChannel(
+    client,
+    Config.logs.koFi,
+    ChannelType.GuildText,
+  )
+
+  const userData = payload.included.find(
+    (data) => data.type === "user" && "attributes" in data,
+  )
+
+  const discordFields = []
+  if (userData) {
+    discordFields.push({
+      name: "User",
+      value: userMention(
+        userData.attributes.social_connections.discord.user_id,
+      ),
+    })
+  }
+
+  await channel.send({
+    embeds: [
+      new EmbedBuilder()
+        .setTitle(`Pledge ${trigger.split(":").at(-1)}d`)
+        .setFields(
+          { name: "ID", value: payload.data.id },
+          {
+            name: "Patron",
+            value: userData
+              ? hyperlink(
+                  userData.attributes.full_name,
+                  userData.attributes.url,
+                )
+              : payload.data.attributes.full_name,
+          },
+          { name: "Email", value: spoiler(payload.data.attributes.email) },
+          ...discordFields,
+          {
+            name: "Entitled tiers",
+            value:
+              payload.data.relationships.currently_entitled_tiers.data
+                .map((tier) => `-${tier.id}`)
+                .join("\n") || "None",
+          },
+        )
+        .setThumbnail(userData?.attributes.image_url || null),
+    ],
+  })
+}
+
 async function endHandler(
-  _client: Client<true>,
+  client: Client<true>,
   request: IncomingMessage,
   response: ServerResponse,
   body: string,
 ) {
-  if (!(typeof request.headers["x-patreon-event"] === "string")) {
-    badRequest(
-      response,
-      `Invalid trigger ${request.headers["x-patreon-event"]?.toString()}`,
-    )
+  const trigger = request.headers["x-patreon-event"]
+  if (!(typeof trigger === "string")) {
+    badRequest(response, `Invalid trigger ${trigger?.toString()}`)
     return
   }
 
-  if (!triggers.has(request.headers["x-patreon-event"])) {
-    console.log(`Ignored trigger ${request.headers["x-patreon-event"]}`)
+  if (!triggers.has(trigger)) {
+    console.log(`Ignored trigger ${trigger}`)
     ok(response)
     return
   }
 
+  console.log(trigger, body)
+
   try {
-    console.log(request.headers["x-patreon-event"], body)
-    const data = await webhook.safeParseAsync(JSON.parse(body))
-    if (!data.success || data.error) {
-      console.log(data)
-      badRequest(response, `Invalid data ${data.error.toString()}`)
+    const payload = await webhook.safeParseAsync(JSON.parse(body))
+    if (!payload.success || payload.error) {
+      console.log(payload)
+      badRequest(response, `Invalid data ${payload.error.toString()}`)
       return
     }
 
     ok(response)
+    await log(client, trigger, payload.data)
   } catch (e) {
     badRequest(response)
     console.log(e)
