@@ -86,7 +86,7 @@ async function log(
             name: "Entitled tiers",
             value:
               payload.data.relationships.currently_entitled_tiers.data
-                .map((tier) => `-${tier.id}`)
+                .map((tier) => `- ${tier.id}`)
                 .join("\n") || "None",
           },
         )
