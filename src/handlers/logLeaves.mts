@@ -6,7 +6,6 @@ import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
 import { inviteesTable, usersTable } from "../schema.mjs"
 import { fetchChannel } from "../utilities/discordUtilities.mjs"
-import { untilExpiredMillis } from "../utilities/subscriptionUtilities.mjs"
 import {
   ChannelType,
   EmbedBuilder,
@@ -83,17 +82,6 @@ export const LogLeaves = handler({
       .from(inviteesTable)
       .where(eq(inviteesTable.discordId, member.id))
       .innerJoin(usersTable, eq(inviteesTable.userId, usersTable.id))
-    const [subscriber] = await Drizzle.select()
-      .from(usersTable)
-      .where(eq(usersTable.discordId, member.id))
-
-    if (subscriber) {
-      embed.addFields({
-        name: "Subscription",
-        value: `${subscriber.lastPaymentTier}${untilExpiredMillis(subscriber) < 0 ? " (expired)" : ""}`,
-        inline: true,
-      })
-    }
 
     if (invitee) {
       embed.addFields({

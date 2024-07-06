@@ -1,10 +1,8 @@
 /**
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
-import { AssignCommand } from "./commands/assignCommand.mjs"
 import { BirthdayCommand } from "./commands/birthdayCommand.mjs"
 import { ColourCommand } from "./commands/colourCommand.mjs"
-import { InviteCommand } from "./commands/inviteCommand.mjs"
 import { MembersCommand } from "./commands/membersCommand.mjs"
 import { StarboardCommand } from "./commands/starboard.mjs"
 import type { Command } from "./models/command.mjs"
@@ -13,9 +11,7 @@ import type { ApplicationCommandType, Snowflake } from "discord.js"
 
 export const SlashCommands: Command<ApplicationCommandType.ChatInput>[] = [
   ColourCommand,
-  InviteCommand,
   MembersCommand,
-  AssignCommand,
   BirthdayCommand,
   StarboardCommand,
 ]
