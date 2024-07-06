@@ -1,9 +1,9 @@
 /**
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
-import { BirthdayCommand } from "./commands/birthdayCommand.mjs"
-import { ColourCommand } from "./commands/colourCommand.mjs"
-import { MembersCommand } from "./commands/membersCommand.mjs"
+import { BirthdayCommand } from "./commands/birthday.mjs"
+import { ColourCommand } from "./commands/colour.mjs"
+import { MembersCommand } from "./commands/members.mjs"
 import { StarboardCommand } from "./commands/starboard.mjs"
 import type { Command } from "./models/command.mjs"
 import { Collection } from "discord.js"

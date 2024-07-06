@@ -19,7 +19,7 @@ import {
 
 let logChannel: TextChannel | undefined
 
-export const VoiceLogsHandler = handler({
+export const LogVoiceState = handler({
   event: "voiceStateUpdate",
   once: false,
   async handle(oldState, newState) {
