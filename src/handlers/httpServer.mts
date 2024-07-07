@@ -4,7 +4,7 @@
 import { logError } from "../errors.mjs"
 import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
-import { webhook } from "../models/patreon.mjs"
+import { pledgeSchema } from "../models/patreon.mjs"
 import { fetchChannel } from "../utilities/discordUtilities.mjs"
 import { Variables } from "../variables.mjs"
 import {
@@ -43,7 +43,7 @@ function badRequest(response: ServerResponse, log?: object | string) {
 async function log(
   client: Client<true>,
   trigger: string,
-  payload: z.infer<typeof webhook>,
+  payload: z.infer<typeof pledgeSchema>,
 ) {
   const channel = await fetchChannel(
     client,
@@ -116,7 +116,7 @@ async function endHandler(
   console.log(trigger, body)
 
   try {
-    const payload = await webhook.safeParseAsync(JSON.parse(body))
+    const payload = await pledgeSchema.safeParseAsync(JSON.parse(body))
     if (!payload.success || payload.error) {
       console.log(payload)
       badRequest(response, `Invalid data ${payload.error.toString()}`)
