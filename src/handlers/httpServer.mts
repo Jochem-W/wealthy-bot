@@ -54,7 +54,7 @@ async function log(
   const userData = payload.included.find((data) => data.type === "user")
 
   const discordFields = []
-  if (userData) {
+  if (userData?.attributes.social_connections.discord) {
     discordFields.push({
       name: "User",
       value: userMention(
