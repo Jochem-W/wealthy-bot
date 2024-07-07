@@ -18,9 +18,11 @@ const userSchema = z.object({
     image_url: z.string().url(),
     url: z.string().url(),
     social_connections: z.object({
-      discord: z.object({
-        user_id: z.string(),
-      }),
+      discord: z
+        .object({
+          user_id: z.string(),
+        })
+        .nullable(),
     }),
   }),
 })
