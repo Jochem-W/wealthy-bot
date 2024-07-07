@@ -51,9 +51,7 @@ async function log(
     ChannelType.GuildText,
   )
 
-  const userData = payload.included.find(
-    (data) => data.type === "user" && "attributes" in data,
-  )
+  const userData = payload.included.find((data) => data.type === "user")
 
   const discordFields = []
   if (userData) {
@@ -64,6 +62,8 @@ async function log(
       ),
     })
   }
+
+  const tiers = payload.included.filter((obj) => obj.type === "tier")
 
   await channel.send({
     embeds: [
@@ -86,7 +86,10 @@ async function log(
             name: "Entitled tiers",
             value:
               payload.data.relationships.currently_entitled_tiers.data
-                .map((tier) => `- ${tier.id}`)
+                .map(
+                  (tier) =>
+                    `- ${tiers.find((obj) => obj.id === tier.id)?.attributes.title ?? tier.id}`,
+                )
                 .join("\n") || "None",
           },
         )
