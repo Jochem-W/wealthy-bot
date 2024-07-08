@@ -4,7 +4,7 @@
 import { Drizzle } from "../clients.mjs"
 import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
-import { inviteesTable, usersTable } from "../schema.mjs"
+import { invitesTable } from "../schema.mjs"
 import { fetchChannel } from "../utilities/discordUtilities.mjs"
 import {
   ChannelType,
@@ -78,17 +78,14 @@ export const LogLeaves = handler({
       embed.addFields({ name: "Roles", value: joined })
     }
 
-    const [invitee] = await Drizzle.select()
-      .from(inviteesTable)
-      .where(eq(inviteesTable.discordId, member.id))
-      .innerJoin(usersTable, eq(inviteesTable.userId, usersTable.id))
+    const [invite] = await Drizzle.select()
+      .from(invitesTable)
+      .where(eq(invitesTable.invitee, member.id))
 
-    if (invitee) {
+    if (invite) {
       embed.addFields({
         name: "Invited by",
-        value: invitee.user.discordId
-          ? `${userMention(invitee.user.discordId)} (${invitee.user.name})`
-          : invitee.user.name,
+        value: `${userMention(invite.inviter)}`,
         inline: true,
       })
     }

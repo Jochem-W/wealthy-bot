@@ -1,8 +1,10 @@
 /**
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
+import { CheckInvite } from "./handlers/checkInvite.mjs"
 import { HttpServer } from "./handlers/httpServer.mjs"
 import { InteractionHandler } from "./handlers/interactionCreate.mjs"
+import { InvitesOnStart } from "./handlers/invitesOnStart.mjs"
 import { LogJoins } from "./handlers/logJoins.mjs"
 import { LogLeaves } from "./handlers/logLeaves.mjs"
 import { LogMessageDelete } from "./handlers/logMessageDelete.mjs"
@@ -23,4 +25,6 @@ export const Handlers: Handler<keyof ClientEvents>[] = [
   LogMessageEdits,
   LogVoiceState,
   StarboardHandler,
+  CheckInvite,
+  InvitesOnStart,
 ]
