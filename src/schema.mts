@@ -19,7 +19,7 @@ export const birthdaysTable = pgTable("birthday", {
 
 export const invitesTable = pgTable("invites", {
   inviter: text("inviter").primaryKey(),
-  invitee: text("invitee").notNull(),
+  invitee: text("invitee").notNull().unique(),
 })
 
 export const inviteLinksTable = pgTable("invite_links", {
