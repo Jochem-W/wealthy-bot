@@ -20,9 +20,6 @@ importers:
       emoji-regex:
         specifier: ^10.3.0
         version: 10.3.0
-      jose:
-        specifier: ^5.6.3
-        version: 5.6.3
       luxon:
         specifier: ^3.4.4
         version: 3.4.4
@@ -1010,9 +1007,6 @@ packages:
 
   javascript-natural-sort@0.7.1:
     resolution: {integrity: sha512-nO6jcEfZWQXDhOiBtG2KvKyEptz7RVbpGP4vTD2hLBdmNQSsCiicO2Ioinv6UI4y9ukqnBpy+XZ9H6uLNgJTlw==}
-
-  jose@5.6.3:
-    resolution: {integrity: sha512-1Jh//hEEwMhNYPDDLwXHa2ePWgWiFNNUadVmguAAw2IJ6sj9mNxV5tGXJNqlMkJAybF6Lgw1mISDxTePP/187g==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -2174,8 +2168,6 @@ snapshots:
   isexe@2.0.0: {}
 
   javascript-natural-sort@0.7.1: {}
-
-  jose@5.6.3: {}
 
   js-tokens@4.0.0: {}
 

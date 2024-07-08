@@ -4,7 +4,6 @@
 import { BirthdayCommand } from "./commands/birthday.mjs"
 import { ColourCommand } from "./commands/colour.mjs"
 import { InviteCommand } from "./commands/invite.mjs"
-import { MembersCommand } from "./commands/members.mjs"
 import { StarboardCommand } from "./commands/starboard.mjs"
 import type { Command } from "./models/command.mjs"
 import { Collection } from "discord.js"
@@ -12,7 +11,6 @@ import type { ApplicationCommandType, Snowflake } from "discord.js"
 
 export const SlashCommands: Command<ApplicationCommandType.ChatInput>[] = [
   ColourCommand,
-  MembersCommand,
   BirthdayCommand,
   StarboardCommand,
   InviteCommand,
