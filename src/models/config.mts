@@ -17,23 +17,10 @@ const model = z.object({
     messages: z.string(),
     voice: z.string(),
   }),
-  gracePeriod: z.number(),
   guild: z.string(),
   roles: z.object({
-    unsubscribed: z.string(),
-    exemptNormal: z.string(),
-    exemptExtra: z.string(),
     invited: z.string(),
   }),
-  tiers: z
-    .record(
-      z.string(),
-      z.object({
-        position: z.number(),
-        roleId: z.string(),
-      }),
-    )
-    .transform((arg) => new Map(Object.entries(arg))),
 })
 
 export const Config = await model.parseAsync(
