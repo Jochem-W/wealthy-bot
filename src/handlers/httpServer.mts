@@ -1,6 +1,7 @@
 /**
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
+import { Colours } from "../colours.mjs"
 import { logError } from "../errors.mjs"
 import { Config } from "../models/config.mjs"
 import { handler } from "../models/handler.mjs"
@@ -93,7 +94,14 @@ async function log(
                 .join("\n") || "None",
           },
         )
-        .setThumbnail(userData?.attributes.image_url || null),
+        .setThumbnail(userData?.attributes.image_url || null)
+        .setColor(
+          trigger === "members:pledge:create"
+            ? Colours.green[500]
+            : trigger === "members:pledge:update"
+              ? Colours.blue[500]
+              : Colours.red[500],
+        ),
     ],
   })
 }
