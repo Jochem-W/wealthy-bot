@@ -7,13 +7,13 @@ import { InteractionContext, InstallationContext } from "../models/command.mjs"
 import { contextMenuCommand } from "../models/contextMenuCommand.mjs"
 import {
   ApplicationCommandType,
+  Attachment,
   blockQuote,
-  MessageContextMenuCommandInteraction,
   PermissionFlagsBits,
 } from "discord.js"
 import Ffmpeg from "fluent-ffmpeg"
 import { createReadStream } from "fs"
-import { writeFile } from "fs/promises"
+import { writeFile, unlink } from "fs/promises"
 
 const transcriptions = new Map<string, string>()
 
@@ -55,6 +55,25 @@ export const TranscribeCommand = contextMenuCommand({
 
     await writeFile(srcFile, audio.body)
 
+    async function end() {
+      await unlink(srcFile)
+
+      const transcription = (await OpenAIClient.audio.transcriptions.create({
+        file: createReadStream(dstFile),
+        model: "whisper-1",
+        response_format: "text",
+        prompt: "Ko-fi, Patreon",
+      })) as unknown as string
+
+      await unlink(dstFile)
+
+      transcriptions.set((attachment as Attachment).id, transcription)
+
+      await interaction.editReply({
+        content: `${interaction.targetMessage.url}\n${blockQuote(transcription)}`,
+      })
+    }
+
     Ffmpeg()
       .input(srcFile)
       .audioCodec("aac")
@@ -63,30 +82,8 @@ export const TranscribeCommand = contextMenuCommand({
       .on("error", (e) => void logError(interaction.client, e))
       .on(
         "end",
-        () =>
-          void end(interaction, dstFile, attachment.id).catch((e) => {
-            void logError(interaction.client, e)
-          }),
+        () => void end().catch((e) => void logError(interaction.client, e)),
       )
       .run()
   },
 })
-
-async function end(
-  interaction: MessageContextMenuCommandInteraction,
-  filename: string,
-  id: string,
-) {
-  const transcription = (await OpenAIClient.audio.transcriptions.create({
-    file: createReadStream(filename),
-    model: "whisper-1",
-    response_format: "text",
-    prompt: "Ko-fi, Patreon",
-  })) as unknown as string
-
-  transcriptions.set(id, transcription)
-
-  await interaction.editReply({
-    content: `${interaction.targetMessage.url}\n${blockQuote(transcription)}`,
-  })
-}
