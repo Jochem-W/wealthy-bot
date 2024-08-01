@@ -71,6 +71,7 @@ async function end(
     file: createReadStream(filename),
     model: "whisper-1",
     response_format: "text",
+    prompt: "Ko-fi, Patreon",
   })) as unknown as string
 
   await interaction.editReply({
