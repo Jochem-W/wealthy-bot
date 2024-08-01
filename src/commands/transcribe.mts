@@ -8,7 +8,7 @@ import { contextMenuCommand } from "../models/contextMenuCommand.mjs"
 import {
   ApplicationCommandType,
   blockQuote,
-  CommandInteraction,
+  MessageContextMenuCommandInteraction,
   PermissionFlagsBits,
 } from "discord.js"
 import Ffmpeg from "fluent-ffmpeg"
@@ -16,7 +16,7 @@ import { createReadStream } from "fs"
 import { writeFile } from "fs/promises"
 
 export const TranscribeCommand = contextMenuCommand({
-  name: "Transcribe",
+  name: "Transcribe voice message",
   type: ApplicationCommandType.Message,
   contexts: [InteractionContext.Guild],
   integrationTypes: [InstallationContext.GuildInstall],
@@ -25,7 +25,7 @@ export const TranscribeCommand = contextMenuCommand({
     const attachment = message.attachments.find((a) => a.duration && a.waveform)
     if (!attachment) {
       await interaction.reply({
-        content: "Message doesn't contain audio",
+        content: "This isn't a voice message.",
         ephemeral: true,
       })
       return
@@ -35,7 +35,9 @@ export const TranscribeCommand = contextMenuCommand({
 
     const audio = await fetch(attachment.url)
     if (!audio.ok || !audio.body) {
-      await interaction.editReply({ content: "Fetch failed" })
+      await interaction.editReply({
+        content: "An error ocurred while downloading the voice message.",
+      })
       return
     }
 
@@ -61,12 +63,17 @@ export const TranscribeCommand = contextMenuCommand({
   },
 })
 
-async function end(interaction: CommandInteraction, filename: string) {
+async function end(
+  interaction: MessageContextMenuCommandInteraction,
+  filename: string,
+) {
   const transcription = (await OpenAIClient.audio.transcriptions.create({
     file: createReadStream(filename),
     model: "whisper-1",
     response_format: "text",
   })) as unknown as string
 
-  await interaction.editReply({ content: blockQuote(transcription) })
+  await interaction.editReply({
+    content: `${interaction.targetMessage.url}\n${blockQuote(transcription)}`,
+  })
 }
