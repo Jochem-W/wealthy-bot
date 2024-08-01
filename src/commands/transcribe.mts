@@ -12,6 +12,7 @@ import {
 } from "discord.js"
 import Ffmpeg from "fluent-ffmpeg"
 import { createReadStream } from "fs"
+import { unlink } from "fs/promises"
 import { Readable } from "stream"
 
 export const TranscribeCommand = contextMenuCommand({
@@ -56,12 +57,12 @@ export const TranscribeCommand = contextMenuCommand({
 
 async function end(interaction: CommandInteraction, filename: string) {
   const transcription = await OpenAIClient.audio.transcriptions.create({
-    file: createReadStream(filename).on("close", () => {
-      console.log("Stream closed")
-    }),
+    file: createReadStream(filename),
     model: "whisper-1",
     response_format: "text",
   })
 
   await interaction.reply({ content: transcription.text, ephemeral: true })
+
+  await unlink(filename)
 }
