@@ -7,6 +7,7 @@ import { InteractionContext, InstallationContext } from "../models/command.mjs"
 import { contextMenuCommand } from "../models/contextMenuCommand.mjs"
 import {
   ApplicationCommandType,
+  blockQuote,
   CommandInteraction,
   PermissionFlagsBits,
 } from "discord.js"
@@ -67,5 +68,5 @@ async function end(interaction: CommandInteraction, filename: string) {
     response_format: "text",
   })) as unknown as string
 
-  await interaction.editReply({ content: transcription })
+  await interaction.editReply({ content: blockQuote(transcription) })
 }
