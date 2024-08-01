@@ -37,9 +37,7 @@ export const TranscribeCommand = contextMenuCommand({
     const filename = `${attachment.id}.m4a`
 
     Ffmpeg()
-      .input(
-        new Readable().wrap(audio.body as unknown as NodeJS.ReadableStream),
-      )
+      .input(Readable.fromWeb(audio.body))
       .audioCodec("aac")
       .audioBitrate("128k")
       .saveToFile(filename)
