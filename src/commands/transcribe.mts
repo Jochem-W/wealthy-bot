@@ -61,11 +61,11 @@ export const TranscribeCommand = contextMenuCommand({
 })
 
 async function end(interaction: CommandInteraction, filename: string) {
-  const transcription = await OpenAIClient.audio.transcriptions.create({
+  const transcription = (await OpenAIClient.audio.transcriptions.create({
     file: createReadStream(filename),
     model: "whisper-1",
     response_format: "text",
-  })
+  })) as unknown as string
 
-  await interaction.editReply({ content: JSON.stringify(transcription) })
+  await interaction.editReply({ content: transcription })
 }
