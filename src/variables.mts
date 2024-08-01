@@ -15,6 +15,7 @@ const model = z
       .string()
       .url()
       .transform((arg) => new URL(arg).toString()),
+    OPENAI_KEY: z.string(),
   })
   .transform((arg) => camelcaseKeys(arg))
 

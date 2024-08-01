@@ -9,8 +9,10 @@
     "discord.js": "^14.15.3",
     "drizzle-orm": "^0.32.1",
     "emoji-regex": "^10.3.0",
+    "fluent-ffmpeg": "^2.1.3",
     "luxon": "^3.4.4",
     "node-emoji": "^2.1.3",
+    "openai": "^4.53.2",
     "postgres": "^3.4.4",
     "zod": "^3.23.8"
   },
@@ -20,6 +22,7 @@
     "@tsconfig/node22": "^22.0.0",
     "@tsconfig/strictest": "^2.0.5",
     "@types/eslint__js": "^8.42.3",
+    "@types/fluent-ffmpeg": "^2.1.25",
     "@types/luxon": "^3.4.2",
     "@types/node": "^22.0.2",
     "drizzle-kit": "^0.23.1",

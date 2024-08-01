@@ -327,9 +327,9 @@ export class InvalidDateTimeError extends CustomError {
   }
 }
 
-export async function logError(client: Client, error: Error) {
+export async function logError(client: Client, error: unknown) {
   console.error(error)
-  if (!client.isReady()) {
+  if (!client.isReady() || !(error instanceof Error)) {
     return
   }
 
