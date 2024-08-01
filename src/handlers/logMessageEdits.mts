@@ -27,7 +27,6 @@ export const LogMessageEdits = handler({
     }
 
     if (newMessage.partial) {
-      // eslint-disable-next-line require-atomic-updates, no-param-reassign
       newMessage = await newMessage.fetch()
     }
 
