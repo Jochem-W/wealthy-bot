@@ -94,6 +94,7 @@ async function log(
                 .join("\n") || "None",
           },
         )
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         .setThumbnail(userData?.attributes.image_url || null)
         .setColor(
           trigger === "members:pledge:create"

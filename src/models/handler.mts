@@ -1,6 +1,8 @@
 /**
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
+
+/* eslint @typescript-eslint/no-unnecessary-type-parameters: 0 */
 import type { ClientEvents } from "discord.js"
 
 export function handler<T extends keyof ClientEvents>({

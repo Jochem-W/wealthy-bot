@@ -26,12 +26,12 @@ function parseEmoji(guild: Guild, emoji: string | null) {
   }
 
   const unicodeEmoji = emoji.match(regex)
-  if (unicodeEmoji && unicodeEmoji[0]) {
+  if (unicodeEmoji?.[0]) {
     return unicodeEmoji[0]
   }
 
-  const guildEmoji = emoji.match(/<a?:[\w-]+:(\d+)>/)
-  if (!guildEmoji || !guildEmoji[1] || !guild.emojis.cache.has(guildEmoji[1])) {
+  const guildEmoji = /<a?:[\w-]+:(\d+)>/.exec(emoji)
+  if (!guildEmoji?.[1] || !guild.emojis.cache.has(guildEmoji[1])) {
     return null
   }
 

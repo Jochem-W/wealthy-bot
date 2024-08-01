@@ -47,7 +47,7 @@ export const StarboardHandler = handler({
       .from(starboardConfiguration)
       .orderBy(desc(starboardConfiguration.timestamp))
       .limit(1)
-    if (!configuration || !configuration.channel) {
+    if (!configuration?.channel) {
       return
     }
 
