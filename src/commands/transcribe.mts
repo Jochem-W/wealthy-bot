@@ -12,8 +12,7 @@ import {
 } from "discord.js"
 import Ffmpeg from "fluent-ffmpeg"
 import { createReadStream } from "fs"
-import { unlink } from "fs/promises"
-import { Readable } from "stream"
+import { writeFile } from "fs/promises"
 
 export const TranscribeCommand = contextMenuCommand({
   name: "Transcribe",
@@ -34,18 +33,21 @@ export const TranscribeCommand = contextMenuCommand({
       return
     }
 
-    const filename = `${attachment.id}.m4a`
+    const srcFile = `${attachment.id}.ogg`
+    const dstFile = `${attachment.id}.m4a`
+
+    await writeFile(srcFile, audio.body)
 
     Ffmpeg()
-      .input(Readable.fromWeb(audio.body))
+      .input(srcFile)
       .audioCodec("aac")
       .audioBitrate("128k")
-      .saveToFile(filename)
+      .saveToFile(dstFile)
       .on("error", (e) => void logError(interaction.client, e))
       .on(
         "end",
         () =>
-          void end(interaction, filename).catch((e) => {
+          void end(interaction, dstFile).catch((e) => {
             void logError(interaction.client, e)
           }),
       )
@@ -61,6 +63,4 @@ async function end(interaction: CommandInteraction, filename: string) {
   })
 
   await interaction.reply({ content: transcription.text, ephemeral: true })
-
-  await unlink(filename)
 }
