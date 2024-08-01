@@ -25,6 +25,8 @@ ARG commit_hash
 ENV NODE_ENV=production
 WORKDIR /app
 
+RUN apk add ffmpeg
+
 # Copy all files (including source :/)
 COPY --from=builder /app .
 
