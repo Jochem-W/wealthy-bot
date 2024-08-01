@@ -2,7 +2,7 @@
   "extends": ["@tsconfig/node22", "@tsconfig/strictest"],
   "compilerOptions": {
     "outDir": "dist",
-
     "sourceMap": true
-  }
+  },
+  "include": ["src/**/*"]
 }
