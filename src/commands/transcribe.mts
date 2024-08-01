@@ -23,13 +23,18 @@ export const TranscribeCommand = contextMenuCommand({
   async handle(interaction, message) {
     const attachment = message.attachments.find((a) => a.duration && a.waveform)
     if (!attachment) {
-      await interaction.reply({ embeds: [], ephemeral: true })
+      await interaction.reply({
+        content: "Message doesn't contain audio",
+        ephemeral: true,
+      })
       return
     }
 
+    await interaction.deferReply({ ephemeral: true })
+
     const audio = await fetch(attachment.url)
     if (!audio.ok || !audio.body) {
-      await interaction.reply({ embeds: [], ephemeral: true })
+      await interaction.editReply({ content: "Fetch failed" })
       return
     }
 
@@ -62,5 +67,5 @@ async function end(interaction: CommandInteraction, filename: string) {
     response_format: "text",
   })
 
-  await interaction.reply({ content: transcription.text, ephemeral: true })
+  await interaction.editReply({ content: transcription.text })
 }
