@@ -57,8 +57,6 @@ export const TranscribeCommand = contextMenuCommand({
     await writeFile(srcFile, audio.body)
 
     async function end() {
-      await unlink(srcFile)
-
       const transcription = (await OpenAIClient.audio.transcriptions.create({
         file: createReadStream(dstFile),
         model: "whisper-1",
