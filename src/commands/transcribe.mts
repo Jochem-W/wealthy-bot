@@ -15,6 +15,8 @@ import Ffmpeg from "fluent-ffmpeg"
 import { createReadStream } from "fs"
 import { writeFile } from "fs/promises"
 
+const transcriptions = new Map<string, string>()
+
 export const TranscribeCommand = contextMenuCommand({
   name: "Transcribe voice message",
   type: ApplicationCommandType.Message,
@@ -29,6 +31,13 @@ export const TranscribeCommand = contextMenuCommand({
         ephemeral: true,
       })
       return
+    }
+
+    if (transcriptions.has(attachment.id)) {
+      await interaction.reply({
+        content: `${interaction.targetMessage.url}\n${blockQuote(transcriptions.get(attachment.id) ?? "")}`,
+        ephemeral: true,
+      })
     }
 
     await interaction.deferReply({ ephemeral: true })
@@ -55,7 +64,7 @@ export const TranscribeCommand = contextMenuCommand({
       .on(
         "end",
         () =>
-          void end(interaction, dstFile).catch((e) => {
+          void end(interaction, dstFile, attachment.id).catch((e) => {
             void logError(interaction.client, e)
           }),
       )
@@ -66,6 +75,7 @@ export const TranscribeCommand = contextMenuCommand({
 async function end(
   interaction: MessageContextMenuCommandInteraction,
   filename: string,
+  id: string,
 ) {
   const transcription = (await OpenAIClient.audio.transcriptions.create({
     file: createReadStream(filename),
@@ -73,6 +83,8 @@ async function end(
     response_format: "text",
     prompt: "Ko-fi, Patreon",
   })) as unknown as string
+
+  transcriptions.set(id, transcription)
 
   await interaction.editReply({
     content: `${interaction.targetMessage.url}\n${blockQuote(transcription)}`,
