@@ -38,6 +38,7 @@ export const TranscribeCommand = contextMenuCommand({
         content: `${interaction.targetMessage.url}\n${blockQuote(transcriptions.get(attachment.id) ?? "")}`,
         ephemeral: true,
       })
+      return
     }
 
     await interaction.deferReply({ ephemeral: true })
