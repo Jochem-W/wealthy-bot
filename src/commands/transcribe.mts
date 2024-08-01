@@ -64,8 +64,7 @@ async function end(interaction: CommandInteraction, filename: string) {
   const transcription = await OpenAIClient.audio.transcriptions.create({
     file: createReadStream(filename),
     model: "whisper-1",
-    response_format: "text",
   })
 
-  await interaction.editReply({ content: transcription.text })
+  await interaction.editReply({ content: JSON.stringify(transcription) })
 }
