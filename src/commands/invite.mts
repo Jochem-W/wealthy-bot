@@ -3,6 +3,7 @@
  */
 import { Drizzle } from "../clients.mjs"
 import { Invites } from "../handlers/invitesOnStart.mjs"
+import { InteractionContext, InstallationContext } from "../models/command.mjs"
 import { Config } from "../models/config.mjs"
 import { slashCommand } from "../models/slashCommand.mjs"
 import { invitesTable, inviteLinksTable } from "../schema.mjs"
@@ -19,7 +20,8 @@ export const InviteCommand = slashCommand({
   name: "invite",
   description: "Invite a user to the server",
   defaultMemberPermissions: null,
-  dmPermission: false,
+  contexts: [InteractionContext.Guild],
+  integrationTypes: [InstallationContext.GuildInstall],
   nsfw: false,
   async handle(interaction) {
     if (!interaction.inCachedGuild()) {

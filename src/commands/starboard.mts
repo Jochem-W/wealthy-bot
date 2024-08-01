@@ -3,6 +3,7 @@
  */
 import { Drizzle } from "../clients.mjs"
 import { Colours } from "../colours.mjs"
+import { InteractionContext, InstallationContext } from "../models/command.mjs"
 import { slashCommand, slashSubcommand } from "../models/slashCommand.mjs"
 import { starboardConfiguration } from "../schema.mjs"
 import {
@@ -40,7 +41,9 @@ function parseEmoji(guild: Guild, emoji: string | null) {
 export const StarboardCommand = slashCommand({
   name: "starboard",
   description: "Commands related to starboard functionality",
-  dmPermission: false,
+  contexts: [InteractionContext.Guild],
+  integrationTypes: [InstallationContext.GuildInstall],
+  nsfw: false,
   defaultMemberPermissions: PermissionFlagsBits.Administrator,
   subcommandGroups: [
     {

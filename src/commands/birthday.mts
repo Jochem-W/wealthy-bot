@@ -2,6 +2,7 @@
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
 import { Drizzle } from "../clients.mjs"
+import { InstallationContext, InteractionContext } from "../models/command.mjs"
 import { slashCommand, slashSubcommand } from "../models/slashCommand.mjs"
 import { birthdaysTable } from "../schema.mjs"
 import { PermissionFlagsBits } from "discord.js"
@@ -168,6 +169,8 @@ export const BirthdayCommand = slashCommand({
   name: "birthday",
   description: "Modify a member's stored birthdate",
   defaultMemberPermissions: PermissionFlagsBits.Administrator,
-  dmPermission: false,
+  contexts: [InteractionContext.Guild],
+  integrationTypes: [InstallationContext.GuildInstall],
+  nsfw: false,
   subcommands: [get, set, clear],
 })

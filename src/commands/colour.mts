@@ -1,6 +1,7 @@
 /**
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
+import { InteractionContext, InstallationContext } from "../models/command.mjs"
 import { slashCommand, slashSubcommand } from "../models/slashCommand.mjs"
 import { interactionMember } from "../utilities/interactionUtilities.mjs"
 import { EmbedBuilder, Locale, inlineCode } from "discord.js"
@@ -19,7 +20,8 @@ export const ColourCommand = slashCommand({
     "en-US": "Change your role color",
   },
   defaultMemberPermissions: null,
-  dmPermission: false,
+  contexts: [InteractionContext.Guild],
+  integrationTypes: [InstallationContext.GuildInstall],
   nsfw: false,
   subcommands: [
     slashSubcommand({

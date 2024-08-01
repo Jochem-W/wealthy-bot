@@ -1,6 +1,7 @@
 /**
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
+import { InstallationContext, InteractionContext } from "./command.mjs"
 import {
   ContextMenuCommandBuilder,
   ApplicationCommandType,
@@ -9,6 +10,7 @@ import {
   type MessageContextMenuCommandInteraction,
   type User,
   type UserContextMenuCommandInteraction,
+  Permissions,
 } from "discord.js"
 
 type Interaction<T extends ContextMenuCommandType> =
@@ -28,15 +30,17 @@ type Value<T extends ContextMenuCommandType> =
 export function contextMenuCommand<T extends ContextMenuCommandType>({
   name,
   type,
+  integrationTypes,
+  contexts,
   defaultMemberPermissions,
-  dmPermission,
   transform,
   handle,
 }: {
   name: string
   type: T
-  defaultMemberPermissions: bigint | null
-  dmPermission: boolean
+  integrationTypes: InstallationContext[]
+  contexts: InteractionContext[]
+  defaultMemberPermissions: Permissions | bigint | number | null
   transform?: (builder: ContextMenuCommandBuilder) => void
   handle: (interaction: Interaction<T>, value: Value<T>) => Promise<void>
 }) {
@@ -44,7 +48,11 @@ export function contextMenuCommand<T extends ContextMenuCommandType>({
     .setName(name)
     .setType(type)
     .setDefaultMemberPermissions(defaultMemberPermissions)
-    .setDMPermission(dmPermission)
+
+  // @ts-expect-error Not implemented in discord.js yet
+  builder.contexts = contexts
+  // @ts-expect-error Not implemented in discord.js yet
+  builder.integration_types = integrationTypes
 
   if (transform) {
     transform(builder)
