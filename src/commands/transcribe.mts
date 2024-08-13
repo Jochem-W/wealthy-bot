@@ -18,7 +18,7 @@ import { createReadStream } from "fs"
 import { unlink, writeFile } from "fs/promises"
 import { TranscriptionCreateParams } from "openai/resources/audio/transcriptions"
 
-const transcriptions = new Map<string, string>()
+export const Transcriptions = new Map<string, string>()
 
 export const TranscribeCommand = contextMenuCommand({
   name: "Transcribe voice message",
@@ -36,9 +36,9 @@ export const TranscribeCommand = contextMenuCommand({
       return
     }
 
-    if (transcriptions.has(attachment.id)) {
+    if (Transcriptions.has(attachment.id)) {
       await interaction.reply({
-        content: `${interaction.targetMessage.url}\n${blockQuote(transcriptions.get(attachment.id) ?? "")}`,
+        content: `${interaction.targetMessage.url}\n${blockQuote(Transcriptions.get(attachment.id) ?? "")}`,
         ephemeral: true,
       })
       return
@@ -86,7 +86,7 @@ export const TranscribeCommand = contextMenuCommand({
       stream.destroy()
       await unlink(dstFile)
 
-      transcriptions.set((attachment as Attachment).id, transcription)
+      Transcriptions.set((attachment as Attachment).id, transcription)
 
       await interaction.editReply({
         content: `${interaction.targetMessage.url}\n${blockQuote(transcription)}`,

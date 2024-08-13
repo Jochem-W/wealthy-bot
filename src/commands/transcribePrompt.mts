@@ -3,6 +3,7 @@ import { InstallationContext, InteractionContext } from "../models/command.mjs"
 import { modal, modalInput } from "../models/modal.mjs"
 import { slashCommand, slashSubcommand } from "../models/slashCommand.mjs"
 import { promptTable } from "../schema.mjs"
+import { Transcriptions } from "./transcribe.mjs"
 import {
   inlineCode,
   PermissionFlagsBits,
@@ -57,6 +58,7 @@ const promptModal = modal({
   ],
   async handle(interaction, { prompt }) {
     await Drizzle.insert(promptTable).values({ prompt })
+    Transcriptions.clear()
     await interaction.reply({
       content: `Set prompt to ${inlineCode(prompt)}.`,
       ephemeral: true,
