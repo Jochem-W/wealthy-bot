@@ -69,6 +69,7 @@ export const TranscribeCommand = contextMenuCommand({
         file: createReadStream(dstFile),
         model: "whisper-1",
         response_format: "text",
+        temperature: 0,
       }
 
       if (prompt) {
