@@ -94,15 +94,14 @@ export const TranscribeCommand = contextMenuCommand({
     }
 
     Ffmpeg()
-      .input(srcFile)
-      .audioCodec("aac")
-      .audioBitrate("128k")
-      .saveToFile(dstFile)
       .on("error", (e) => void logError(interaction.client, e))
       .on(
         "end",
         () => void end().catch((e) => void logError(interaction.client, e)),
       )
-      .run()
+      .input(srcFile)
+      .audioCodec("aac")
+      .audioBitrate("128k")
+      .saveToFile(dstFile)
   },
 })
