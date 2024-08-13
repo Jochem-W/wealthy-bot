@@ -16,7 +16,7 @@ import { desc } from "drizzle-orm"
 import Ffmpeg from "fluent-ffmpeg"
 import { createReadStream } from "fs"
 import { writeFile, unlink } from "fs/promises"
-import { TranscriptionCreateParams } from "openai/resources/audio/transcriptions.mjs"
+import { TranscriptionCreateParams } from "openai/resources/audio/transcriptions"
 
 const transcriptions = new Map<string, string>()
 
