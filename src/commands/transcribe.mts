@@ -15,7 +15,7 @@ import {
 import { desc } from "drizzle-orm"
 import Ffmpeg from "fluent-ffmpeg"
 import { createReadStream } from "fs"
-import { writeFile } from "fs/promises"
+import { unlink, writeFile } from "fs/promises"
 import { TranscriptionCreateParams } from "openai/resources/audio/transcriptions"
 
 const transcriptions = new Map<string, string>()
@@ -60,13 +60,16 @@ export const TranscribeCommand = contextMenuCommand({
     await writeFile(srcFile, audio.body)
 
     async function end() {
+      await unlink(srcFile)
+
       const [prompt] = await Drizzle.select()
         .from(promptTable)
         .orderBy(desc(promptTable.timestamp))
         .limit(1)
 
+      const stream = createReadStream(dstFile)
       const params: TranscriptionCreateParams = {
-        file: createReadStream(dstFile),
+        file: stream,
         model: "whisper-1",
         response_format: "text",
         temperature: 0,
@@ -79,6 +82,9 @@ export const TranscribeCommand = contextMenuCommand({
       const transcription = (await OpenAIClient.audio.transcriptions.create(
         params,
       )) as unknown as string
+
+      stream.destroy()
+      await unlink(dstFile)
 
       transcriptions.set((attachment as Attachment).id, transcription)
 
