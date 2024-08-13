@@ -52,3 +52,9 @@ export const starboardConfiguration = pgTable("starboard_config", {
   threshold: integer("threshold").notNull(),
   emoji: text("emoji").notNull(),
 })
+
+export const promptTable = pgTable("transcription_prompt", {
+  id: serial("id").primaryKey(),
+  timestamp: timestamp("timestamp").notNull().defaultNow(),
+  prompt: text("prompt").notNull(),
+})

@@ -1,19 +1,22 @@
 /**
  * Licensed under AGPL 3.0 or newer. Copyright (C) 2024 Jochem W. <license (at) jochem (dot) cc>
  */
-import { OpenAIClient } from "../clients.mjs"
+import { Drizzle, OpenAIClient } from "../clients.mjs"
 import { logError } from "../errors.mjs"
 import { InteractionContext, InstallationContext } from "../models/command.mjs"
 import { contextMenuCommand } from "../models/contextMenuCommand.mjs"
+import { promptTable } from "../schema.mjs"
 import {
   ApplicationCommandType,
   Attachment,
   blockQuote,
   PermissionFlagsBits,
 } from "discord.js"
+import { desc } from "drizzle-orm"
 import Ffmpeg from "fluent-ffmpeg"
 import { createReadStream } from "fs"
 import { writeFile, unlink } from "fs/promises"
+import { TranscriptionCreateParams } from "openai/resources/audio/transcriptions.mjs"
 
 const transcriptions = new Map<string, string>()
 
@@ -57,12 +60,24 @@ export const TranscribeCommand = contextMenuCommand({
     await writeFile(srcFile, audio.body)
 
     async function end() {
-      const transcription = (await OpenAIClient.audio.transcriptions.create({
+      const [prompt] = await Drizzle.select()
+        .from(promptTable)
+        .orderBy(desc(promptTable.timestamp))
+        .limit(1)
+
+      const params: TranscriptionCreateParams = {
         file: createReadStream(dstFile),
         model: "whisper-1",
         response_format: "text",
-        prompt: "Ko-fi, Patreon",
-      })) as unknown as string
+      }
+
+      if (prompt) {
+        params.prompt = prompt.prompt
+      }
+
+      const transcription = (await OpenAIClient.audio.transcriptions.create(
+        params,
+      )) as unknown as string
 
       await unlink(dstFile)
 
