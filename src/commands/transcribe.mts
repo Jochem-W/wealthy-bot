@@ -15,7 +15,7 @@ import {
 import { desc } from "drizzle-orm"
 import Ffmpeg from "fluent-ffmpeg"
 import { createReadStream } from "fs"
-import { writeFile, unlink } from "fs/promises"
+import { writeFile } from "fs/promises"
 import { TranscriptionCreateParams } from "openai/resources/audio/transcriptions"
 
 const transcriptions = new Map<string, string>()
@@ -79,8 +79,6 @@ export const TranscribeCommand = contextMenuCommand({
       const transcription = (await OpenAIClient.audio.transcriptions.create(
         params,
       )) as unknown as string
-
-      await unlink(dstFile)
 
       transcriptions.set((attachment as Attachment).id, transcription)
 
