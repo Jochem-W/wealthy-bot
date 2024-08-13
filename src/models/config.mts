@@ -20,6 +20,8 @@ const model = z.object({
   guild: z.string(),
   roles: z.object({
     invited: z.string(),
+    subscribed: z.array(z.string()),
+    unsubscribed: z.string(),
   }),
 })
 
