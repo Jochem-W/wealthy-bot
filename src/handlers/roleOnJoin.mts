@@ -7,12 +7,13 @@ export const RoleOnJoinHandler = handler({
   once: false,
   async handle(member) {
     if (
-      (member.user.bot ||
-        member.permissions.has(PermissionFlagsBits.Administrator) ||
-        member.roles.cache.hasAny(...Config.roles.subscribed)) &&
-      member.roles.cache.has(Config.roles.unsubscribed)
+      member.user.bot ||
+      member.permissions.has(PermissionFlagsBits.Administrator) ||
+      member.roles.cache.hasAny(...Config.roles.subscribed)
     ) {
-      await member.roles.remove(Config.roles.unsubscribed)
+      if (member.roles.cache.has(Config.roles.unsubscribed)) {
+        await member.roles.remove(Config.roles.unsubscribed)
+      }
       return
     }
 
