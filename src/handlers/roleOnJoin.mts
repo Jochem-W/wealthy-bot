@@ -12,7 +12,10 @@ export const RoleOnJoinHandler = handler({
       member.roles.cache.hasAny(...Config.roles.subscribed)
     ) {
       await member.roles.remove(Config.roles.unsubscribed)
-    } else {
+      return
+    }
+
+    if (!member.roles.cache.has(Config.roles.unsubscribed)) {
       await member.roles.add(Config.roles.unsubscribed)
     }
   },
