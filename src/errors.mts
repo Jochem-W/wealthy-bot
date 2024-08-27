@@ -5,7 +5,12 @@ import type { Command } from "./models/command.mjs"
 import { Config } from "./models/config.mjs"
 import { fetchChannel } from "./utilities/discordUtilities.mjs"
 import { makeErrorMessage } from "./utilities/embedUtilities.mjs"
-import { Attachment, ChannelType, CommandInteraction } from "discord.js"
+import {
+  Attachment,
+  ChannelType,
+  codeBlock,
+  CommandInteraction,
+} from "discord.js"
 import type {
   Snowflake,
   Channel,
@@ -329,7 +334,7 @@ export class InvalidDateTimeError extends CustomError {
 
 export async function logError(client: Client, error: unknown) {
   console.error(error)
-  if (!client.isReady() || !(error instanceof Error)) {
+  if (!client.isReady()) {
     return
   }
 
@@ -338,5 +343,9 @@ export async function logError(client: Client, error: unknown) {
     Config.channels.error,
     ChannelType.GuildText,
   )
-  await channel.send(makeErrorMessage(error))
+  await channel.send(
+    error instanceof Error
+      ? makeErrorMessage(error)
+      : codeBlock(JSON.stringify(error)),
+  )
 }

@@ -130,6 +130,7 @@ async function endHandler(
   try {
     const payload = await pledgeSchema.safeParseAsync(JSON.parse(body))
     if (!payload.success || payload.error) {
+      await logError(client, payload.error)
       console.log(payload)
       badRequest(response, `Invalid data ${payload.error.toString()}`)
       return
