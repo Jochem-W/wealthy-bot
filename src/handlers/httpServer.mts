@@ -32,14 +32,14 @@ function ok(response: ServerResponse) {
   response.end()
 }
 
-// function badRequest(response: ServerResponse, log?: object | string) {
-//   if (log) {
-//     console.log("Bad request", log)
-//   }
+function badRequest(response: ServerResponse, log?: object | string) {
+  if (log) {
+    console.log("Bad request", log)
+  }
 
-//   response.writeHead(400, { "Content-Length": "0" })
-//   response.end()
-// }
+  response.writeHead(400, { "Content-Length": "0" })
+  response.end()
+}
 
 async function log(
   client: Client<true>,
@@ -115,8 +115,7 @@ async function endHandler(
 ) {
   const trigger = request.headers["x-patreon-event"]
   if (!(typeof trigger === "string")) {
-    // badRequest(response, `Invalid trigger ${trigger?.toString()}`)
-    ok(response)
+    badRequest(response, `Invalid trigger ${trigger?.toString()}`)
     return
   }
 
@@ -132,16 +131,14 @@ async function endHandler(
     const payload = await pledgeSchema.safeParseAsync(JSON.parse(body))
     if (!payload.success || payload.error) {
       console.log(payload)
-      // badRequest(response, `Invalid data ${payload.error.toString()}`)
-      ok(response)
+      badRequest(response, `Invalid data ${payload.error.toString()}`)
       return
     }
 
     ok(response)
     await log(client, trigger, payload.data)
   } catch (e) {
-    // badRequest(response)
-    ok(response)
+    badRequest(response)
     console.log(e)
   }
 }
@@ -153,45 +150,38 @@ async function requestHandler(
 ) {
   try {
     if (!request.url) {
-      // badRequest(response, "No URL")
-      // return
-      console.log("No request URL")
+      badRequest(response, "No URL")
+      return
     }
 
     if (!request.headers.host) {
-      // badRequest(response, "No Host")
-      // return
-      console.log("No host")
+      badRequest(response, "No Host")
+      return
     }
 
     if (request.headers["user-agent"] !== "Patreon HTTP Robot") {
-      // badRequest(
-      //   response,
-      //   `Invalid User-Agent ${request.headers["user-agent"]}`,
-      // )
-      // return
-      console.log("Invalid User-Agent", request.headers["user-agent"])
+      badRequest(
+        response,
+        `Invalid User-Agent ${request.headers["user-agent"]}`,
+      )
+      return
     }
 
     if (request.headers["content-type"] !== "application/json") {
-      // badRequest(
-      //   response,
-      //   `Invalid Content-Type ${request.headers["content-type"]}`,
-      // )
-      // return
-      console.log("Invalid Content-Type", request.headers["content-type"])
+      badRequest(
+        response,
+        `Invalid Content-Type ${request.headers["content-type"]}`,
+      )
+      return
     }
 
-    if (request.url) {
-      const url = new URL(
-        request.url,
-        `https://${request.headers.host}`,
-      ).toString()
-      if (url !== Variables.webhookUrl) {
-        // badRequest(response, `Invalid URL ${url} !== ${Variables.webhookUrl}`)
-        // return
-        console.log("Invalid URL", url)
-      }
+    const url = new URL(
+      request.url,
+      `https://${request.headers.host}`,
+    ).toString()
+    if (url !== Variables.webhookUrl) {
+      badRequest(response, `Invalid URL ${url} !== ${Variables.webhookUrl}`)
+      return
     }
 
     let body = ""
@@ -200,8 +190,7 @@ async function requestHandler(
       void endHandler(client, request, response, body)
     })
   } catch (e) {
-    // badRequest(response)
-    ok(response)
+    badRequest(response)
     if (e instanceof Error) {
       await logError(client, e)
     }
