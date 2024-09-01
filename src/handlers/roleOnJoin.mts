@@ -6,6 +6,10 @@ export const RoleOnJoinHandler = handler({
   event: "guildMemberAdd",
   once: false,
   async handle(member) {
+    if (member.guild.id !== Config.guild) {
+      return
+    }
+
     if (
       member.user.bot ||
       member.permissions.has(PermissionFlagsBits.Administrator) ||
