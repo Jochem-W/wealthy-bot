@@ -1,14 +1,12 @@
-// @ts-check
 import eslint from "@eslint/js"
-import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended"
+import eslintConfigPrettier from "eslint-config-prettier"
 import tseslint from "typescript-eslint"
 
 export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
-  // @ts-expect-error I don't know
-  eslintPluginPrettierRecommended,
+  eslintConfigPrettier,
   {
     languageOptions: {
       parserOptions: {
@@ -19,6 +17,7 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "@typescript-eslint/non-nullable-type-assertion-style": "off",
+      "@typescript-eslint/no-deprecated": "error",
     },
   },
 )

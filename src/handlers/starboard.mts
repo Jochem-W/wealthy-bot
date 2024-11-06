@@ -248,8 +248,12 @@ const button = component({
     const row: ActionRowBuilder<MessageActionRowComponentBuilder> =
       ActionRowBuilder.from(interaction.message.components[0])
     const component = row.components[0] as ButtonBuilder
+    if (!("label" in component.data)) {
+      throw new Error("Button has no label")
+    }
+
     component.setLabel(
-      `${count.value + 1} ${component.data.label?.split(" ")[1]}`,
+      `${count.value + 1} ${component.data.label.split(" ")[1]}`,
     )
 
     await interaction.update({ components: [row] })
