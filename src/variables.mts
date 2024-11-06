@@ -7,9 +7,7 @@ import { z } from "zod"
 const model = z
   .object({
     DISCORD_BOT_TOKEN: z.string(),
-    NODE_ENV: z.string().optional().default("development"),
     HTTP_PORT: z.coerce.number().optional().default(80),
-    INVITE_URL: z.string().url(),
     DATABASE_URL: z.string(),
     WEBHOOK_URL: z
       .string()

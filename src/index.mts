@@ -59,14 +59,12 @@ for (const command of [
   console.log(`Constructed command '${command.builder.name}'`)
 }
 
-const route =
-  Variables.nodeEnv === "production"
-    ? Routes.applicationCommands(Config.applicationId)
-    : Routes.applicationGuildCommands(Config.applicationId, Config.guild)
-
-const applicationCommands = (await discord.rest.put(route, {
-  body: commandsBody,
-})) as RESTPutAPIApplicationGuildCommandsResult
+const applicationCommands = (await discord.rest.put(
+  Routes.applicationCommands(Config.applicationId),
+  {
+    body: commandsBody,
+  },
+)) as RESTPutAPIApplicationGuildCommandsResult
 console.log("Commands updated")
 for (const applicationCommand of applicationCommands) {
   let command: Command<ApplicationCommandType> | undefined
