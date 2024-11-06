@@ -1,29 +1,44 @@
 services:
-  bot:
-    container_name: wealthy-bot
-    build: .
-    env_file: .env
-    volumes:
-      - ./persisted/bot:/app/persisted/bot
+  app:
+    container_name: wealthy-app
+    build: ./wealthy-app
+    environment:
+      DISCORD_BOT_TOKEN: "${DISCORD_BOT_TOKEN}"
+      GUILD_ID: "${GUILD_ID}"
+      DATABASE_URL: "postgresql://wealthy:${POSTGRES_PASSWORD}@wealthy-db:5432/wealthy"
+      ROLES: "${ROLES}"
     restart: unless-stopped
     networks:
-      - wealthy
-      - ubuntu_caddy
+      - default
+      - caddy_default
+    depends_on:
+      - db
+  bot:
+    container_name: wealthy-bot
+    build: ./wealthy-bot
+    environment:
+      DISCORD_BOT_TOKEN: "${DISCORD_BOT_TOKEN}"
+      DATABASE_URL: "postgresql://wealthy:${POSTGRES_PASSWORD}@wealthy-db:5432/wealthy"
+      WEBHOOK_URL: "${WEBHOOK_URL}"
+      OPENAI_KEY: "${OPENAI_KEY}"
+    restart: unless-stopped
+    networks:
+      - default
+      - caddy_default
     depends_on:
       - db
   db:
-    container_name: wealthy-db
-    image: postgres:15
-    env_file: .env.db
+    image: postgres:17
     environment:
-      POSTGRES_USER: wealthy-bot
+      POSTGRES_USER: "wealthy"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
     volumes:
-      - ./persisted/db/data:/var/lib/postgresql/data
+      - wealthy-data:/var/lib/postgresql/data
     restart: unless-stopped
-    networks:
-      - wealthy
 
 networks:
-  ubuntu_caddy:
+  caddy_default:
     external: true
-  wealthy:
+
+volumes:
+  wealthy-data:
