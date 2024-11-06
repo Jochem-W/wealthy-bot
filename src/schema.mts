@@ -39,9 +39,7 @@ export const starredTable = pgTable(
     userId: text("user_id").notNull(),
     messageId: text("message_id").notNull(),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.userId, table.messageId] }),
-  }),
+  (table) => [primaryKey({ columns: [table.userId, table.messageId] })],
 )
 
 export const starboardConfiguration = pgTable("starboard_config", {
